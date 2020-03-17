@@ -1,0 +1,60 @@
+"""
+@Description: command-function: help
+@Author: Longlone
+@LastEditors: Longlone
+@Date: 2020-01-07 18:42:00
+@LastEditTime: 2020-03-03 13:31:16
+"""
+from libs.config import alias, gget, order_alias
+import inspect
+
+
+@alias(True, "h", o="order")
+def run(order: str = "help"):
+    """
+    help
+
+    Output the help document for the command. Defaults to 'help'.
+
+    Args:
+        order (str): The order name
+    """
+    pf = gget(f"{gget('namespace')}.pf")
+    order = order_alias(order)
+    api = gget("api")
+    if order in pf:
+        func = getattr(pf[order], api)
+        if (func.__doc__):
+            print(func.__doc__)
+        block = " " * 4
+        block_two = block * 2
+        sig = inspect.signature(func)
+        folders_namespace = gget("folders_namespace")
+        func_folder, func_name = func.__module__.split(".")
+        func_reverse_alias = gget(
+            "%s.reverse_alias" % func_name, folders_namespace[func_folder]
+        )
+        if (len(sig.parameters)):
+            print("%sCommand Args:" % block)
+        for k, v in sig.parameters.items():
+            arg = "--%s" % k
+            if k in func_reverse_alias:
+                arg = "-%s,%s" % (func_reverse_alias[k], arg)
+            desc = str(v).split(":")
+            if len(desc) > 1:  # 存在参数类型
+                desc = desc[1].split("=")
+                if len(desc) > 1:  # 存在默认值
+                    desc = "[%s] %s (Default: %s)" % (
+                        desc[0].strip(),
+                        k,
+                        desc[1].strip(),
+                    )
+                else:
+                    desc = "[%s] %s" % (desc[0].strip(), k)
+                    arg = "%s(*)" % arg
+            else:
+                desc = "[?] %s" % desc[0]
+                arg = "%s(*)" % arg
+            print("%s%-20s%s%s\n" % (block_two, arg, block_two, desc))
+    elif order:
+        print("%s object is not command-function" % order)
