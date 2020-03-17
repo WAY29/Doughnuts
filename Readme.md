@@ -60,3 +60,8 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ## 参考
 
 灵感源自https://github.com/WangYihang/Webshell-Sniper
+
+## 免责声明
+
+本项目仅供网站管理人员与渗透测试人员学习与交流,任何使用本项目进行的一切未授权攻击行为与本人无关.
+
