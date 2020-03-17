@@ -31,6 +31,8 @@
 
 ```
 安装PYTHON 3.6+
+git clone https://github.com/WAY29/Doughnuts.git
+进入Doughnuts目录下
 pip install -r requirements.txt 或 pip install requests colorma
 python doughnuts.py
 enjoy it!
