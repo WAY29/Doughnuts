@@ -142,8 +142,8 @@ def loop_main():
             except TypeError as e:
                 print("[TyperError] %s" % str(e).replace("%s()" % api, "%s()" % order))
             except Exception as e:
+                exc_type, exc_value, exc_tb = exc_info()
                 if 0:
-                    exc_type, exc_value, exc_tb = exc_info()
                     print_exception(exc_type, exc_value, exc_tb)
                 print("[%s] %s" % (exc_type.__name__, e))
 
