@@ -22,7 +22,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     elif method == "HEADER":
         raw_key = "headers"
     else:
-        print(color.red("Method error."))
+        print(color.red("Method error"))
         return
     encode_functions = [str(f) for f in encode_functions]
     params_dict[raw_key] = {}

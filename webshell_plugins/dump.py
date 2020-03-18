@@ -146,8 +146,6 @@ $zip->addFile($path.$sp.$filename);
 @closedir($path);
 }
 if (!class_exists("ZipArchive")){
-die();
-}
 $zip = new ZipArchive();
 $file_name = $_SERVER["HTTP_HOST"].".zip";
 if ($zip->open($file_name, ZipArchive::CREATE) === TRUE) {
@@ -170,7 +168,9 @@ fclose($fp);
 if($file_count >= $file_size) {
 unlink($file_name);
 }
-}""" % web_file_path
+}
+}
+""" % web_file_path
 
 
 @alias(True, w="web_file_path", l="local_path")

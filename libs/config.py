@@ -1,4 +1,5 @@
 import functools
+from platform import system
 from typing import Any
 
 from colorama import Back, Fore, init
@@ -22,8 +23,11 @@ def gset(key, value, force=False, namespace: str = "") -> bool:
     return False
 
 
-def is_windows():
-    return gget("webshell.os", "webshell")
+def is_windows(remote: bool = True):
+    if (remote):
+        return gget("webshell.os", "webshell")
+    else:
+        return True if 'win' in system().lower() else False
 
 
 def conver_args(arg_dict: dict, arg_name_dict: dict) -> dict:  # 别名转换

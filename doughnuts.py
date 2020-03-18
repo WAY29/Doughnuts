@@ -29,6 +29,7 @@ def change_prompt():
         print(color.yellow("[ws|webshell] ") + color.cyan("Enter interactive webshell"))
         print(color.yellow("[r|read] ") + color.cyan("Read file/files. eg: read {web_file_path1} {web_file_path2} .."))
         print(color.yellow("[w|write] ") + color.cyan("Write file. eg: write {web_file_path}"))
+        print(color.yellow("[m|modify] ") + color.cyan("Modify file. eg: modify {web_file_path}"))
         print(color.yellow("[u|upload] ") + color.cyan("Upload file. eg: upload {file_path} {web_file_path=file_name} {force=False}"))
         print(color.yellow("[d|download] ") + color.cyan("Download file. eg: download {web_file_path} {local_path=./site.com/...}"))
         print(color.yellow("[del|delete] ") + color.cyan("Delete file/files. eg: read {web_file_path1} {web_file_path2} .."))
