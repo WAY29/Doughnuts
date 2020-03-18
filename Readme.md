@@ -2,6 +2,14 @@
 
 *一个基于Python3.6+的PHPwebshell管理器*
 
+# 更新
+
+## V1.4
+
+- 添加指令:修改文件
+- 关闭debug模式
+- 修复了某些情况下fwpf,fc指令无法使用的情况,现在发送数据时会关闭错误提示
+
 ## 特征
 
 - 支持连接,记录,管理webshell,方便下一次连接
@@ -24,8 +32,6 @@
 - Python3.6+
 - Python-requests
 - Python-colorama
-
-
 
 ## 安装方法
 
