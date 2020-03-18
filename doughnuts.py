@@ -1,10 +1,3 @@
-"""
-@Description: parse
-@Author: Longlone
-@LastEditors: Longlone
-@Date: 2020-03-02 17:27:08
-@LastEditTime: 2020-03-04 13:31:37
-"""
 from libs.app import Loop_init, run_loop
 from libs.myapp import banner
 from libs.config import gget, color, add_namespace_callback

@@ -1,11 +1,3 @@
-"""
-@Description: alias config
-@Author: Longlone
-@LastEditors: Longlone
-@Date: 2020-03-02 18:33:01
-@LastEditTime: 2020-03-03 10:05:29
-"""
-
 import functools
 from typing import Any
 

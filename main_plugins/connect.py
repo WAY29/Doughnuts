@@ -1,10 +1,3 @@
-"""
-@Description: command-function: connect
-@Author: Longlone
-@LastEditors: Longlone
-@Date: 2020-01-07 18:42:00
-@LastEditTime: 2020-03-03 13:01:31
-"""
 from libs.config import alias, gset, gget, color, set_namespace
 from libs.myapp import send, print_webshell_info
 from os import path

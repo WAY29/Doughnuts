@@ -1,10 +1,3 @@
-'''
-@Description:Myplugin Main
-@Author: Longlone
-@LastEditors: Longlone
-@Date: 2020-01-07 16:37:40
-@LastEditTime: 2020-03-03 13:15:09
-'''
 from os import listdir, path
 
 

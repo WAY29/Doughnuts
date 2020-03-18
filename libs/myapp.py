@@ -81,7 +81,7 @@ def send(data: str, **extra_params):
     text = req.text
     content = req.content
     req.r_text = text[text.find(head) + 8: text.find(tail)]
-    req.r_content = content[content.find(bytes(head, 'utf-8')) + 8: content.find(bytes(tail, 'utf-8'))] 
+    req.r_content = content[content.find(bytes(head, 'utf-8')) + 8: content.find(bytes(tail, 'utf-8'))]
     try:
         req.r_json = json.loads(req.r_text)
     except json.JSONDecodeError:
