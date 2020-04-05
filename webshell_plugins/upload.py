@@ -33,7 +33,6 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         return
     php = get_php(web_file_path, force)
     text = send(php, files={("file", fp)}).r_text.strip()
-    print("test:", text)
     if text == "success":
         if (flag):
             print(color.green(f"\nUpload {file_path} as {web_file_path} success.\n"))

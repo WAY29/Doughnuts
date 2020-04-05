@@ -124,8 +124,7 @@ def has_env(env: str, remote: bool = True):
 
 
 def open_editor(file_path: str):
-    if (has_env("notepad.exe", False)):
-        editor = "notepad.exe" if has_env("notepad.exe") else "vi"
+    editor = "notepad.exe" if has_env("notepad.exe", False) else "vi"
     try:
         p = subprocess.Popen([editor, file_path], shell=False)
         p.wait()
