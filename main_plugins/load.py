@@ -1,5 +1,5 @@
 from libs.config import alias, color, gset, gget
-from os import path
+from os import path, SEEK_SET
 
 
 @alias(True, "l")
@@ -15,6 +15,7 @@ def run(id: int = 0):
         return
     f = open("webshell.log", "r+")
     lines = f.readlines()
+    f.seek(0, SEEK_SET)
     try:
         if (id <= 0):
             line_num = pf["show"].run()
@@ -33,6 +34,7 @@ def run(id: int = 0):
                 if (flag.lower() in ['n', 'no']):
                     return
                 del lines[load_id - 1]
+                print("".join(lines))
                 f.write("".join(lines))
         else:
             print(color.red("ID error"))
