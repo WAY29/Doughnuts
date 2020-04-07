@@ -4,10 +4,13 @@ from base64 import b64encode
 from os import popen
 from random import randint, sample
 from string import ascii_letters, digits
+from urllib3 import disable_warnings
 
 import requests
 
 from libs.config import color, gget, is_windows
+
+disable_warnings()
 
 
 def banner():
@@ -78,7 +81,8 @@ def send(data: str, **extra_params):
         if func in encode_pf:
             data = encode_pf[func].run(data)
     params_dict[raw_key][password] = data
-    req = requests.post(url, **params_dict)
+    print(params_dict)
+    req = requests.post(url, verify=False, **params_dict)
     # req.encoding = req.apparent_encoding
     text = req.text
     content = req.content
