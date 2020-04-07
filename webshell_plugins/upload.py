@@ -27,7 +27,7 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         web_file_path = path.basename(file_path)
         flag = False
     try:
-        fp = open(file_path, "r")
+        fp = open(file_path, "rb")
     except FileNotFoundError:
         print("\n" + color.red("Local File not exist") + "\n")
         return
