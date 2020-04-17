@@ -140,7 +140,7 @@ def loop_main():
                 arg_dict = args_parse(args)  # 解析参数
                 tpf[order].run(**arg_dict)
             except TypeError as e:
-                print("[TyperError] %s" % str(e).replace("%s()" % api, "%s()" % order))
+                print("[TypeError] %s" % str(e).replace("%s()" % api, "%s()" % order))
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
                 if 0:

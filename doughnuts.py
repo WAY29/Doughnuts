@@ -15,14 +15,14 @@ class My_Loop_init(Loop_init):
 def change_prompt():
     namespace = gget("namespace")
     if (namespace == "main"):
-        print(color.yellow("[help] ") + color.cyan("Get a help doc for command"))
+        print(color.yellow("[help] ") + color.cyan("Get a help doc for command. eg: help {order}"))
         print(color.yellow("[s|show] ") + color.cyan("Show log webshells"))
         print(color.yellow("[se|show_encoders] ") + color.cyan("Show available encoders"))
         print(color.yellow("[l|load] ") + color.cyan("Load a webshell from log. eg: load / load {_id}"))
         print(color.yellow("[c|connect] ") + color.cyan("Connect to a webshell. eg: connect {url} {method} {pass} {encoders...}"))
         print(color.yellow("[quit|exit] ") + color.cyan("Quit this program\n"))
     elif (namespace == "webshell"):
-        print(color.yellow("[help] ") + color.cyan("Get a help doc for command"))
+        print(color.yellow("[help] ") + color.cyan("Get a help doc for command. eg: help {order}"))
         print(color.yellow("[i|info] ") + color.cyan("Print webshell info"))
         print(color.yellow("[s|shell] ") + color.cyan("Enter interactive shell"))
         print(color.yellow("[re|reverse] ") + color.cyan("Reverse shell. eg: reverse {ip} {port} {type=php}"))
