@@ -5,8 +5,11 @@ target/
 .vscode/
 settings.json
 
-DoughnutsV1.3.zip
+target/
+
+.gitignore
 tempCodeRunnerFile.py
 tempCodeRunnerFile.python
 webshell.log
 upadte.txt
+webshell2.log
