@@ -4,8 +4,15 @@
 
 # 更新
 
+## V1.6
+
+- 修复了若干bug
+- 添加了reshell命令,监听本地端口,并让目标反弹一个完整交互式的shell(仅限双方系统都是linux且可能存在一定的问题)
+
+
 ## V1.5
 
+- modify指令现在会调用notepad/vim进行编辑
 - write指令现在会调用notepad/vim进行编辑
 - dump命令现在使用原始php代码进行压缩,可以压缩子目录
 - 优化了发送payload的间隔符

@@ -120,7 +120,10 @@ def loop_main():
         tpf = None
         api = gget("api")
         # --------------------------------------
-        cmd = input(gget(f"{namespace}.prompt"))
+        try:
+            cmd = input(gget(f"{namespace}.prompt"))
+        except (KeyboardInterrupt, EOFError):
+            break
         args = cmd.split(" ")  # 切割
         if " " in cmd:  # 输入的命令
             order = args[0]
@@ -166,6 +169,6 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
     while gget("loop"):
         try:
             sleep(10)
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, EOFError):
             break
     print("\n%s" % leave_message)

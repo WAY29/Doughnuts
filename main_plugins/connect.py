@@ -58,9 +58,6 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         from_log = gget("webshell.from_log", "webshell")
         if not from_log:
             with open("webshell.log", "a+") as f:
-                text = f.read()
-                if not text.endswith("\n"):
-                    f.write("\n")
                 f.write(f"{url}|{method}|{pwd}|{'|'.join(encode_functions)}\n")
         else:
             gset("webshell.from_log", False, True, "webshell")

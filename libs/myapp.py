@@ -54,7 +54,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 1.5\n"))
+    print(color.green("Doughnut Version: 1.6\n"))
 
 
 def base64_encode(data: str):
@@ -110,10 +110,10 @@ def send(data: str, raw: bool = False, **extra_params):
     return req
 
 
-def delay_send(time: float, data: str):
+def delay_send(time: float, data: str, raw: bool = False, **extra_params):
     from time import sleep
     sleep(time)
-    send(data)
+    send(data, raw, **extra_params)
 
 
 def print_webshell_info():

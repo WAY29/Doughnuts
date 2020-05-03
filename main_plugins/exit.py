@@ -13,3 +13,4 @@ def run():
     """
     gset("loop", False, True)
     os.kill(os.getpid(), 0)
+    os._exit(0)

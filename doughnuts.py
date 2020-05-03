@@ -25,6 +25,7 @@ def change_prompt():
         print(color.yellow("[help] ") + color.cyan("Get a help doc for command. eg: help {order}"))
         print(color.yellow("[i|info] ") + color.cyan("Print webshell info"))
         print(color.yellow("[s|shell] ") + color.cyan("Enter interactive shell"))
+        print(color.yellow("[rs|reshell] ") + color.cyan("(Only for both system is linux) (Testing command) Bind a port and waiting for target connect back to get a full shell. eg: reshell {lhost} {port}"))
         print(color.yellow("[re|reverse] ") + color.cyan("Reverse shell. eg: reverse {ip} {port} {type=php}"))
         print(color.yellow("[ws|webshell] ") + color.cyan("Enter interactive webshell"))
         print(color.yellow("[r|read] ") + color.cyan("Read file/files. eg: read {web_file_path1} {web_file_path2} .."))
