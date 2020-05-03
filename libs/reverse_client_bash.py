@@ -90,13 +90,11 @@ def main(port):
         CONNECTED = 1
         stdprint("Connect from %s.\n" % addr[0])
         thread.start_new_thread(recv_daemon, (talk,))
-        # talk.send(bytes("""python -c "__import__('pty').spawn('/bin/sh')" && exit\n""", encoding='utf-8'))
         if (reset):
             talk.send(bytes("""stty rows %s columns %s\n""" %
                             (rows, columns), encoding='utf-8'))
             talk.send(bytes("""reset -s %s\n""" % term, encoding='utf-8'))
             talk.send(bytes("""PS1='[\\u@\\h \\W]\\$ '\n""", encoding='utf-8'))
-            # talk.send(bytes(r"""PS1="[\u@\h \W]\$"\n""" % term, encoding='utf-8'))
         while CONN_ONLINE:
             c = getch()
             if c:

@@ -38,7 +38,7 @@ def change_prompt():
         print(color.yellow("[fwpf] ") + color.cyan("Find writable php file. eg: fwpf {web_file_path=webroot}"))
         print(color.yellow("[fc] ") + color.cyan("Find config file. eg: fwpf {web_file_path=webroot}"))
         print(color.yellow("[pdf] ") + color.cyan("Print disable functions"))
-        print(color.yellow("[ps|portscan] ") + color.cyan("Scan intranet ports. eg: portscan {ip} {ports} {timeout=0.5}"))
+        print(color.yellow("[ps|portscan] ") + color.cyan("Scan intranet ports. eg: portscan {ip} {ports} {type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}"))
         print(color.yellow("[b|back] ") + color.cyan("Back to main menu\n"))
 
 
