@@ -44,19 +44,12 @@ def close_socket():
     CONN_ONLINE = 0
     CONN.close()
     try:
-        termios.tcsetattr(FD, termios.TCSADRAIN, OLD_SETTINGS)
+        if (CONNECTED):
+            termios.tcsetattr(FD, termios.TCSADRAIN, OLD_SETTINGS)
     except Exception:
         pass
     os.system("clear")
     os.system("reset")
-
-
-def timeout(time):
-    from time import sleep
-    sleep(time)
-    if (not CONNECTED):
-        stdprint("Bind timeout...\n")
-        close_socket()
 
 
 def recv_daemon(conn):
@@ -80,7 +73,7 @@ def main(port):
     global CONN, CONNECTED
     CONN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     CONN.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    thread.start_new_thread(timeout, (30,))
+    CONN.settimeout(30.0)
     reset = True
     try:
         CONN.bind(('0.0.0.0', port))
@@ -110,6 +103,8 @@ def main(port):
                     break
     except KeyboardInterrupt:
         pass
+    except socket.timeout:
+        stdprint("Connection timeout...\n")
     finally:
         stdprint("Connection close...\n")
         close_socket()

