@@ -2,7 +2,7 @@
 
 *一个基于Python3.6+的PHPwebshell管理器*
 ![YPIoee.png](https://s1.ax1x.com/2020/05/05/YPIoee.png)
-![YPITdH.png](https://s1.ax1x.com/2020/05/05/YPITdH.png)
+![YPIjQf.png](https://s1.ax1x.com/2020/05/05/YPIjQf.png)
 
 
 # 更新
