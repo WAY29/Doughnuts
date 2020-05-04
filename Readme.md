@@ -4,6 +4,13 @@
 
 # 更新
 
+## V1.7
+
+- 修改reshell命令,修复bug,优化体验,可以随意伪装进程名
+- 在libs目录下放置reverse_server_light的源码,方便编译与修改(origin:https://github.com/QAX-A-Team/ptyshell)
+- 重写portscan,支持三种扫描方式
+
+
 ## V1.6
 
 - 修复了若干bug
