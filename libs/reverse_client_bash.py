@@ -1,22 +1,24 @@
 import socket
-import sys
 import tty
 import termios
 from os import popen
-from sys import stdout
-import _thread as thread
-from libs.config import is_windows
+import sys
+# from sys import stdin, stdout, stderr, __stdin__, __stdout__, __stderr__
+from threading import Thread
+from time import sleep
+from libs.app import gget
 
 
 class _GetchUnix:
     def __call__(self):
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
+        global FD, OLD_SETTINGS
+        FD = sys.stdin.fileno()
+        OLD_SETTINGS = termios.tcgetattr(FD)
         try:
             tty.setraw(sys.stdin.fileno())
             ch = sys.stdin.read(1)
         finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            termios.tcsetattr(FD, termios.TCSADRAIN, OLD_SETTINGS)
         return ch
 
 
@@ -27,29 +29,44 @@ CONN = None
 CONNECTED = 0
 CONN_ONLINE = 1
 CLOSED = 0
-STDOUT = stdout.buffer
+STDOUT = sys.stdout.buffer
+
+
+def init():
+    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN, CONNECTED
+    FD = None
+    OLD_SETTINGS = None
+    CONN = None
+    CONNECTED = 0
+    CONN_ONLINE = 1
+    CLOSED = 0
 
 
 def stdprint(message):
-    stdout.write(message)
-    stdout.flush()
+    sys.stdout.write(message)
+    sys.stdout.flush()
 
 
 def close_socket():
     import os
-    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN
+    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN, CONNECTED
     if (CLOSED):
         return
     CLOSED = 1
     CONN_ONLINE = 0
-    CONN.close()
     try:
-        if (CONNECTED):
-            termios.tcsetattr(FD, termios.TCSADRAIN, OLD_SETTINGS)
+        CONN.close()
+        termios.tcsetattr(FD, termios.TCSADRAIN, OLD_SETTINGS)
     except Exception:
         pass
-    os.system("clear")
+    sys.stdin = sys.__stdin__
+    sys.stdout = sys.__stdout__
+    sys.stderr = sys.__stderr__
     os.system("reset")
+    os.system("clear")
+    if (CONNECTED):
+        stdprint(gget("webshell.prompt"))
+    CONNECTED = 0
 
 
 def recv_daemon(conn):
@@ -59,7 +76,7 @@ def recv_daemon(conn):
             tmp = conn.recv(16)
             if (tmp):
                 STDOUT.write(tmp)
-                stdout.flush()
+                sys.stdout.flush()
             else:
                 raise socket.error
         except socket.error:
@@ -69,8 +86,21 @@ def recv_daemon(conn):
             close_socket()
 
 
+def input_deamon(talk):
+    global CONN_ONLINE
+    while CONN_ONLINE:
+        c = getch()
+        if not c:
+            continue
+        try:
+            talk.send(bytes(c, encoding='utf-8'))
+        except socket.error:
+            break
+
+
 def main(port):
     global CONN, CONNECTED
+    init()
     CONN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     CONN.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     CONN.settimeout(30.0)
@@ -84,24 +114,27 @@ def main(port):
         rows, columns = popen('stty size', 'r').read().strip().split(" ")
         term = popen('printf $TERM').read()
     except Exception:
+        term = "bomb"
         reset = False
     try:
         talk, addr = CONN.accept()
         CONNECTED = 1
         stdprint("Connect from %s.\n" % addr[0])
-        thread.start_new_thread(recv_daemon, (talk,))
+        t = Thread(target=recv_daemon, args=(talk, ))
+        t.start()
+        stdprint("step 1 !")
+        t = Thread(target=input_deamon, args=(talk, ))
+        t.start()
+        stdprint("step 2 !")
+        talk.send(bytes("""alias ls='ls --color=auto'\n""", encoding='utf-8'))
+        talk.send(bytes("""alias grep='grep --color=auto'\n""", encoding='utf-8'))
         if (reset):
             talk.send(bytes("""stty rows %s columns %s\n""" %
                             (rows, columns), encoding='utf-8'))
-            talk.send(bytes("""reset -s %s\n""" % term, encoding='utf-8'))
-            talk.send(bytes("""PS1='[\\u@\\h \\W]\\$ '\n""", encoding='utf-8'))
+        talk.send(bytes("""export TERM=%s\n""" % term, encoding='utf-8'))
+        talk.send(bytes("""reset %s\n""" % term, encoding='utf-8'))
         while CONN_ONLINE:
-            c = getch()
-            if c:
-                try:
-                    talk.send(bytes(c, encoding='utf-8'))
-                except socket.error:
-                    break
+            sleep(0.5)
     except KeyboardInterrupt:
         pass
     except socket.timeout:
