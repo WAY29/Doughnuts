@@ -51,6 +51,7 @@ class Platform():
                     self.__message_dict[pluginName] = self.plugin_path + \
                         '.' + pluginName + ' Failed Loaded by missing required.'
         except ImportError as e:  # 导入错误
+            # print(e)
             if (self.__message is True):
                 self.__message_dict[pluginName] = self.plugin_path + \
                     '.' + pluginName + ' Failed Loaded. ' + str(e)

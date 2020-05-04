@@ -1,5 +1,5 @@
 from libs.config import color
-from libs.myapp import send
+from libs.myapp import gget
 
 
 def run():
@@ -8,10 +8,10 @@ def run():
 
     print disable_functions of website
     """
-    text = send(f"print(ini_get('disable_functions'));").r_text.strip()
-    disable_func_list = ["    " + f.strip() for f in text.split(",")]
-    if len(text):
+    disable_func_list = gget("webshell.disable_functions", "webshell")
+    print(len(disable_func_list), disable_func_list)
+    if len(disable_func_list):
         print(color.green("\ndisable_functions:\n"))
-        print("\n".join(disable_func_list) + "\n")
+        print("    " + "\n    ".join(disable_func_list) + "\n")
     else:
         print(f"{color.green('No disable_functions')} / {color.red('Read error')}")

