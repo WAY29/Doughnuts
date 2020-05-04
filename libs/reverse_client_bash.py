@@ -5,7 +5,6 @@ from os import popen
 import sys
 from threading import Thread
 from time import sleep
-from libs.app import gget
 
 
 class _GetchUnix:
@@ -64,7 +63,7 @@ def close_socket():
     os.system("reset")
     os.system("clear")
     if (CONNECTED):
-        stdprint(gget("webshell.prompt"))
+        stdprint("Prese Enter to continue:")
     CONNECTED = 0
 
 
