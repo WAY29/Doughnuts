@@ -20,7 +20,7 @@ def change_prompt():
         print(color.yellow("[se|show_encoders] ") + color.cyan("Show available encoders"))
         print(color.yellow("[l|load] ") + color.cyan("Load a webshell from log. eg: load / load {_id}"))
         print(color.yellow("[c|connect] ") + color.cyan("Connect to a webshell. eg: connect {url} {method} {pass} {encoders...}"))
-        print(color.yellow("[quit|exit] ") + color.cyan("Quit this program\n"))
+        print(color.yellow("[quit|q] ") + color.cyan("Quit this program\n"))
     elif (namespace == "webshell"):
         print(color.yellow("[help] ") + color.cyan("Get a help doc for command. eg: help {order=help}"))
         print(color.yellow("[i|info] ") + color.cyan("Print webshell info"))
