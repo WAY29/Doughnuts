@@ -40,6 +40,7 @@ def change_prompt():
         print(color.yellow("[fc] ") + color.cyan("Find config file. eg: fwpf {web_file_path=webroot}"))
         print(color.yellow("[pdf] ") + color.cyan("Print disable functions"))
         print(color.yellow("[ps|portscan] ") + color.cyan("Scan intranet ports. eg: portscan {ip} {ports} {type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}"))
+        print(color.yellow("[ag|agent] ") + color.cyan("Intranet agent. eg: agent {url} {method} {data=''} {params=''} {cookie=''} {type=[socket|file_get_contents|curl]{1|2|3},default = 1} {timeout=3} {redirect_method=POST} {redirect_auto=1} {redirect_cookie_use=1} {create_dir=0}"))
         print(color.yellow("[b|back] ") + color.cyan("Back to main menu\n"))
 
 

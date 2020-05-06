@@ -1,13 +1,14 @@
 import json
 import subprocess
-from base64 import b64encode
+from base64 import b64decode, b64encode
 from os import popen
+from platform import system
 from random import randint, sample
-from urllib3 import disable_warnings
 
 import requests
+from urllib3 import disable_warnings
 
-from libs.config import color, gget, is_windows
+from libs.config import color, gget
 
 disable_warnings()
 
@@ -61,6 +62,10 @@ def base64_encode(data: str):
     return b64encode(data.encode()).decode()
 
 
+def base64_decode(data: str):
+    return b64decode(data.encode()).decode()
+
+
 def send(data: str, raw: bool = False, **extra_params):
     offset = 8
 
@@ -92,12 +97,16 @@ def send(data: str, raw: bool = False, **extra_params):
     content = req.content
     text_head_offset = text.find(head)
     text_tail_offset = text.find(tail)
-    text_head_offset = text_head_offset + offset if (text_head_offset != -1) else 0
-    text_tail_offset = text_tail_offset if (text_tail_offset != -1) else len(text)
+    text_head_offset = text_head_offset + \
+        offset if (text_head_offset != -1) else 0
+    text_tail_offset = text_tail_offset if (
+        text_tail_offset != -1) else len(text)
     con_head_offset = content.find(bytes(head, 'utf-8'))
     con_tail_offset = content.find(bytes(tail, 'utf-8'))
-    con_head_offset = con_head_offset + offset if (con_head_offset != -1) else 0
-    con_tail_offset = con_tail_offset if (con_tail_offset != -1) else len(content)
+    con_head_offset = con_head_offset + \
+        offset if (con_head_offset != -1) else 0
+    con_tail_offset = con_tail_offset if (
+        con_tail_offset != -1) else len(content)
     req.r_text = text[text_head_offset: text_tail_offset]
     req.r_content = content[con_head_offset: con_tail_offset]
     try:
@@ -125,6 +134,13 @@ def print_webshell_info():
     info_name = ["Web root:", "OS version:", "PHP version:"]
     for name, info in zip(info_name, info):
         print(name + "\n    " + info + "\n")
+
+
+def is_windows(remote: bool = True):
+    if (remote):
+        return gget("webshell.iswin", "webshell")
+    else:
+        return True if 'win' in system().lower() else False
 
 
 def has_env(env: str, remote: bool = True):
