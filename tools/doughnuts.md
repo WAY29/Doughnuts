@@ -62,11 +62,11 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 即可成功连接至webshell
 
-## 参考
-
-灵感源自[https://github.com/WangYihang/Webshell-Sniper](https://github.com/WangYihang/Webshell-Sniper)
+## 作者
 
 原作者：Longlone
+
+Github 链接：[https://github.com/WAY29/Doughnuts](https://github.com/WAY29/Doughnuts)
 
 ## 更新
 
