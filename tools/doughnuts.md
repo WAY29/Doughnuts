@@ -23,7 +23,7 @@ _基于Python3.6+的PHPwebshell管理器_
   * 寻找配置文件\(文件名中包含cfg/config/db/database\) 也可以通过修改代码来支持寻找更多的文件\(以树状结构显示\)
   * 输出disbale\_functions
   * 端口扫描
-  * 内网代理浏览功能
+  * 内网代理浏览
 * 使用可扩展性的模块化编写，易于编写、管理自定义插件
 
 ## 依赖
@@ -71,10 +71,6 @@ Github 链接：[https://github.com/WAY29/Doughnuts](https://github.com/WAY29/Do
 ## 更新
 
 
-
-### V1.8.1
-
-* 增加3种可选模式的内网代理浏览功能，支持GET、POST参数请求，自动跳转以及跳转时COOKIE自动获取传输功能，可在最大程度保留js和css内容前提下将浏览得到的内容存入本地.html文件中
 
 ### V1.8
 
