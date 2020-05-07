@@ -6,7 +6,7 @@
 
 * Doughnuts 1.80 ：
   *  一个由Python 3.6编写，基于PHPWebshell的管理工具
-  * 更多细节：[https://morouure.gitbook.io/morouu/tools/doughnuts](https://morouure.gitbook.io/morouu/tools/doughnuts)![](../.gitbook/assets/visitor.png) 
+  * 更多细节：[https://github.com/WAY29/Doughnuts](https://github.com/WAY29/Doughnuts)![](../.gitbook/assets/visitor.png) 
 
 
 
