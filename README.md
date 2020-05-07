@@ -4,21 +4,17 @@ description: 一个还可以的玩意
 
 # 主页
 
-## 15.0.0 - 2042-12-03
+## **欢迎欢迎！**
 
-### Fixed
+### 人员名单
 
-* Removed humns, they weren't doing fine with animals.
+* ~~**武星宇**~~
 
-### Changed
+### 日期
 
-* Animals are now super cute, all of them.
+* 2020-05-07
 
-## 14.0.0 - 2042-10-06
-
-### Added
-
-* Introduced animals into the world, we believe they're going to be a neat addition.
+## 
 
 
 
