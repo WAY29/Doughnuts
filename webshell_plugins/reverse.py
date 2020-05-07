@@ -1,7 +1,7 @@
 from threading import Thread
 
-from libs.config import alias, color, is_windows
-from libs.myapp import send, delay_send, has_env
+from libs.config import alias, color
+from libs.myapp import send, delay_send, has_env, is_windows
 
 
 def get_reverse_php(ip: str, port: str):

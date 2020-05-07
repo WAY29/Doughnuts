@@ -50,7 +50,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         gset("webshell.root", info[0], namespace="webshell")
         gset("webshell.os_version", info[1], namespace="webshell")
         gset(
-            "webshell.os",
+            "webshell.iswin",
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )

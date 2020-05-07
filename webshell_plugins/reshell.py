@@ -5,8 +5,8 @@ from libs.c64 import encrypt
 from os import getcwd, path
 from threading import Thread
 
-from libs.config import alias, color, is_windows
-from libs.myapp import delay_send, send
+from libs.config import alias, color
+from libs.myapp import delay_send, send, is_windows
 from webshell_plugins.upload import run as upload
 
 
