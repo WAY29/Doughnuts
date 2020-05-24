@@ -3,7 +3,7 @@ from libs.myapp import send
 
 
 @alias(True, func_alias="r")
-def run(*web_file_paths: str):
+def run(*web_file_paths):
     """
     read
 
