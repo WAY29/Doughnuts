@@ -69,9 +69,6 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ### V1.9
 - 添加search命令,使用glob函数递归搜索文件.命令格式为search {pattern}
 
-
-## 更新
-
 ### V1.8
 - 优化连接时发送的请求,从发送三次变成发送2次
 - 修改pdf命令的逻辑,在连接时获取
