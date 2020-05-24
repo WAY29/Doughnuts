@@ -38,9 +38,9 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         path.join(gget("root_path"), "target", webshell_netloc),
         namespace="webshell",
     )
-    req = send("print(phpversion().'|'.md5(1));", raw=True)
-    gset("webshell.php_version", req.text.split("|")[0].strip(), namespace="webshell")
-    if ('7.' in req.text):
+    req = send("print(phpversion().'|'.md5(1));")
+    gset("webshell.php_version", req.r_text.split("|")[0].strip(), namespace="webshell")
+    if ('7.' in req.r_text):
         gset("webshell.v7", True, namespace="webshell")
     if "c4ca4238a0b923820dcc509a6f75849b" in req.r_text:  # 验证是否成功连接
         info_req = send(
