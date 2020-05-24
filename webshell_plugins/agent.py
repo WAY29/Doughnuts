@@ -2,12 +2,12 @@ from libs.config import alias, color
 from libs.myapp import send, base64_encode, base64_decode
 from re import findall, I, M
 from os import makedirs, urandom
-from os.path import dirname,exists
+from os.path import dirname, exists
 from time import time
 
 
-def get_php( request_target, request_method, request_redirect_method, request_data, request_params, request_cookie,
-             redirect_auto, redirect_cookie_use, timeout, type ):
+def get_php(request_target, request_method, request_redirect_method, request_data, request_params, request_cookie,
+            redirect_auto, redirect_cookie_use, timeout, type):
     return base64_encode("""
 # 代理目标
 $REQUEST_URL= "%s";
@@ -87,7 +87,7 @@ class Agent{
 
     private function get_params($params){
         $re_params=[];
-		if($params == '') return [''=>''];
+        if($params == '') return [''=>''];
         foreach(explode('&',$params) as $line){
             $key_value=explode('=',$line);       
             $re_params[urldecode(isset($key_value[0])?$key_value[0]:'')]=urldecode(isset($key_value[1])?$key_value[1]:'');
@@ -125,28 +125,28 @@ class Agent{
         }
 
         $body.="\\n<!-- \\n<CurrentUrl>".base64_encode($this->current_url)."</CurrentUrl>";
-		$body.="<CurrentCookie>".base64_encode($this->request_cookie)."</CurrentCookie>";
-		$body.="<CurrentHeader>";
-		if(is_array($this->header_data)){
-		    foreach($this->header_data as $tag){
-				if($tag){
-					$body.=base64_encode("[{$tag}]")."|";
-				}
-		    }
-		}
-		$body.="</CurrentHeader>";
-		$body.="<CurrentStatus>success</CurrentStatus>\\n -->";
-		
+        $body.="<CurrentCookie>".base64_encode($this->request_cookie)."</CurrentCookie>";
+        $body.="<CurrentHeader>";
+        if(is_array($this->header_data)){
+            foreach($this->header_data as $tag){
+                if($tag){
+                    $body.=base64_encode("[{$tag}]")."|";
+                }
+            }
+        }
+        $body.="</CurrentHeader>";
+        $body.="<CurrentStatus>success</CurrentStatus>\\n -->";
+        
         return $body;
     }
 
     private function get302_socket($url)
     {
         try {
-			
-			$result="";
+            
+            $result="";
             $url_group = $this->url_cut($url);
-			
+            
             $fp = @fsockopen($url_group['host'], isset($url_group['port']) ? $url_group['port'] : (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : 80), $erro, $errostr, $this->timeout);
             if (!$fp) {
                 throw new Exception("Can't connect```");
@@ -169,8 +169,8 @@ class Agent{
                 $r .= "Content-Type: " . $type . "\\r\\n";
                 $r .= "Content-Length: " . $len . "\\r\\n";
                 $r .= "Connection: close\\r\\n\\r\\n";
-				
-				
+                
+                
                 fputs($fp, $r);
                 while (!feof($fp)) {
                     $result .= fgets($fp, 1024);
@@ -186,16 +186,16 @@ class Agent{
                     if (300 <= $code[1] and $code[1] < 400) {
                         $redirect_url = $this->get_redirect($header);
                         $cookie = $this->get_cookie($header) ? $this->get_cookie($header) : $this->request_cookie;
-						if($this->redirect_cookie_use and $cookie  != ''){
-							$this->request_cookie = $cookie;
-						}
-						if(stripos($redirect_url,'http://') == false){
-							if($redirect_url[0] == '/'){
-								$redirect_url = $this->get_host($url).$redirect_url;
-							}else{
-								$redirect_url = $url_group['scheme'].'://'.$url_group['host']. ':' . (isset($url_group['port']) ? $url_group['port'] : '80').(isset($url_group['path'])?($url_group['path'] == '/'?'/':substr($url_group['path'],0,strripos($url_group['path'],'/') + 1)):'/').$redirect_url;
-							}
-						}
+                        if($this->redirect_cookie_use and $cookie  != ''){
+                            $this->request_cookie = $cookie;
+                        }
+                        if(stripos($redirect_url,'http://') == false){
+                            if($redirect_url[0] == '/'){
+                                $redirect_url = $this->get_host($url).$redirect_url;
+                            }else{
+                                $redirect_url = $url_group['scheme'].'://'.$url_group['host']. ':' . (isset($url_group['port']) ? $url_group['port'] : '80').(isset($url_group['path'])?($url_group['path'] == '/'?'/':substr($url_group['path'],0,strripos($url_group['path'],'/') + 1)):'/').$redirect_url;
+                            }
+                        }
                         $this->current_url = $redirect_url;
                         return $this->redirect_auto ? $this->get302_socket($redirect_url) : $body;
                     } else {
@@ -211,8 +211,7 @@ class Agent{
     private function get302_fg($url)
     {
         try {
-			$url_group = $this->url_cut($url);
-			
+            $url_group = $this->url_cut($url);
             if (in_array($this->request_redirect_method, $this->request_allowed_method)) {
                 if ($this->request_redirect_method === 'POST') {
                     $type = "application/x-www-form-urlencoded";
@@ -227,8 +226,8 @@ class Agent{
                         ($this->request_cookie ? 'Cookie: ' . $this->request_cookie . "\\r\\n":'' )
                 )
             );
-			
-			
+            
+            
             $context = stream_context_create($opts);
             $body = @file_get_contents($url, false, $context);
             $result = $http_response_header;
@@ -238,16 +237,16 @@ class Agent{
             if (300 <= $code[1] and $code[1] < 400) {
                 $redirect_url = $this->get_redirect($result);
                 $cookie = $this->get_cookie($result) ? $this->get_cookie($result) : $this->request_cookie;
-				if($this->redirect_cookie_use and $cookie  != ''){
-							$this->request_cookie = $cookie;
-						}
-						if(stripos($redirect_url,'http://') == false){
-							if($redirect_url[0] == '/'){
-								$redirect_url = $this->get_host($url).$redirect_url;
-							}else{
-								$redirect_url = $url_group['scheme'].'://'.$url_group['host']. ':' . (isset($url_group['port']) ? $url_group['port'] : '80').(isset($url_group['path'])?($url_group['path'] == '/'?'/':substr($url_group['path'],0,strripos($url_group['path'],'/') + 1)):'/').$redirect_url;
-							}
-						}
+                if($this->redirect_cookie_use and $cookie  != ''){
+                            $this->request_cookie = $cookie;
+                        }
+                        if(stripos($redirect_url,'http://') == false){
+                            if($redirect_url[0] == '/'){
+                                $redirect_url = $this->get_host($url).$redirect_url;
+                            }else{
+                                $redirect_url = $url_group['scheme'].'://'.$url_group['host']. ':' . (isset($url_group['port']) ? $url_group['port'] : '80').(isset($url_group['path'])?($url_group['path'] == '/'?'/':substr($url_group['path'],0,strripos($url_group['path'],'/') + 1)):'/').$redirect_url;
+                            }
+                        }
                         $this->current_url = $redirect_url;
                         return $this->redirect_auto ? $this->get302_fg($redirect_url) : ($body === false ? "Can't fetch contents```" : $body);
             } else {
@@ -261,8 +260,8 @@ class Agent{
     private function get302_c($url){
         try{
             $r = curl_init();
-			$url_group = $this->url_cut($url);
-			
+            $url_group = $this->url_cut($url);
+            
             curl_setopt($r, CURLOPT_URL, $url);
             curl_setopt($r, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($r, CURLOPT_CONNECTTIMEOUT, $this->timeout);
@@ -292,16 +291,16 @@ class Agent{
                 if (300 <= $status_code and $status_code < 400) {
                     $redirect_url = $this->get_redirect($header);
                     $cookie = $this->get_cookie($header) ? $this->get_cookie($header) : $this->request_cookie;
-					if($this->redirect_cookie_use and $cookie  != ''){
-							$this->request_cookie = $cookie;
-						}
-						if(stripos($redirect_url,'http://') == false){
-							if($redirect_url[0] == '/'){
-								$redirect_url = $this->get_host($url).$redirect_url;
-							}else{
-								$redirect_url = $url_group['scheme'].'://'.$url_group['host']. ':' . (isset($url_group['port']) ? $url_group['port'] : '80').(isset($url_group['path'])?($url_group['path'] == '/'?'/':substr($url_group['path'],0,strripos($url_group['path'],'/') + 1)):'/').$redirect_url;
-							}
-						}
+                    if($this->redirect_cookie_use and $cookie  != ''){
+                            $this->request_cookie = $cookie;
+                        }
+                        if(stripos($redirect_url,'http://') == false){
+                            if($redirect_url[0] == '/'){
+                                $redirect_url = $this->get_host($url).$redirect_url;
+                            }else{
+                                $redirect_url = $url_group['scheme'].'://'.$url_group['host']. ':' . (isset($url_group['port']) ? $url_group['port'] : '80').(isset($url_group['path'])?($url_group['path'] == '/'?'/':substr($url_group['path'],0,strripos($url_group['path'],'/') + 1)):'/').$redirect_url;
+                            }
+                        }
                         $this->current_url = $redirect_url;
                         return $this->redirect_auto ? $this->get302_c($redirect_url) : $body;
                 }else{
@@ -320,8 +319,8 @@ class Agent{
             $fp = @fsockopen($this->request_url_group['host'], isset($this->request_url_group['port']) ? $this->request_url_group['port'] : 80, $erro, $errostr, $this->timeout);
 
             if (!$fp) {
-				var_dump($this->request_url_group['scheme'] . '://' . $this->request_url_group['host'] . (isset($this->request_url_group['path']) ? $this->request_url_group['path'] : '/' . '?' . $this->get_query($this->request_params)));
-				var_dump(isset($this->request_url_group['port']) ? $this->request_url_group['port'] : 80);
+                var_dump($this->request_url_group['scheme'] . '://' . $this->request_url_group['host'] . (isset($this->request_url_group['path']) ? $this->request_url_group['path'] : '/' . '?' . $this->get_query($this->request_params)));
+                var_dump(isset($this->request_url_group['port']) ? $this->request_url_group['port'] : 80);
                 throw new Exception("Can't connect```");
             } else {
 
@@ -336,8 +335,8 @@ class Agent{
                         $len = 0;
                     }
                 }
-				
-				
+                
+                
                 $r .= "Host: " . $this->request_url_group['host'] . ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80') . "\r\n";
                 $r .= $this->request_cookie ? "Cookie: " . $this->request_cookie . "\\r\\n" : '';
                 $r .= "Content-Type: " . $type . "\\r\\n";
@@ -360,16 +359,16 @@ class Agent{
                     if (300 <= $code[1] and $code[1] < 400) {
                         $redirect_url = $this->get_redirect($header);
                         $cookie = $this->redirect_cookie_use ? ($this->get_cookie($header) ? $this->get_cookie($header) : $this->request_cookie) : '';
-						if($this->redirect_cookie_use and $cookie  != ''){
-							$this->request_cookie = $cookie;
-						}
-						if(stripos($redirect_url,'http://') == false){
-							if($redirect_url[0] == '/'){
-								$redirect_url = $this->get_host($this->request_url).$redirect_url;
-							}else{
-								$redirect_url = $this->request_url_group['scheme'].'://'.$this->request_url_group['host']. ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80').(isset($this->request_url_group['path'])?($this->request_url_group['path'] == '/'?'/':substr($this->request_url_group['path'],0,strripos($this->request_url_group['path'],'/') + 1)):'/').$redirect_url;
-							}
-						}
+                        if($this->redirect_cookie_use and $cookie  != ''){
+                            $this->request_cookie = $cookie;
+                        }
+                        if(stripos($redirect_url,'http://') == false){
+                            if($redirect_url[0] == '/'){
+                                $redirect_url = $this->get_host($this->request_url).$redirect_url;
+                            }else{
+                                $redirect_url = $this->request_url_group['scheme'].'://'.$this->request_url_group['host']. ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80').(isset($this->request_url_group['path'])?($this->request_url_group['path'] == '/'?'/':substr($this->request_url_group['path'],0,strripos($this->request_url_group['path'],'/') + 1)):'/').$redirect_url;
+                            }
+                        }
                         $this->current_url = $redirect_url;
                         return $this->redirect_auto ? $this->get302_socket($redirect_url) : $body;
                     } else {
@@ -410,20 +409,20 @@ class Agent{
             if (300 <= $code[1] and $code[1] < 400) {
                 $redirect_url = $this->get_redirect($result);
                 $cookie = $this->redirect_cookie_use ? ($this->get_cookie($result) ? $this->get_cookie($result) : $this->request_cookie) : '';
-				if($this->redirect_cookie_use and $cookie  != ''){
-							$this->request_cookie = $cookie;
-						}
-						if(stripos($redirect_url,'http://') == false){
-							if($redirect_url[0] == '/'){
-								$redirect_url = $this->get_host($this->request_url).$redirect_url;
-							}else{
-								$redirect_url = $this->request_url_group['scheme'].'://'.$this->request_url_group['host']. ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80').(isset($this->request_url_group['path'])?($this->request_url_group['path'] == '/'?'/':substr($this->request_url_group['path'],0,strripos($this->request_url_group['path'],'/') + 1)):'/').$redirect_url;
-							}
-						}
+                if($this->redirect_cookie_use and $cookie  != ''){
+                            $this->request_cookie = $cookie;
+                        }
+                        if(stripos($redirect_url,'http://') == false){
+                            if($redirect_url[0] == '/'){
+                                $redirect_url = $this->get_host($this->request_url).$redirect_url;
+                            }else{
+                                $redirect_url = $this->request_url_group['scheme'].'://'.$this->request_url_group['host']. ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80').(isset($this->request_url_group['path'])?($this->request_url_group['path'] == '/'?'/':substr($this->request_url_group['path'],0,strripos($this->request_url_group['path'],'/') + 1)):'/').$redirect_url;
+                            }
+                        }
                         $this->current_url = $redirect_url;
                         return $this->redirect_auto ? $this->get302_fg($redirect_url) : ($body===false?"Can't fetch contents```":$body);
             }else{
-				return $body === false ? "Can't fetch contents```" : $body;
+                return $body === false ? "Can't fetch contents```" : $body;
             }
         } catch(Exception $e){
             die("File_Get_Contents_error #:" . $e);
@@ -465,16 +464,16 @@ class Agent{
                     if(300 <= $status_code and $status_code < 400){
                         $redirect_url = $this->get_redirect($header);
                         $cookie = $this->redirect_cookie_use ? ($this->get_cookie($header) ? $this->get_cookie($header) : $this->request_cookie) : '';
-						if($this->redirect_cookie_use and $cookie  != ''){
-							$this->request_cookie = $cookie;
-						}
-						if(stripos($redirect_url,'http://') == false){
-							if($redirect_url[0] == '/'){
-								$redirect_url = $this->get_host($this->request_url).$redirect_url;
-							}else{
-								$redirect_url = $this->request_url_group['scheme'].'://'.$this->request_url_group['host']. ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80').(isset($this->request_url_group['path'])?($this->request_url_group['path'] == '/'?'/':substr($this->request_url_group['path'],0,strripos($this->request_url_group['path'],'/') + 1)):'/').$redirect_url;
-							}
-						}
+                        if($this->redirect_cookie_use and $cookie  != ''){
+                            $this->request_cookie = $cookie;
+                        }
+                        if(stripos($redirect_url,'http://') == false){
+                            if($redirect_url[0] == '/'){
+                                $redirect_url = $this->get_host($this->request_url).$redirect_url;
+                            }else{
+                                $redirect_url = $this->request_url_group['scheme'].'://'.$this->request_url_group['host']. ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80').(isset($this->request_url_group['path'])?($this->request_url_group['path'] == '/'?'/':substr($this->request_url_group['path'],0,strripos($this->request_url_group['path'],'/') + 1)):'/').$redirect_url;
+                            }
+                        }
                         $this->current_url = $redirect_url;
                         return $this->redirect_auto ? $this->get302_c($redirect_url) : $body;
                     }else{
@@ -538,11 +537,11 @@ echo $this_request;
        redirect_auto, redirect_cookie_use, timeout, type))
 
 
-@alias(True, func_alias = "ag", u = "url", m = "method", d = "data", p = "params", c = "cookie", t = "type",
-       to = "timeout", re_m = "redirect_method")
-def run( url: str, method: str,
-         data: str = '', params: str = '', cookie: str = '', type: int = 1, timeout: float = 3,
-         redirect_method: str = "POST", redirect_auto: int = 1, redirect_cookie_use: int = 1, create_dir: int = 0 ):
+@alias(True, func_alias="ag", u="url", m="method", d="data", p="params", c="cookie", t="type",
+       to="timeout", re_m="redirect_method")
+def run(url: str, method: str,
+        data: str = '', params: str = '', cookie: str = '', type: int = 1, timeout: float = 3,
+        redirect_method: str = "POST", redirect_auto: int = 1, redirect_cookie_use: int = 1, create_dir: int = 0):
     """
     agent
 
@@ -551,7 +550,7 @@ def run( url: str, method: str,
 
     php = get_php(
         url,
-        method.upper( ), redirect_method.upper( ),
+        method.upper(), redirect_method.upper(),
         data, params, cookie,
         redirect_auto, redirect_cookie_use, timeout, type
     )
@@ -562,48 +561,56 @@ def run( url: str, method: str,
 
     try:
 
-        current_status = findall('<CurrentStatus>(.*)</CurrentStatus>', text, I + M)
+        current_status = findall(
+            '<CurrentStatus>(.*)</CurrentStatus>', text, I + M)
         assert len(current_status), "Can't get status```"
-        current_status = current_status[ 0 ]
+        current_status = current_status[0]
 
         current_url = findall('<CurrentUrl>(.*)</CurrentUrl>', text, I + M)
-        current_url = base64_decode(current_url[ 0 ]) if len(current_url) else ''
+        current_url = base64_decode(current_url[0]) if len(current_url) else ''
 
-        current_cookie = findall('<CurrentCookie>(.*)</CurrentCookie>', text, I + M)
-        current_cookie = base64_decode(current_cookie[ 0 ]) if len(current_cookie) else ''
+        current_cookie = findall(
+            '<CurrentCookie>(.*)</CurrentCookie>', text, I + M)
+        current_cookie = base64_decode(
+            current_cookie[0]) if len(current_cookie) else ''
 
-        current_header = findall('<CurrentHeader>(.*)</CurrentHeader>', text, I + M)
-        current_header = "\n    ".join(base64_decode(line) for line in current_header[ 0 ].split("|")) if len(
+        current_header = findall(
+            '<CurrentHeader>(.*)</CurrentHeader>', text, I + M)
+        current_header = "\n    ".join(base64_decode(line) for line in current_header[0].split("|")) if len(
             current_header) else ''
 
         if (current_status == "success"):
-            print(color.magenta("Current Url: ") + color.cyan(current_url) + "\n")
-            print(color.blue("Response Headers: \n\n") + " " * 4 + color.white(current_header))
-            print(color.blue("Cookie: \n\n") + " " * 4 + color.red(current_cookie) + "\n")
+            print(color.magenta("Current Url: ") +
+                  color.cyan(current_url) + "\n")
+            print(color.blue("Response Headers: \n\n") +
+                  " " * 4 + color.white(current_header))
+            print(color.blue("Cookie: \n\n") + " " *
+                  4 + color.red(current_cookie) + "\n")
             print(color.yellow("*" * 20 + " Body " + "*" * 20) + "\n\n")
             print(color.cyan(text) + "\n\n")
             print(color.yellow("*" * 20 + " END " + "*" * 21) + "\n\n")
             if (create_dir == 1):
-                dir_path = dirname(current_url.split("//", maxsplit = 1)[ 1 ])
+                dir_path = dirname(current_url.split("//", maxsplit=1)[1])
                 dir_path = dir_path.replace(":", "-")
-                dir_path = dir_path.replace('.',"_")
-                file_name = "".join(hex(each)[ 2: ].zfill(2) for each in urandom(20)) + "_" + str(time( )) + '.html'
+                dir_path = dir_path.replace('.', "_")
+                file_name = "".join(hex(each)[2:].zfill(
+                    2) for each in urandom(20)) + "_" + str(time()) + '.html'
 
                 if(not exists(dir_path)):
                     makedirs(dir_path)
 
                 method = "w"
                 try:
-                    contents = text.encode( )
+                    contents = text.encode()
                     method = "wb"
-                except:
+                except Exception:
                     contents = text
 
                 with open(dir_path + "/" + file_name, method) as out_file:
                     out_file.write(contents)
 
-                print(color.blue("Outfile: ") + color.cyan(dir_path + "/" + file_name) + "\n\n")
-
+                print(color.blue("Outfile: ") +
+                      color.cyan(dir_path + "/" + file_name) + "\n\n")
 
     except Exception as e:
         print("Agent error.", e)
