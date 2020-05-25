@@ -13,7 +13,7 @@
     - 获取网站,系统信息
     - 获取一个临时的非完全交互式shell和webshell
     - 以php/python的方式反弹shell(windows/unix通用)
-    - (仅限双方均为*unix)获取完全交互式shell
+    - (仅限双方均为*unix)获取完全交互式的反弹shell
     - 读/写/上传/下载/删除/搜索文件
     - 网站目录打包下载
     - 寻找可写的PHP文件(以树状结构显示)
