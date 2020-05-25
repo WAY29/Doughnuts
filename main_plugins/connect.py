@@ -39,10 +39,10 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         namespace="webshell",
     )
     req = send("print('c4ca4238a0b923820d|'.phpversion().'|cc509a6f75849b');", raw=True)
-    gset("webshell.php_version", req.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
     if ('7.' in req.r_text):
         gset("webshell.v7", True, namespace="webshell")
     if "c4ca4238a0b923820d" in req.r_text:  # 验证是否成功连接
+        gset("webshell.php_version", req.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
         info_req = send(
             "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.ini_get('disable_functions'));"
         )
