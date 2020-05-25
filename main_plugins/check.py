@@ -1,6 +1,6 @@
 from libs.config import gget, alias, color
 from os.path import exists
-from requests import post, Timeout
+from requests import post, exceptions
 
 
 @alias(True)
@@ -35,13 +35,16 @@ def run(timeout: float = 2.0):
             params_dict = {"data": {}, "timeout": timeout}
             params_dict[raw_key] = {}
             params_dict[raw_key][pwd] = check_command
-            common_text = ""
+            common_text, status_code_text = "", "000"
             try:
                 res = post(url, verify=False, **params_dict)
+                status_code_text = str(res.status_code)
                 if ("c4ca4238a0b923820dcc509a6f75849b" in res.text):
                     common_text = color.green("Alive")
                 else:
                     common_text = color.red("Not Alive")
-            except Timeout:
+            except exceptions.Timeout:
                 common_text = color.yellow("Timeout")
-            print(f"[{color.blue(str(index))}] [{color.yellow(str(res.status_code))}] {common_text} {url}")
+            except exceptions.RequestException:
+                common_text = color.red("Request error")
+            print(f"[{color.blue(str(index))}] [{color.yellow(status_code_text)}] {common_text} {url}")
