@@ -38,7 +38,7 @@ $TIMEOUT = %f;
 
 # 有4种。
 # 前3种分别对应 socket file_get_contents curl 的内网代理
-# 最后1种是单纯的file_get_contents()，可以玩php伪协议 
+# 最后1种是单纯的file_get_contents()，可以玩php伪协议
 $TYPE = %d;
 
 
@@ -61,10 +61,7 @@ class Agent{
     private $request_url;
     private $request_url_group;
     private $current_url;
-    
     private $header_data;
-
-
     private function get_cookie($header_lines){
         foreach ($header_lines as $line) {
             preg_match_all('/set-cookie:(.*)/i', $line, $cookie);
@@ -89,7 +86,7 @@ class Agent{
         $re_params=[];
         if($params == '') return [''=>''];
         foreach(explode('&',$params) as $line){
-            $key_value=explode('=',$line);       
+            $key_value=explode('=',$line);
             $re_params[urldecode(isset($key_value[0])?$key_value[0]:'')]=urldecode(isset($key_value[1])?$key_value[1]:'');
         }
         return $re_params;
@@ -113,7 +110,6 @@ class Agent{
     }
 
     private function get_element($host,$body){
-        
         preg_match_all("/<link[\s\S]*?href=['\\"](.*?[.]css.*?)[\\"'][\s\S]*?>/i", $body, $css);
         preg_match_all("/<script[\s\S]*?src=['\\"](.*?[.]js.*?)[\\"'][\s\S]*?>/i", $body, $js);
 
@@ -136,17 +132,14 @@ class Agent{
         }
         $body.="</CurrentHeader>";
         $body.="<CurrentStatus>success</CurrentStatus>\\n -->";
-        
         return $body;
     }
 
     private function get302_socket($url)
     {
         try {
-            
             $result="";
             $url_group = $this->url_cut($url);
-            
             $fp = @fsockopen($url_group['host'], isset($url_group['port']) ? $url_group['port'] : (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : 80), $erro, $errostr, $this->timeout);
             if (!$fp) {
                 throw new Exception("Can't connect```");
@@ -169,14 +162,11 @@ class Agent{
                 $r .= "Content-Type: " . $type . "\\r\\n";
                 $r .= "Content-Length: " . $len . "\\r\\n";
                 $r .= "Connection: close\\r\\n\\r\\n";
-                
-                
                 fputs($fp, $r);
                 while (!feof($fp)) {
                     $result .= fgets($fp, 1024);
                 }
                 fclose($fp);
-
                 if ($result) {
                     list($header, $body) = explode("\\r\\n\\r\\n" , $result, 2);
                     preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", explode("\\r\\n", $header)[0], $code);
@@ -226,13 +216,10 @@ class Agent{
                         ($this->request_cookie ? 'Cookie: ' . $this->request_cookie . "\\r\\n":'' )
                 )
             );
-            
-            
             $context = stream_context_create($opts);
             $body = @file_get_contents($url, false, $context);
             $result = $http_response_header;
             $this->header_data = $result;
-            
             preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $result[0], $code);
             if (300 <= $code[1] and $code[1] < 400) {
                 $redirect_url = $this->get_redirect($result);
@@ -261,7 +248,7 @@ class Agent{
         try{
             $r = curl_init();
             $url_group = $this->url_cut($url);
-            
+
             curl_setopt($r, CURLOPT_URL, $url);
             curl_setopt($r, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($r, CURLOPT_CONNECTTIMEOUT, $this->timeout);
@@ -335,8 +322,6 @@ class Agent{
                         $len = 0;
                     }
                 }
-                
-                
                 $r .= "Host: " . $this->request_url_group['host'] . ':' . (isset($this->request_url_group['port']) ? $this->request_url_group['port'] : '80') . "\r\n";
                 $r .= $this->request_cookie ? "Cookie: " . $this->request_cookie . "\\r\\n" : '';
                 $r .= "Content-Type: " . $type . "\\r\\n";
@@ -404,7 +389,7 @@ class Agent{
             $body = @file_get_contents($this->request_url.'?'.$this->get_query($this->request_params),false,$context);
             $result = $http_response_header;
             $this->header_data = $result;
-            
+
             preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $result[0], $code);
             if (300 <= $code[1] and $code[1] < 400) {
                 $redirect_url = $this->get_redirect($result);
@@ -428,9 +413,6 @@ class Agent{
             die("File_Get_Contents_error #:" . $e);
         }
     }
-
-
-
     public function getContent_c(){
         try{
             if(in_array($this->request_method,$this->request_allowed_method)){
@@ -458,7 +440,7 @@ class Agent{
                     $body = substr($result,$header_size);
                     $status_code = intval(curl_getinfo($curl,CURLINFO_HTTP_CODE));
                     $this->header_data = $header;
-                    
+
                     curl_close($curl);
 
                     if(300 <= $status_code and $status_code < 400){
@@ -509,7 +491,7 @@ class Agent{
     }
 
     public function __toString(){
-        
+
         switch($this->type){
             case 1:
                 $this->page_content = $this->get_element($this->request_url,$this->getContent_sock());
@@ -527,7 +509,6 @@ class Agent{
 
         return $this->page_content;
     }
-    
 }
 
 $this_request = new Agent($REQUEST_URL,$REQUEST_METHOD,$REQUEST_REDIRECT_METHOD,$REDIRECT_AUTO,$REDIRECT_COOKIE_USE,$REQUEST_PARAMS,$REQUEST_DATA,$REQUEST_COOKIE,$TIMEOUT,$TYPE);
@@ -545,7 +526,9 @@ def run(url: str, method: str,
     """
     agent
 
-    Lightweight intranet browsing
+    Lightweight intranet browsing.
+
+    eg: agent {url} {method} {data=''} {params=''} {cookie=''} {type=[socket|file_get_contents|curl]{1|2|3},default = 1} {timeout=3} {redirect_method=POST} {redirect_auto=1} {redirect_cookie_use=1} {create_dir=0}
     """
 
     php = get_php(

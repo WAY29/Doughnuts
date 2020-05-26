@@ -121,7 +121,9 @@ def run(ip: str, port: str, reverse_type: str = "php"):
     """
     reverse
 
-    reverse shell to a host from website host
+    reverse shell to a host from target system.
+
+    eg: reverse {ip} {port} {type=php}
     """
     reverse_type = str(reverse_type).lower()
     if reverse_type == "php":

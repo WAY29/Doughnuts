@@ -7,7 +7,7 @@ def run():
     """
     show
 
-    Show log webshells
+    Show log webshells.
     """
     if not path.exists("webshell.log"):
         print(color.red("No webshell.Log"))

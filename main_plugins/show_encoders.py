@@ -7,7 +7,7 @@ def run():
     """
     show
 
-    Show avilable encoders
+    Show avilable encoders.
     """
     encoders_pf = gget("encode.pf")
     if (not len(encoders_pf)):

@@ -18,6 +18,8 @@ def run(filename: str = ""):
     touch
 
     Specify a file whose modification time stamp is the same as a random file in the current directory.
+
+    eg: touch {filename=this_webshell}
     """
     disable_function_list = gget("webshell.disable_functions", "webshell")
     command_execute_set = {"system", "exec", "passthru", "shell_exec"}

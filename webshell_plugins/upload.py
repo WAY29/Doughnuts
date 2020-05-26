@@ -20,7 +20,9 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
     """
     upload
 
-    Upload file to website
+    Upload file to target system.
+
+    eg: upload {file_path} {web_file_path=file_name} {force=False}
     """
     flag = True
     if (not web_file_path):

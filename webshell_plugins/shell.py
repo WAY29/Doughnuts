@@ -7,7 +7,7 @@ def run():
     """
     shell
 
-    Get a fake shell of website
+    Get a fake shell of target system.
     """
     print(color.cyan("Eenter interactive temporary shell...\n"))
     cwd = send(f'print(getcwd());').r_text.strip()

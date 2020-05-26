@@ -7,7 +7,9 @@ def run(*web_file_paths):
     """
     read
 
-    Read file(s) from website
+    Read file(s) from target system.
+
+    eg: read {web_file_path1} {web_file_path2} ..
     """
     for each_file_path in web_file_paths:
         text = send(f"print(file_get_contents('{each_file_path}'));").r_text.strip()

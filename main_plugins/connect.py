@@ -9,7 +9,9 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     """
     connect
 
-    Connect a webshell of php
+    Connect a webshell of php.
+
+    eg: connect {url} {method} {pass} {encoders...}
     """
     method = str(method).upper()
     params_dict = {}

@@ -7,7 +7,7 @@ def run():
     """
     webshell
 
-    Get a webshell of website
+    Get a webshell of target website.
     """
     print(color.cyan("Eenter interactive temporary webshell...\n"))
     cwd = send(f'print(getcwd());').r_text.strip()

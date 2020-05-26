@@ -26,7 +26,9 @@ def run(
     """
     download
 
-    Download file(s) from website
+    Download file(s) from target system.
+
+    eg: download {web_file_path} {local_path=./site.com/...}
     """
     php = get_php(web_file_path)
     res = send(php)

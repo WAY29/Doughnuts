@@ -11,7 +11,9 @@ def run(web_file_path: str):
     """
     write
 
-    Write files directly to the website directory
+    Write files directly to the target system.
+
+    eg: write {web_file_path}
     """
     # result = base64_encode(multi_input(" >>>"))
     file_name = path.split(web_file_path)[1]

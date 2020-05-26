@@ -9,7 +9,7 @@ def run():
     """
     exit
 
-    Quit this program
+    Quit this program.
     """
     gset("loop", False, True)
     os._exit(0)

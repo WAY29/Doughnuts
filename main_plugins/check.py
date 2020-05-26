@@ -8,7 +8,9 @@ def run(timeout: float = 2.0):
     """
     check
 
-    Check if each webshell is alive
+    Check if each webshell is alive.
+
+     eg: check {timeout=2.0}
     """
     if not exists("webshell.log"):
         print(color.red("No webshell.Log"))

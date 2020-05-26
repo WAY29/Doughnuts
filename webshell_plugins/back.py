@@ -7,6 +7,6 @@ def run():
     """
     back
 
-    Back to main menu
+    Back to main menu.
     """
     set_namespace("main")

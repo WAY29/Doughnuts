@@ -18,7 +18,9 @@ def run(pattern: str):
     """
     read
 
-    Search file(s) from website
+    Search file(s) from target system.
+
+    eg: search {pattern}
     """
     files = send(get_php(pattern)).r_text.strip()
     if (len(files)):

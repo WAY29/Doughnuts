@@ -7,7 +7,9 @@ def run(web_file_path: str):
     """
     modify
 
-    modify file(s) from website (download->modify->upload) by notepad/vi
+    modify file(s) from target system (download->modify->upload) by notepad/vi.
+
+    eg: modify {web_file_path}
     """
     webshell_pf = gget("webshell.pf")
     download_file_path = webshell_pf["download"].run(web_file_path)

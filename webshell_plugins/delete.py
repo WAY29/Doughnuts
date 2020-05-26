@@ -11,7 +11,9 @@ def run(*web_file_paths):
     """
     delete
 
-    Delete website file(s)
+    Delete traget system file(s).
+
+    eg: read {web_file_path1} {web_file_path2} ..
     """
     for each_file_path in web_file_paths:
         php = get_php(each_file_path)

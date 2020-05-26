@@ -7,7 +7,9 @@ def run(id: int = 0):
     """
     load
 
-    Load a webshell from log
+    Load a webshell from log.
+
+    eg: load {_id}
     """
     pf = gget("main.pf")
     if (not path.exists("webshell.log")):

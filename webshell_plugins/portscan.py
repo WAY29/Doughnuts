@@ -106,7 +106,9 @@ def run(ip: str, ports: str, type: int = 2, timeout: float = 0.5):
     """
     portscan
 
-    Scan intranet ports
+    Scan intranet ports.
+
+    eg: portscan {ip} {ports} {type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}
     """
     php = get_php(type, ip, ports, timeout)
     text = send(f'eval(base64_decode("{php}"));').r_text

@@ -7,7 +7,7 @@ def run():
     """
     info
 
-    Show website information
+    Show website information and command information.
     """
     print_webshell_info()
     set_namespace("webshell")

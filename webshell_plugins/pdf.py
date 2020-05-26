@@ -6,7 +6,7 @@ def run():
     """
     pdf
 
-    print disable_functions of website
+    print disable_functions of website.
     """
     disable_func_list = gget("webshell.disable_functions", "webshell")
     print(len(disable_func_list), disable_func_list)
