@@ -32,7 +32,7 @@ def run(web_file_path: str = ""):
     """
     fc
 
-    Find config file from target system.
+    Search config file from target system.
 
     eg: fc {web_file_path=webroot}
     """

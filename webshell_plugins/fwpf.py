@@ -28,7 +28,7 @@ def run(web_file_path: str = ''):
     """
     fwpf
 
-    Find writable php files from target system.
+    Search writable php files from target system.
 
     eg: fwpf {web_file_path=webroot}
     """
