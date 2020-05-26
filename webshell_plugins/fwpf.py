@@ -35,6 +35,4 @@ def run(web_file_path: str = ''):
     web_file_path = web_file_path if (len(web_file_path)) else gget("webshell.root", "webshell")
     php = get_php(web_file_path)
     file_tree = send(f'{php}').r_json
-    text = send(f'{php}').text
-    print(text)
     print_tree(web_file_path, file_tree)
