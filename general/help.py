@@ -1,16 +1,19 @@
-from libs.config import alias, gget, order_alias
+from libs.config import alias, gget, order_alias, set_namespace
 import inspect
 
 
-@alias(True, "h", o="order")
-def run(order: str = "help"):
+@alias(True, func_alias="?", o="order")
+def run(order: str = ""):
     """
     help
 
-    Output the help document for the command. Defaults to 'help'.
+    Output the help document for the command or all help menu.
 
-    eg: help {order=help}
+    eg: help {order}
     """
+    if (order == ""):
+        set_namespace(gget("namespace"))
+        return
     pf = None
     gpf = gget(f"general.pf")
     npf = gget(f"{gget('namespace')}.pf")

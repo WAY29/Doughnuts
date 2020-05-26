@@ -57,7 +57,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 1.9\n"))
+    print(color.green("Doughnut Version: 2.0\n"))
 
 
 def base64_encode(data: str):
@@ -93,8 +93,12 @@ def send(data: str, raw: bool = False, **extra_params):
         if func in encode_pf:
             data = encode_pf[func].run(data)
     params_dict[raw_key][password] = data
-    req = requests.post(url, verify=False, **params_dict)
-    # req.encoding = req.apparent_encoding
+    try:
+        req = requests.post(url, verify=False, **params_dict)
+    except requests.RequestException:
+        print("Request Error")
+        return
+    req.encoding = req.apparent_encoding
     text = req.text
     content = req.content
     text_head_offset = text.find(head)
@@ -103,8 +107,8 @@ def send(data: str, raw: bool = False, **extra_params):
         offset if (text_head_offset != -1) else 0
     text_tail_offset = text_tail_offset if (
         text_tail_offset != -1) else len(text)
-    con_head_offset = content.find(bytes(head, 'utf-8'))
-    con_tail_offset = content.find(bytes(tail, 'utf-8'))
+    con_head_offset = content.find(bytes(head, req.encoding))
+    con_tail_offset = content.find(bytes(tail, req.encoding))
     con_head_offset = con_head_offset + \
         offset if (con_head_offset != -1) else 0
     con_tail_offset = con_tail_offset if (

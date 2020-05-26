@@ -56,8 +56,11 @@ def add_namespace_callback(func):
 def order_alias(order):
     namespace = gget("namespace")
     func_alias_dict = gget("order_alias", namespace=namespace)
+    general_func_alias_dict = gget("order_alias", namespace="general")
     if order in func_alias_dict:
         return func_alias_dict[order]
+    elif order in general_func_alias_dict:
+        return general_func_alias_dict[order]
     return order
 
 

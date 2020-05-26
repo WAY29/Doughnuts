@@ -1,8 +1,12 @@
 # Doughnuts
 
 *一个基于Python3.6+的PHPwebshell管理器*
-![YPIoee.png](https://s1.ax1x.com/2020/05/05/YPIoee.png)
-![YPIjQf.png](https://s1.ax1x.com/2020/05/05/YPIjQf.png)
+
+![image-20200526150047298](https://i.loli.net/2020/05/26/jEc6dHqemtrus9V.png)
+
+![image-20200526150141089](https://i.loli.net/2020/05/26/eJEZhAU1NpIQnmd.png)
+
+![image-20200526150402014](https://i.loli.net/2020/05/26/t5uExkDTQ7eR4dA.png)
 
 ## 特征
 
@@ -63,8 +67,17 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 灵感源自https://github.com/WangYihang/Webshell-Sniper
 
+## 更新日志
 
-## 更新
+### V2.0
+
+- 修复一个BUG曾导致无法连接php7的webshell
+- 修复一个BUG曾导致help无法输出对应的帮助
+- 修改help命令的别名为?,现在只输入?或help将输出帮助菜单
+- 修改info输出的信息
+- 修改各个函数的帮助信息,变得更加统一
+- 重写fc与fwpf命令,重写树状输出
+- 新增ls,bindshell(only for *unix)命令
 
 ### V1.9
 - 添加search命令,使用glob函数递归搜索文件.命令格式为search {pattern}

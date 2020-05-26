@@ -1,4 +1,4 @@
-from libs.config import alias, set_namespace
+from libs.config import alias
 from libs.myapp import print_webshell_info
 
 
@@ -7,7 +7,6 @@ def run():
     """
     info
 
-    Show website information and command information.
+    Show website information.
     """
     print_webshell_info()
-    set_namespace("webshell")

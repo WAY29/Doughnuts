@@ -68,7 +68,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             gset("webshell.from_log", False, True, "webshell")
         print(color.cyan("Connect success...\n"))
         print_webshell_info()
-        set_namespace("webshell")
+        set_namespace("webshell", callback=False)
         return True
     else:
         print(color.red("Connect failed..."))
