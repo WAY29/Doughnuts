@@ -10,6 +10,8 @@ from urllib3 import disable_warnings
 
 from libs.config import color, gget
 
+level = []
+connect_pipe_map = {True: "│  ", False: "   "}
 disable_warnings()
 
 
@@ -165,7 +167,48 @@ def open_editor(file_path: str):
         return False
 
 
-def print_tree(origin_path: str, tree: dict, depth: int = 0):
+def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
+    if (is_file):
+        pipe = "└─" if (end) else "├─"
+        connect_pipe = "".join([connect_pipe_map[_] for _ in level[:depth-1]])
+        try:
+            tree_or_node = b64decode(tree_or_node.encode()).decode('gbk')
+        except Exception:
+            pass
+        if ("/" in tree_or_node):
+            tree_or_node = tree_or_node.split("/")[-1]
+        print(connect_pipe + pipe + tree_or_node)
+    elif (isinstance(tree_or_node, list)):
+        index = 0
+        for v in tree_or_node:
+            index += 1
+            if (index == len(tree_or_node)):
+                end = True
+            _print_tree(v, depth+1, is_file=True, end=end)  # 输出目录
+    elif (isinstance(tree_or_node, dict)):
+        index = 0
+        level.append(True)
+        for k, v in tree_or_node.items():
+            index += 1
+            if (index == len(tree_or_node)):
+                end = True
+            if (isinstance(v, (list, dict))):  # 树中树
+                _print_tree(k, depth+1, is_file=True, end=end)  # 输出目录
+                if (end):
+                    level[depth] = False
+                _print_tree(v, depth+1)  # 递归输出树x
+            elif (isinstance(v, str)) or v is None:  # 节点
+                _print_tree(v, depth+1, is_file=True, end=end)  # 输出文件
+
+
+def print_tree(name, tree):
+    global level
+    level = []
+    print(name)
+    _print_tree(tree)
+
+
+def old_print_tree(origin_path: str, tree: dict, depth: int = 0):
     if depth:
         if not origin_path.isdigit() and tree:
             origin_path = color.blue(origin_path)

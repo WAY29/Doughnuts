@@ -8,25 +8,23 @@ def get_php(file_path: str):
 function is_cfg($v,$vv){
     return strstr($v, $vv);
 }
-function listAllFiles($dir){
+function scan_rescursive($directory) {
     global $cfgs;
-    if(is_dir($dir)){
-        if($handle=opendir($dir)){
-            while(false!==($file=readdir($handle))){
-                if($file!="."&&$file!=".."){
-                    if(is_dir($dir."/".$file)){
-                        $files[$file]=listAllFiles($dir."/".$file);
-                    }else if(count(array_filter(array_map("is_cfg", array_fill(0, count($cfgs), $file), $cfgs)))){
-                        $files[]=$dir."/".$file;
-                    }
-                }
-            }
-            closedir($handle);
+    $res = array();
+    foreach(glob("$directory/*") as $item) {
+        if(is_dir($item)) {
+            $items=explode('/', $item);
+            $folder = base64_encode(end($items));
+            $res[$folder] = scan_rescursive($item);
+            continue;
+        }
+        else if (count(array_filter(array_map("is_cfg", array_fill(0, count($cfgs), $item), $cfgs)))){
+            $res[] = base64_encode(basename($item));
         }
     }
-    return $files;
+    return $res;
 }
-print(json_encode(listAllFiles("%s")));""" % file_path
+print(json_encode(scan_rescursive("%s")));""" % file_path
 
 
 @alias(True, fp="file_path")
