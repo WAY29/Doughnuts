@@ -37,7 +37,7 @@ def change_prompt():
         print("\n[FILE]\n")
         print(color.yellow("[r|read]       ") + color.cyan("Read file/files"))
         print(color.yellow("[w|write]      ") + color.cyan("Write file"))
-        print(color.yellow("[m|modify]     ") + color.cyan("Modify file"))
+        print(color.yellow("[e|edit]       ") + color.cyan("Modify file"))
         print(color.yellow("[u|upload]     ") + color.cyan("Upload file"))
         print(color.yellow("[d|download]   ") + color.cyan("Download file"))
         print(color.yellow("[del|delete]   ") + color.cyan("Delete file/files"))

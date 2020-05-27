@@ -2,14 +2,14 @@ from libs.config import alias, color, gget
 from libs.myapp import open_editor
 
 
-@alias(True, func_alias="m")
+@alias(True, func_alias="e")
 def run(web_file_path: str):
     """
-    modify
+    edit
 
-    modify file(s) from target system (download->modify->upload) by notepad/vi.
+    edit file from target system (download->edit->upload) by notepad/vi.
 
-    eg: modify {web_file_path}
+    eg: edit {web_file_path}
     """
     webshell_pf = gget("webshell.pf")
     download_file_path = webshell_pf["download"].run(web_file_path)
