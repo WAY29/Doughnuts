@@ -46,7 +46,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     if "c4ca4238a0b923820d" in req.r_text:  # 验证是否成功连接
         gset("webshell.php_version", req.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
         info_req = send(
-            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.ini_get('disable_functions'));"
+            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions'));"
         )
         info = info_req.r_text.strip().split("|")
         gset("webshell.root", info[0], namespace="webshell")
@@ -56,7 +56,9 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )
-        disable_function_list = [f.strip() for f in info[2].split(",")]
+        gset("webshell.upload_tmp_dir", info[2], namespace="webshell")
+        print("test", info[2])
+        disable_function_list = [f.strip() for f in info[3].split(",")]
         if ('' in disable_function_list):
             disable_function_list.remove('')
         gset("webshell.disable_functions", disable_function_list, namespace="webshell")

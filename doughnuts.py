@@ -47,10 +47,11 @@ def change_prompt():
         print(color.yellow("[fwpf]         ") + color.cyan("Search writable php file"))
         print(color.yellow("[fc]           ") + color.cyan("Search config file"))
         print("\n[OTHER]\n")
-        print(color.yellow("[pdf]          ") + color.cyan("Print disable functions"))
-        print(color.yellow("[ps|portscan]  ") + color.cyan("Scan intranet ports"))
         print(color.yellow("[ag|agent]     ") + color.cyan("Intranet agent"))
         print(color.yellow("[t|touch]      ") + color.cyan("Specify a file whose modification time stamp is the same as a random file in the current directory"))
+        print(color.yellow("[pdf]          ") + color.cyan("Print disable functions"))
+        print(color.yellow("[ps|portscan]  ") + color.cyan("Scan intranet ports"))
+        print(color.yellow("[socks]  ") + color.cyan("(Only for *unix) Run a socks5 server on the target machine"))
         print()
 
 
