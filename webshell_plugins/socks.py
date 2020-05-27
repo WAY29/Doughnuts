@@ -95,7 +95,7 @@ def run(port: int = 8888):
     """
     socks
 
-    (Only for *unix) Run a socks5 server on the target machine.
+    (Only for *unix) Run a socks5 server on the target machine by python.
 
     eg: bindshell {port=8888}
     """
