@@ -1,5 +1,5 @@
 from libs.config import alias, gset, gget, color, set_namespace
-from libs.myapp import send, print_webshell_info
+from libs.myapp import send, print_webshell_info, is_windows
 from os import path
 from urllib.parse import urlparse
 
@@ -56,7 +56,16 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )
-        gset("webshell.upload_tmp_dir", info[2], namespace="webshell")
+        upload_tmp_dir = info[2]
+        if (not upload_tmp_dir):
+            if (not is_windows()):
+                upload_tmp_dir = "/tmp/"
+        else:
+            if (is_windows()):
+                upload_tmp_dir += "\\\\"
+            else:
+                upload_tmp_dir += "/"
+        gset("webshell.upload_tmp_dir", upload_tmp_dir, namespace="webshell")
         print("test", info[2])
         disable_function_list = [f.strip() for f in info[3].split(",")]
         if ('' in disable_function_list):

