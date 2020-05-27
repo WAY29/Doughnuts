@@ -1,7 +1,6 @@
 import json
 import subprocess
 from base64 import b64decode, b64encode
-from os import popen
 from platform import system
 from random import randint, sample
 
@@ -158,7 +157,7 @@ def has_env(env: str, remote: bool = True):
     if (is_windows(remote)):
         command = "where"
     else:
-        command = "whereis"
+        command = "which"
     if (remote):
         if (not gget("webshell.has_%s" % env, "webshell")):
             flag = send(f"system('{command} {env}');").r_text
@@ -167,7 +166,8 @@ def has_env(env: str, remote: bool = True):
             flag = gget("webshell.has_%s" % env, "webshell")
     else:
         if (not gget("has_%s")):
-            flag = popen(f"{command} {env}").read()
+            p = subprocess.Popen([command, env], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            flag = p.stdout.read()
             gset("has_%s" % env, flag)
         else:
             flag = gget("has_%s")
