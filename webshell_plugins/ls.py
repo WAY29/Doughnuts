@@ -52,15 +52,17 @@ function getmtime($file){
 }
 function getinfo($file){
     $islinux = strtoupper(substr(PHP_OS,0,3))==='WIN'?FALSE:TRUE;
-    $format="%%s %%-4s %%-4s %%6s %%11s %%s";
+    $format="%%s %%s %%s %%s %%s %%s";
     $filename=!is_link($file)?basename($file):basename($file).' -> '.readlink($file);
     $owner=fileowner($file);
     $group=filegroup($file);
     return sprintf($format, getprems($file), $owner, $group, getfilesize($file),getmtime($file),$filename);
 }
 $files=glob("%s/*");
-echo "privileges uid  gid    size mtime       name\\n";
-foreach($files as $file) {echo getinfo($file)."\\n";}""" % path
+echo "Listing: ".realpath("%s")."\\n";
+echo "==============================\\n";
+echo "MODE        UID   GID     Size  MTIME         NAME\\n";
+foreach($files as $file) {echo getinfo($file)."\\n";}""" % (path, path)
 
 
 @alias(True, p="path")
@@ -73,12 +75,18 @@ def run(path: str = "."):
     eg: ls {path=.}
     """
     info_list = send(f'{get_php(path)}').r_text.strip().split('\n')
-    for line in info_list:
+    print('\n'.join(info_list[:3]))
+    # print("test,", info_list)
+    for line in info_list[3:]:
         info = line.split(" ")
         prems, name = info[0], info[-1]
-        color_line = line
+        # color_line = line
+        # info[0] = color.cyan(name)
         if (prems[0] == 'd'):
-            color_line = color_line.replace(name, color.cyan(name))
+            info[-1] = color.cyan(name)
+            # color_line = color_line.replace(name, color.cyan(name))
         elif ('x' in prems):
-            color_line = color_line.replace(name, color.green(name))
-        print(color_line)
+            info[-1] = color.green(name)
+            # color_line = color_line.replace(name, color.green(name))
+        print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
+        # print(color_line)
