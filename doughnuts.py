@@ -8,7 +8,7 @@ class My_Loop_init(Loop_init):
         return {"main": "main_plugins", "webshell": "webshell_plugins", "general": "general", "encode": "encode"}
 
     def set_prompts(self) -> dict:
-        return {"main": ":>", "webshell": "=>"}
+        return {"main": "doughnuts > ", "webshell": "> "}
 
 
 @add_namespace_callback

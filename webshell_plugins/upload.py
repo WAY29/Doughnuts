@@ -44,4 +44,4 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
     elif text == "exist":
         print(color.yellow(f"\n{web_file_path} exist.\n"))
     else:
-        print("\n" + color.red("Upload error") + "\n")
+        print("\n" + color.red("Upload error / Privileges not enough") + "\n")

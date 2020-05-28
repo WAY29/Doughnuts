@@ -9,14 +9,17 @@ from .config import gset, gget, order_alias, set_namespace
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
 
 """
-namespace ['']
 api ['']
+namespace ['']
+namespace_folders ['']
+folders_namespace ['']
+root_path ['']
 {platform}.pf ['']
 {platform}.prompt ['']
 {module_name}.reverse_alias [namespace]
 order_alias [namespace]
-特殊插件平台:general 存放通用命令
-特殊插件平台:encode 存放传输数据的编码命令
+speical plugin platform:general   general commands
+speical plugin platform:encode    Encoders
 """
 
 
@@ -121,7 +124,8 @@ def loop_main():
         api = gget("api")
         # --------------------------------------
         try:
-            cmd = input(gget(f"{namespace}.prompt"))
+            print(gget(f"{namespace}.prompt"), end="")
+            cmd = input()
         except (KeyboardInterrupt, EOFError):
             break
         args = cmd.split(" ")  # 切割

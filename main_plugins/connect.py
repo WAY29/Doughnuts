@@ -1,7 +1,26 @@
-from libs.config import alias, gset, gget, color, set_namespace
-from libs.myapp import send, print_webshell_info, is_windows
 from os import path
 from urllib.parse import urlparse
+
+from libs.config import alias, color, gget, gset, set_namespace
+from libs.myapp import is_windows, print_webshell_info, send
+
+"""
+url ['webshell']
+webshell.params_dict ['webshell']
+webshell.password ['webshell']
+webshell.method ['webshell']
+webshell.encode_functions ['webshell']  Encoder(s) used by webshell
+webshell.disable_functions ['webshell']
+webshell.netloc ['webshell']
+webshell.download_path ['webshell']
+webshell.os_version ['webshell']
+webshell.php_version ['webshell']
+webshell.root ['webshell']
+webshell.v7 ['webshell'] Whether is php7
+webshell.iswin ['webshell'] Whether is windows
+webshell.upload_tmp_dir ['webshell']
+webshell.from_log ['webshell'] Whether connect from log
+"""
 
 
 @alias(True, "c", u="url", m="method", p="pwd")
@@ -56,6 +75,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )
+        gset("webshell.prompt", f"doughnuts ({color.cyan(webshell_netloc)}) > ")
         upload_tmp_dir = info[2]
         if (not upload_tmp_dir):
             if (not is_windows()):
