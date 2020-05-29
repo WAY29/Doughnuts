@@ -65,7 +65,7 @@ echo "MODE        UID   GID     Size  MTIME         NAME\\n";
 foreach($files as $file) {echo getinfo($file)."\\n";}""" % (path, path)
 
 
-@alias(True, p="path")
+@alias(True, func_alias="dir", p="path")
 def run(path: str = "."):
     """
     ls
