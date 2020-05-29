@@ -1,21 +1,27 @@
 import json
+from sys import exit
 from re import compile as re_compile
-from sys import exc_info, path
+from sys import exc_info, path, stdout
 from traceback import print_exception
+from atexit import register
 
 from Myplugin import Platform
-from .config import gset, gget, order_alias, set_namespace
+
+from .config import gget, gset, order_alias, set_namespace
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
+STDIN_STREAM = b''
 
 """
 api ['']
+leave_message ['']
 namespace ['']
 namespace_folders ['']
 folders_namespace ['']
 root_path ['']
 {platform}.pf ['']
 {platform}.prompt ['']
+
 {module_name}.reverse_alias [namespace]
 order_alias [namespace]
 speical plugin platform:general   general commands
@@ -35,6 +41,7 @@ class Loop_init:
         platforms = self.set_platforms()
         gset("api", api)
         gset("loop", True)
+        gset("blockexit", False)
         gset("namespace", init_namespace)
         gset("root_path", path[0])
         gset("namespace_folders",  platforms)
@@ -91,21 +98,70 @@ def args_parse(args: list) -> dict:
     return arg_dict
 
 
-def multi_input(prompt: str = "Multi:>"):
-    result = ""
-    data = input(prompt)
-    stop = 0
-    while gget("loop"):
-        if data != "":
-            result += data + "\n"
-            stop = 0
-        else:
-            stop += 1
-            result += "\n"
-            if stop == 2:
+def _find_getch():
+    try:
+        import termios
+    except ImportError:
+        import msvcrt
+        return msvcrt.getch
+
+    import sys, tty
+
+    def _getch():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+    return _getch
+
+
+def getline(_exit: bool = True):
+    global STDIN_STREAM
+    cmd = ''
+    while 1:
+        ch = _find_getch()()
+        try:
+            dch = ch.decode()
+        except UnicodeDecodeError:
+            continue
+        if (32 <= ord(dch) <= 127):
+            stdout.write(dch)
+            stdout.flush()
+            STDIN_STREAM += ch
+        elif(ch == b'\r' or ch == b'\n'):
+            stdout.write('\n')
+            stdout.flush()
+            cmd = STDIN_STREAM.decode()
+            STDIN_STREAM = b''
+            break
+        elif(ord(dch) == 8 and len(STDIN_STREAM) > 0):
+            stdout.write('\b \b')
+            stdout.flush()
+            STDIN_STREAM = STDIN_STREAM[:-1]
+        elif(ord(dch) == 4):
+            STDIN_STREAM = b''
+            if (_exit):
+                gset("loop", False, True)
+                exit(0)
+            else:
+                print("exit\n", end="")
+                cmd = 'exit'
                 break
-        data = input(" %s " % ("·" * (len(prompt) - 2)))
-    return result.strip()
+        elif(ord(dch) == 3):
+            stdout.write('^C\n')
+            stdout.flush()
+            STDIN_STREAM = b''
+            break
+    return cmd
+
+
+def print_leave_message():
+    print('\n' + gget("leave_message"))
 
 
 def loop_main():
@@ -116,18 +172,15 @@ def loop_main():
         api (str, optional): The name of the entry function that is common to all plugins. Defaults to 'run'.
         prompt (str, optional): Command Prompt. Defaults to ':>'.
     """
+    gpf = gget("general.pf")
+    tpf = None
+    api = gget("api")
     while gget("loop"):
         namespace = gget("namespace")
         npf = gget(f"{namespace}.pf")
-        gpf = gget("general.pf")
-        tpf = None
-        api = gget("api")
         # --------------------------------------
-        try:
-            print(gget(f"{namespace}.prompt"), end="")
-            cmd = input()
-        except (KeyboardInterrupt, EOFError):
-            break
+        print(gget(f"{namespace}.prompt"), end="")
+        cmd = getline()
         args = cmd.split(" ")  # 切割
         if " " in cmd:  # 输入的命令
             order = args[0]
@@ -167,6 +220,8 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
     from time import sleep
 
     set_namespace("main")
+    gset("leave_message", leave_message)
+    register(print_leave_message)
     t = Thread(target=loop_main)
     t.setDaemon(True)
     t.start()
@@ -175,4 +230,3 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
             sleep(10)
         except (KeyboardInterrupt, EOFError):
             break
-    print("\n%s" % leave_message)
