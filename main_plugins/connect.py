@@ -59,6 +59,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         path.join(gget("root_path"), "target", webshell_netloc),
         namespace="webshell",
     )
+    gset("webshell.pwd", ".", namespace="webshell")
     req = send("print('c4ca4238a0b923820d|'.phpversion().'|cc509a6f75849b');", raw=True)
     if ('7.' in req.r_text):
         gset("webshell.v7", True, namespace="webshell")
