@@ -1,5 +1,5 @@
 from libs.config import alias, gset
-from sys import exit
+from libs.app import sys_exit
 
 
 # ? alias装饰器第一个参数为none_named_arg(true/FALSE),True即把没有参数名时传入的参数值顺序传入
@@ -12,4 +12,4 @@ def run():
     Quit this program.
     """
     gset("loop", False, True)
-    exit(0)
+    sys_exit()

@@ -14,7 +14,7 @@ def run():
     pwd = send(f'print(getcwd());').r_text.strip()
     while gget("loop"):
         print(f"webshell:{pwd} >>", end="")
-        data = getline(False)
+        data = getline()
         lower_data = data.lower()
         if (lower_data.lower() in ['exit', 'quit', 'back']):
             break

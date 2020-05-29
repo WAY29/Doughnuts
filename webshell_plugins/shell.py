@@ -19,7 +19,7 @@ def run():
         prompt = prompt.replace("\r", "").replace("\n", "") + ":%s$ "
     while gget("loop"):
         print(prompt % pwd, end="")
-        data = getline(False)
+        data = getline()
         lower_data = data.lower()
         if (lower_data.lower() in ['exit', 'quit', 'back']):
             break

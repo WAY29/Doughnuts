@@ -30,6 +30,7 @@ def change_prompt():
         print(color.yellow("[cd]           ") + color.cyan("Change the working directory"))
         print(color.yellow("[ls|dir]       ") + color.cyan("List information about the files"))
         print(color.yellow("[b|back]       ") + color.cyan("Back to main menu"))
+        print(color.yellow("[q|quit]       ") + color.cyan("Quit this program"))
         print("\n[SHELL]\n")
         print(color.yellow("[bs|bindshell] ") + color.cyan("(Only for *unix) Bind a port and wait for someone to connect to get a shell"))
         print(color.yellow("[re|reverse]   ") + color.cyan("Reverse shell"))

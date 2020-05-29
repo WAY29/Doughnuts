@@ -1,9 +1,8 @@
 import json
-from sys import exit
+from os import _exit
 from re import compile as re_compile
 from sys import exc_info, path, stdout
 from traceback import print_exception
-from atexit import register
 
 from Myplugin import Platform
 
@@ -120,7 +119,7 @@ def _find_getch():
     return _getch
 
 
-def getline(_exit: bool = True):
+def getline():
     global STDIN_STREAM
     cmd = ''
     while 1:
@@ -145,13 +144,9 @@ def getline(_exit: bool = True):
             STDIN_STREAM = STDIN_STREAM[:-1]
         elif(ord(dch) == 4):
             STDIN_STREAM = b''
-            if (_exit):
-                gset("loop", False, True)
-                exit(0)
-            else:
-                print("exit\n", end="")
-                cmd = 'exit'
-                break
+            print("quit\n", end="")
+            cmd = 'quit'
+            break
         elif(ord(dch) == 3):
             stdout.write('^C\n')
             stdout.flush()
@@ -160,8 +155,9 @@ def getline(_exit: bool = True):
     return cmd
 
 
-def print_leave_message():
+def sys_exit():
     print('\n' + gget("leave_message"))
+    _exit(0)
 
 
 def loop_main():
@@ -181,6 +177,8 @@ def loop_main():
         # --------------------------------------
         print(gget(f"{namespace}.prompt"), end="")
         cmd = getline()
+        if (not cmd):
+            continue
         args = cmd.split(" ")  # 切割
         if " " in cmd:  # 输入的命令
             order = args[0]
@@ -221,7 +219,6 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
 
     set_namespace("main")
     gset("leave_message", leave_message)
-    register(print_leave_message)
     t = Thread(target=loop_main)
     t.setDaemon(True)
     t.start()
@@ -230,3 +227,4 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
             sleep(10)
         except (KeyboardInterrupt, EOFError):
             break
+    sys_exit()
