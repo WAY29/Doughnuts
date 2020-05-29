@@ -15,7 +15,7 @@ def run():
     if is_windows():
         prompt = "%s> "
     else:
-        prompt = prompt.strip() + ":%s$ "
+        prompt = prompt.replace("\r", "").replace("\n", "") + ":%s$ "
     while gget("loop"):
         data = input(prompt % pwd)
         lower_data = data.lower()
