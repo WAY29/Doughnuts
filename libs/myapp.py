@@ -135,8 +135,9 @@ def print_webshell_info():
         gget("webshell.root", "webshell"),
         gget("webshell.os_version", "webshell"),
         gget("webshell.php_version", "webshell"),
+        gget("webshell.server_version", "webshell"),
     )
-    info_name = ("Web root:", "OS version:", "PHP version:")
+    info_name = ("Web root:", "OS version:", "PHP version:", "Server version:")
     for name, info in zip(info_name, info):
         print(name + "\n    " + info + "\n")
 
