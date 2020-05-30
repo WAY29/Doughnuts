@@ -70,6 +70,11 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ## 更新日志
 
+### V2.2
+- 重写输入，现在支持按下ctrl+c与ctrl+d
+- 添加clear命令
+
+
 ### V2.1
 - 修改windows环境下python反弹shell上传位置,并使其可以返回错误
 - 修改帮助菜单为等宽
