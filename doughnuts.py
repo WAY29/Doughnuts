@@ -21,6 +21,7 @@ def change_prompt():
         print(color.yellow("[l|load]           ") + color.cyan("Load a webshell from log"))
         print(color.yellow("[c|connect]        ") + color.cyan("Connect to a webshell"))
         print(color.yellow("[check]            ") + color.cyan("Check if each webshell is alive"))
+        print(color.yellow("[cls|clear]        ") + color.cyan("Clear screen"))
         print(color.yellow("[q|quit]           ") + color.cyan("Quit this program"))
     elif (namespace == "webshell"):
         print("\n[COMMON]\n")
@@ -29,6 +30,7 @@ def change_prompt():
         print(color.yellow("[pwd]          ") + color.cyan("Print the name of the current working directory"))
         print(color.yellow("[cd]           ") + color.cyan("Change the working directory"))
         print(color.yellow("[ls|dir]       ") + color.cyan("List information about the files"))
+        print(color.yellow("[cls|clear]    ") + color.cyan("Clear screen"))
         print(color.yellow("[b|back]       ") + color.cyan("Back to main menu"))
         print(color.yellow("[q|quit]       ") + color.cyan("Quit this program"))
         print("\n[SHELL]\n")
