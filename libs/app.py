@@ -97,16 +97,11 @@ def args_parse(args: list) -> dict:
     return arg_dict
 
 
-def _find_getch():
-    try:
-        import termios
-    except ImportError:
-        import msvcrt
-        return msvcrt.getch
-
+try:
+    # POSIX system: Create and return a getch that manipulates the tty
+    import termios
     import sys, tty
-
-    def _getch():
+    def getch():
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -114,44 +109,89 @@ def _find_getch():
             ch = sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-        return ch
+            return ch
 
-    return _getch
+    #  Read arrow keys correctly
+    def getchar():
+        firstChar = getch()
+        if firstChar == '\x1b':
+            return {"[A": "up", "[B": "down", "[C": "right", "[D": "left"}[getch() + getch()]
+        else:
+            return firstChar
+
+except ImportError:
+    # Non-POSIX: Return msvcrt's (Windows') getch
+    from msvcrt import getch
+
+    # Read arrow keys correctly
+    def getchar():
+        firstChar = getch()
+        if firstChar == b'\xe0':
+            return {b"H": "up", b"P": "down", b"M": "right", b"K": "left"}[getch()]
+        else:
+            return firstChar
 
 
 def getline():
     global STDIN_STREAM
     cmd = ''
+    pointer = 0
     while 1:
-        ch = _find_getch()()
+        old_stream_len = len(STDIN_STREAM)
+        old_pointer = pointer
         try:
-            dch = ch.decode()
-        except UnicodeDecodeError:
-            continue
-        if (32 <= ord(dch) <= 127):
-            stdout.write(dch)
-            stdout.flush()
-            STDIN_STREAM += ch
-        elif(ch == b'\r' or ch == b'\n'):
+            ch = getchar()
+        except Exception:
+            print(f"\nGetchar error\n")
+            cmd = ''
+            break
+        if (isinstance(ch, bytes)):
+            try:
+                dch = ch.decode()
+            except UnicodeDecodeError:
+                continue
+        # print(ch)
+        if (isinstance(ch, str)):
+            if (ch == "up"):  # up
+                pass
+            if (ch == "down"):  # down
+                pass
+            if (ch == "left" and pointer > 0):  # left
+                pointer -= 1
+            if (ch == "right"):  # right
+                pointer += 1
+        elif (32 <= ord(dch) <= 127):
+            if (pointer == len(STDIN_STREAM)):
+                STDIN_STREAM += ch
+            else:
+                STDIN_STREAM = STDIN_STREAM[:pointer] + ch + STDIN_STREAM[pointer:]
+            pointer += 1
+        elif(ch == b'\r' or ch == b'\n'):  # enter
             stdout.write('\n')
             stdout.flush()
             cmd = STDIN_STREAM.decode()
             STDIN_STREAM = b''
             break
-        elif(ord(dch) == 8 and len(STDIN_STREAM) > 0):
-            stdout.write('\b \b')
-            stdout.flush()
-            STDIN_STREAM = STDIN_STREAM[:-1]
-        elif(ord(dch) == 4):
+        elif(ord(dch) == 8 and pointer > 0):  # \b
+            if (pointer == len(STDIN_STREAM)):
+                STDIN_STREAM = STDIN_STREAM[:-1]
+            else:
+                STDIN_STREAM = STDIN_STREAM[:pointer] + STDIN_STREAM[pointer+1:]
+            pointer -= 1
+        elif(ord(dch) == 4):  # ctrl+d
             STDIN_STREAM = b''
             print("quit\n", end="")
             cmd = 'quit'
             break
-        elif(ord(dch) == 3):
+        elif(ord(dch) == 3):  # ctrl+c
             stdout.write('^C\n')
             stdout.flush()
             STDIN_STREAM = b''
             break
+        # print(f"point:{pointer}, len:{old_stream_len}")
+        stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len + STDIN_STREAM.decode())
+        stdout.write("\b" * (len(STDIN_STREAM) - pointer))
+        stdout.flush()
     return cmd
 
 
