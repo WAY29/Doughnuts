@@ -10,6 +10,9 @@ from .config import gget, gset, order_alias, set_namespace
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
 STDIN_STREAM = b''
+HISTORY = []
+HISTORY_POINTER = 0
+FROM_HISTORY = False
 
 """
 api ['']
@@ -101,6 +104,7 @@ try:
     # POSIX system: Create and return a getch that manipulates the tty
     import termios
     import sys, tty
+
     def getch():
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
@@ -133,7 +137,7 @@ except ImportError:
 
 
 def getline():
-    global STDIN_STREAM
+    global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
     cmd = ''
     pointer = 0
     while 1:
@@ -151,19 +155,28 @@ def getline():
             except UnicodeDecodeError:
                 continue
         if (isinstance(ch, str)):
-            if (ch == "up"):  # up
-                pass
-            if (ch == "down"):  # down
-                pass
-            if (ch == "left" and pointer > 0):  # left
+            read_history = False
+            if (ch == "up" and HISTORY_POINTER > 0):  # up
+                HISTORY_POINTER -= 1
+                read_history = True
+            elif (ch == "down" and HISTORY_POINTER < len(HISTORY) - 1):  # down
+                HISTORY_POINTER += 1
+                read_history = True
+            elif (ch == "left" and pointer > 0):  # left
                 pointer -= 1
-            if (ch == "right"):  # right
+            elif (ch == "right" and pointer < len(STDIN_STREAM)):  # right
                 pointer += 1
+            if ((ch == "up" or ch == "down") and read_history):
+                STDIN_STREAM = HISTORY[HISTORY_POINTER]
+                pointer = len(STDIN_STREAM)
+                FROM_HISTORY = True
         elif (32 <= ord(dch) <= 127):
             if (pointer == len(STDIN_STREAM)):
                 STDIN_STREAM += ch
             else:
                 STDIN_STREAM = STDIN_STREAM[:pointer] + ch + STDIN_STREAM[pointer:]
+            if (FROM_HISTORY):
+                FROM_HISTORY = False
             pointer += 1
         elif(ch == b'\r' or ch == b'\n'):  # enter
             stdout.write('\n')
@@ -187,10 +200,12 @@ def getline():
             stdout.flush()
             STDIN_STREAM = b''
             break
-        # print(f"point:{pointer}, len:{old_stream_len}")
         stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len + STDIN_STREAM.decode())
         stdout.write("\b" * (len(STDIN_STREAM) - pointer))
         stdout.flush()
+    if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):
+        HISTORY.append(cmd.encode())
+    HISTORY_POINTER = len(HISTORY)
     return cmd
 
 
