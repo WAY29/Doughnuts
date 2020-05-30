@@ -96,7 +96,7 @@ def send(data: str, raw: bool = False, **extra_params):
     try:
         req = requests.post(url, verify=False, **params_dict)
     except requests.RequestException:
-        print("Request Error")
+        print("\nRequest Error")
         return
     req.encoding = req.apparent_encoding
     text = req.text
