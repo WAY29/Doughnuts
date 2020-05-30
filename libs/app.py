@@ -209,10 +209,10 @@ def loop_main():
         prompt (str, optional): Command Prompt. Defaults to ':>'.
     """
     gpf = gget("general.pf")
-    tpf = None
     api = gget("api")
     while gget("loop"):
         namespace = gget("namespace")
+        tpf = None
         npf = gget(f"{namespace}.pf")
         # --------------------------------------
         print(gget(f"{namespace}.prompt"), end="")
