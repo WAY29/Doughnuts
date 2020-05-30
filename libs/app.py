@@ -117,7 +117,7 @@ try:
         if firstChar == '\x1b':
             return {"[A": "up", "[B": "down", "[C": "right", "[D": "left"}[getch() + getch()]
         else:
-            return firstChar
+            return firstChar.encode()
 
 except ImportError:
     # Non-POSIX: Return msvcrt's (Windows') getch
@@ -150,7 +150,6 @@ def getline():
                 dch = ch.decode()
             except UnicodeDecodeError:
                 continue
-        # print(ch)
         if (isinstance(ch, str)):
             if (ch == "up"):  # up
                 pass
