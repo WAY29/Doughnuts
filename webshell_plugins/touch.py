@@ -24,7 +24,7 @@ def run(filename: str = ""):
         print(color.red("Target system is windows."))
         return
     try:
-        command = get_system_code("touch -r $reference $file")
+        command = get_system_code("touch -r $reference $file", False)
         reference = send(get_php(filename, command)).r_text.strip()
         print(color.green(f"Modify time stamp {reference} success."))
     except IndexError:

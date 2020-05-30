@@ -150,21 +150,24 @@ def get_system_template(exec_func: str):
     if (not exec_func):
         SYSTEM_TEMPLATE = ''
     elif (exec_func == 'system'):
-        SYSTEM_TEMPLATE = """system(base64_decode("%s"));"""
+        SYSTEM_TEMPLATE = """ob_start();system(base64_decode("%s"));$o=ob_get_contents();ob_end_clean();"""
     elif (exec_func == 'exec'):
-        SYSTEM_TEMPLATE = """$o=array();exec(base64_decode("%s"), $o);$o=join(chr(10),$o);print($o);"""
+        SYSTEM_TEMPLATE = """$o=array();exec(base64_decode("%s"), $o);$o=join(chr(10),$o);"""
     elif (exec_func == 'passthru'):
-        SYSTEM_TEMPLATE = """$o=array();passthru(base64_decode("%s"), $o);$o=join(chr(10),$o);print($o);"""
+        SYSTEM_TEMPLATE = """$o=array();passthru(base64_decode("%s"), $o);$o=join(chr(10),$o);"""
     elif (exec_func == 'proc_open'):
-        SYSTEM_TEMPLATE = """$handle=proc_open(base64_decode("%s"),array(array('pipe','r'),array('pipe','w'),array('pipe','w')),$pipes);$o=NULL;while(!feof($pipes[1])){$o.=fread($pipes[1],1024);}print($o);@proc_close($handle);"""
+        SYSTEM_TEMPLATE = """$handle=proc_open(base64_decode("%s"),array(array('pipe','r'),array('pipe','w'),array('pipe','w')),$pipes);$o=NULL;while(!feof($pipes[1])){$o.=fread($pipes[1],1024);}@proc_close($handle);"""
     elif (exec_func == 'shell_exec'):
-        SYSTEM_TEMPLATE = """echo shell_exec(base64_decode("%s"));"""
+        SYSTEM_TEMPLATE = """$o=shell_exec(base64_decode("%s"));"""
     elif (exec_func == 'popen'):
-        SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}print($o);@pclose($fp);"""
+        SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
 
 
-def get_system_code(command: str):
-    return SYSTEM_TEMPLATE % (base64_encode(command))
+def get_system_code(command: str, print_result: bool = True):
+    if (print_result):
+        return SYSTEM_TEMPLATE % (base64_encode(command)) + "print($o);"
+    else:
+        return SYSTEM_TEMPLATE % (base64_encode(command))
 
 
 def is_windows(remote: bool = True):

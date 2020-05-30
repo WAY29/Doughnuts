@@ -70,6 +70,11 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ## 更新日志
 
+
+### V2.3
+- 尝试绕过disable_functions寻找可执行的系统命令函数
+
+
 ### V2.2
 - 重写输入，现在支持按下ctrl+c与ctrl+d
 - 添加clear命令
