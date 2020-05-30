@@ -34,7 +34,7 @@ def change_prompt():
         print(color.yellow("[b|back]       ") + color.cyan("Back to main menu"))
         print(color.yellow("[q|quit]       ") + color.cyan("Quit this program"))
         print("\n[SHELL]\n")
-        print(color.yellow("[bs|bindshell] ") + color.cyan("(Only for *unix) Bind a port and wait for someone to connect to get a shell"))
+        print(color.yellow("[bs|bindshell] ") + color.cyan("Bind a port and wait for someone to connect to get a shell"))
         print(color.yellow("[re|reverse]   ") + color.cyan("Reverse shell"))
         print(color.yellow("[rs|reshell]   ") + color.cyan("(Only for both system is linux) (Testing command) Bind a port and waiting for target connect back to get a full shell"))
         print(color.yellow("[s|shell]      ") + color.cyan("Get a temporary shell of target system by system function"))

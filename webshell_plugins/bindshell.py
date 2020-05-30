@@ -145,7 +145,7 @@ def run(port: int = 7777, passwd: str = "doughnuts"):
     """
     bind shell
 
-    (Only for *unix) Bind a port and wait for someone to connect to get a shell.
+    Bind a port and wait for someone to connect to get a shell.
 
     eg: bindshell {port=7777} {passwd=doughnuts}
     """
