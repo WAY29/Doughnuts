@@ -11,11 +11,10 @@ def run(web_file_path: str):
     """
     write
 
-    Write files directly to the target system.
+    Write files directly to the target system by notepad/vi.
 
     eg: write {web_file_path}
     """
-    # result = base64_encode(multi_input(" >>>"))
     file_name = path.split(web_file_path)[1]
     file_path = gget("webshell.download_path", "webshell")
     if not path.exists(file_path):
