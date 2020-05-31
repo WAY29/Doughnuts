@@ -2,17 +2,20 @@ from libs.config import alias, color
 from libs.myapp import send
 
 
-@alias(True, func_alias="r")
+@alias(True, func_alias="c")
 def run(*web_file_paths):
     """
-    read
+    cat
 
     Read file(s) from target system.
 
-    eg: read {web_file_path1} {web_file_path2} ..
+    eg: cat {web_file_path1} {web_file_path2} ..
     """
     for each_file_path in web_file_paths:
-        text = send(f"print(file_get_contents('{each_file_path}'));").r_text.strip()
+        res = send(f"print(file_get_contents('{each_file_path}'));")
+        if (not res):
+            return
+        text = res.r_text.strip()
         if len(text):
             print("\n" + color.green(each_file_path))
             print("\n" + text + "\n")

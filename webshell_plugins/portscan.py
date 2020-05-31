@@ -1,9 +1,9 @@
 from libs.config import alias, color
-from libs.myapp import send, base64_encode
+from libs.myapp import send
 
 
 def get_php(type, ip, ports, timeout):
-    return base64_encode("""
+    return """
 # gettime_
 function microtime_float()
 {
@@ -98,7 +98,7 @@ foreach ($ports as $port){
 }
 
 Scan($type,$ip,$new_ports,$timeout);
-""" % (type, ip, ports, timeout))
+""" % (type, ip, ports, timeout)
 
 
 @alias(True, func_alias="ps", t="type", p="ports", to="timeout")
@@ -111,7 +111,10 @@ def run(ip: str, ports: str, type: int = 2, timeout: float = 0.5):
     eg: portscan {ip} {ports} {type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}
     """
     php = get_php(type, ip, ports, timeout)
-    text = send(f'eval(base64_decode("{php}"));').r_text
+    res = send(php)
+    if (not res):
+        return
+    text = res.r_text
     ports = str(ports)
     split_ports = ports.split(",")
     all_ports = set()

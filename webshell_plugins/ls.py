@@ -74,7 +74,10 @@ def run(path: str = "."):
 
     eg: ls {path=.}
     """
-    info_list = send(f'{get_php(path)}').r_text.strip().split('\n')
+    res = send(get_php(path))
+    if (not res):
+        return
+    info_list = res.r_text.strip().split('\n')
     print('\n'.join(info_list[:3]))
     # print("test,", info_list)
     for line in info_list[3:]:

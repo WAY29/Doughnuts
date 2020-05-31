@@ -105,9 +105,10 @@ def run(port: int = 8888):
     if flag:
         python = get_python(port)
         pyname = "check.py"
-        text = send(
-            f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{b64encode(python.encode()).decode()}\")));"
-        ).r_text.strip()
+        res = send(f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{b64encode(python.encode()).decode()}\")));")
+        if (not res):
+            return
+        text = res.r_text.strip()
         if not len(text):
             print(color.red("Failed to write file in /tmp directory."))
             return

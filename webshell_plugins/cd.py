@@ -12,6 +12,9 @@ def run(directory: str = ''):
     Change the working directory.
     """
     directory = b64encode(directory.encode()).decode()
-    pwd = send(f"chdir(base64_decode('{directory}'));print(getcwd());").r_text.strip()
+    res = send(f"chdir(base64_decode('{directory}'));print(getcwd());")
+    if (not res):
+        return
+    pwd = res.r_text.strip()
     gset("webshell.pwd", pwd, namespace="webshell")
     gset("webshell.prompt", f"doughnuts ({color.cyan(gget('webshell.netloc', 'webshell'))}) > ")

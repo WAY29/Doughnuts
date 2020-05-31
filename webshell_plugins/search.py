@@ -22,7 +22,10 @@ def run(pattern: str):
 
     eg: search {pattern}
     """
-    files = send(get_php(pattern)).r_text.strip()
+    res = send(get_php(pattern))
+    if (not res):
+        return
+    files = res.r_text.strip()
     if (len(files)):
         print("\n" + color.green("Search Result:") + "\n    " + files.replace("./", "").replace("\n", "\n    ") + "\n")
     else:

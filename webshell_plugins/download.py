@@ -32,6 +32,8 @@ def run(
     """
     php = get_php(web_file_path)
     res = send(php)
+    if (not res):
+        return
     content = res.r_content
     download_path = local_path or gget("webshell.download_path", "webshell")
     if len(content):

@@ -40,7 +40,7 @@ def change_prompt():
         print(color.yellow("[s|shell]      ") + color.cyan("Get a temporary shell of target system by system function"))
         print(color.yellow("[ws|webshell]  ") + color.cyan("Get a webshell of target system"))
         print("\n[FILE]\n")
-        print(color.yellow("[r|read]       ") + color.cyan("Read file/files"))
+        print(color.yellow("[c|cat]        ") + color.cyan("Read file/files"))
         print(color.yellow("[w|write]      ") + color.cyan("Write file"))
         print(color.yellow("[e|edit]       ") + color.cyan("Modify file"))
         print(color.yellow("[u|upload]     ") + color.cyan("Upload file"))

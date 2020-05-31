@@ -34,6 +34,9 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         print("\n" + color.red("Local File not exist") + "\n")
         return
     php = get_php(web_file_path, force)
+    res = send(php)
+    if (not res):
+        return
     text = send(php, files={("file", fp)}).r_text.strip()
     if text == "success":
         if (flag):

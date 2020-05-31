@@ -39,7 +39,10 @@ def run(web_file_path: str = ""):
     web_file_path = web_file_path if (len(web_file_path)) else gget("webshell.root", "webshell")
     php = get_php(web_file_path)
     try:
-        file_tree = send(f'{php}').r_json
+        res = send(php)
+        if (not res):
+            return
+        file_tree = res.r_json
     except JSONDecodeError:
         print(color.red("Null Error"))
         return

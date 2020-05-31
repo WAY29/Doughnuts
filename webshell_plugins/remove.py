@@ -17,7 +17,10 @@ def run(*web_file_paths):
     """
     for each_file_path in web_file_paths:
         php = get_php(each_file_path)
-        text = send(php).r_text.strip()
+        res = send(php)
+        if (not res):
+            return
+        text = res.r_text.strip()
         if (text == 'success'):
             print("\n" + color.green(f"Delete {each_file_path} success") + "\n")
         else:

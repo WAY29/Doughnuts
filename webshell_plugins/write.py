@@ -26,7 +26,10 @@ def run(web_file_path: str):
     open_editor(real_file_path)
     with open(real_file_path, "r") as f:
         result = base64_encode(f.read())
-        text = send(f"print(file_put_contents('{web_file_path}', base64_decode('{result}')));").r_text.strip()
+        res = send(f"print(file_put_contents('{web_file_path}', base64_decode('{result}')));")
+        if (not res):
+            return
+        text = res.r_text.strip()
         if (match(r"\w+", text) and text != '0'):
             print(color.green(f"\nWrite {web_file_path} success.\n"))
         else:

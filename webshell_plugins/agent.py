@@ -537,8 +537,10 @@ def run(url: str, method: str,
         data, params, cookie,
         redirect_auto, redirect_cookie_use, timeout, type
     )
-
-    text = send(f'eval(base64_decode("{php}"));').r_text
+    res = send(php)
+    if (not res):
+        return
+    text = res.r_text
 
     # ------------------------------------------
 

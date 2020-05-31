@@ -73,6 +73,8 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ### V2.3
 - 尝试绕过disable_functions寻找可执行的系统命令函数
+- 请求错误处理
+- read命令更名为cat命令,别名为c
 
 
 ### V2.2

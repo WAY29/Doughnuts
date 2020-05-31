@@ -67,4 +67,6 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     if (not bind(port, MODE)):
         print(color.red(f"Bind port error."))
     if (MODE == 3):
-        send(f"unlink('/tmp/{filename}');")
+        res = send(f"unlink('/tmp/{filename}');")
+        if (not res):
+            return
