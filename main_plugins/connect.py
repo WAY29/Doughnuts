@@ -124,5 +124,3 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         if (exec_func == ''):
             print(color.red("No system execute function!\n"))
         return True
-
-        
