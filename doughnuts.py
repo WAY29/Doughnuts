@@ -48,7 +48,7 @@ def change_prompt():
         print(color.yellow("[d|download]   ") + color.cyan("Download file"))
         print(color.yellow("[mv|move]      ") + color.cyan("Rename file or move it to new_file_path"))
         print(color.yellow("[rm|remove]    ") + color.cyan("Delete target system file(s)"))
-        print(color.yellow("[chmod]        ") + color.cyan("Changes file mode"))
+        print(color.yellow("[chmod]        ") + color.cyan("(Only for *unix) Changes file mode"))
         print(color.yellow("[dump]         ") + color.cyan("Package and compress files in a folder and download it"))
         print("\n[SEARCH]\n")
         print(color.yellow("[search]       ") + color.cyan("Search file by glob, pattern support . * [...]"))

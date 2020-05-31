@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.myapp import send
+from libs.myapp import send, is_windows
 
 
 @alias(True, f="web_file_path", m="mode")
@@ -7,10 +7,13 @@ def run(mode: str, *web_file_paths):
     """
     chmod
 
-    Changes file(s) mode.
+    (Only for *unix) Changes file(s) mode.
 
     eg: chmod {mode} {web_file_path}
     """
+    if (is_windows()):
+        print(color.red("Target system is windows."))
+        return
     mode = str(mode)
     if (len(mode) < 4):
         mode = "0" + mode
