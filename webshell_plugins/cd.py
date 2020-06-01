@@ -11,7 +11,7 @@ def run(directory: str = ''):
 
     Change the working directory.
     """
-    directory = b64encode(directory.encode()).decode()
+    directory = b64encode(str(directory).encode()).decode()
     res = send(f"chdir(base64_decode('{directory}'));print(getcwd());")
     if (not res):
         return
