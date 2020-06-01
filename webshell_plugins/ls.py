@@ -79,17 +79,12 @@ def run(path: str = "."):
         return
     info_list = res.r_text.strip().split('\n')
     print('\n'.join(info_list[:3]))
-    # print("test,", info_list)
     for line in info_list[3:]:
         info = line.split(" ")
         prems, name = info[0], info[-1]
-        # color_line = line
-        # info[0] = color.cyan(name)
         if (prems[0] == 'd'):
             info[-1] = color.cyan(name)
-            # color_line = color_line.replace(name, color.cyan(name))
+            info[3] = ''
         elif ('x' in prems):
             info[-1] = color.green(name)
-            # color_line = color_line.replace(name, color.green(name))
         print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
-        # print(color_line)
