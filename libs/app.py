@@ -6,7 +6,7 @@ from traceback import print_exception
 
 from Myplugin import Platform
 
-from .config import gget, gset, order_alias, set_namespace
+from .config import gget, gset, order_alias, set_namespace, color
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
 STDIN_STREAM = b''
@@ -140,8 +140,12 @@ def getline():
     global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
     cmd = ''
     pointer = 0
+    history_line = b''
     while 1:
-        old_stream_len = len(STDIN_STREAM)
+        if (history_line):
+            old_stream_len = len(history_line)
+        else:
+            old_stream_len = len(STDIN_STREAM)
         old_pointer = pointer
         try:
             ch = getchar()
@@ -164,8 +168,13 @@ def getline():
                 read_history = True
             elif (ch == "left" and pointer > 0):  # left
                 pointer -= 1
-            elif (ch == "right" and pointer < len(STDIN_STREAM)):  # right
-                pointer += 1
+                # print(STDIN_STREAM.decode())
+            elif (ch == "right"):  # right
+                if (pointer < len(STDIN_STREAM)):
+                    pointer += 1
+                elif (history_line):
+                    STDIN_STREAM = history_line
+                    pointer = len(history_line)
             if ((ch == "up" or ch == "down") and read_history):
                 STDIN_STREAM = HISTORY[HISTORY_POINTER]
                 pointer = len(STDIN_STREAM)
@@ -190,6 +199,9 @@ def getline():
             else:
                 STDIN_STREAM = STDIN_STREAM[:pointer] + STDIN_STREAM[pointer+1:]
             pointer -= 1
+        elif(ch == b'\t' and pointer > 0 and history_line):  # \t
+            STDIN_STREAM = history_line
+            pointer = len(history_line)
         elif(ord(dch) == 4):  # ctrl+d
             STDIN_STREAM = b''
             print("quit\n", end="")
@@ -200,8 +212,17 @@ def getline():
             stdout.flush()
             STDIN_STREAM = b''
             break
-        stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len + STDIN_STREAM.decode())
+        stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)
+        print(color.cyan(STDIN_STREAM.decode()), end="")
         stdout.write("\b" * (len(STDIN_STREAM) - pointer))
+        if (history_line):
+            history_line = b''
+        if (pointer > 0):
+            for line in reversed(HISTORY):
+                if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line):
+                    stdout.write(line[len(STDIN_STREAM):].decode() + "\b" * (len(line) - len(STDIN_STREAM)))
+                    history_line = line
+                    break
         stdout.flush()
     if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):
         HISTORY.append(cmd.encode())
