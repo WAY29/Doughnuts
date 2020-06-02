@@ -10,12 +10,13 @@ from .config import gget, gset, order_alias, set_namespace, color
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
 STDIN_STREAM = b''
-HISTORY = []
+HISTORY = None
 HISTORY_POINTER = 0
 FROM_HISTORY = False
 
 """
 api ['']
+history_commands ['']
 leave_message ['']
 namespace ['']
 namespace_folders ['']
@@ -49,7 +50,13 @@ class Loop_init:
         gset("namespace_folders",  platforms)
         gset("folders_namespace", {v: k for k, v in platforms.items()})
         for k, v in platforms.items():
-            gset(k + ".pf", import_platform(v, api))
+            pf = import_platform(v, api)
+            commands = [s.encode() for s in pf.names()]
+            gset(k + ".pf", pf)
+            gset(k + ".commands", commands)
+            gset(k + ".command_number", len(commands))
+            print("test", commands)
+        gset("history_commands", gget(f"{init_namespace}.commands"))
         for k, v in self.set_prompts().items():
             gset(k + ".prompt", v)
 
@@ -141,6 +148,7 @@ def getline():
     cmd = ''
     pointer = 0
     history_line = b''
+    HISTORY = gget("history_commands")
     while 1:
         if (history_line):
             old_stream_len = len(history_line)
@@ -160,7 +168,7 @@ def getline():
                 continue
         if (isinstance(ch, str)):
             read_history = False
-            if (ch == "up" and HISTORY_POINTER > 0):  # up
+            if (ch == "up" and HISTORY_POINTER > gget(f"{gget('namespace')}.command_number")):  # up
                 HISTORY_POINTER -= 1
                 read_history = True
             elif (ch == "down" and HISTORY_POINTER < len(HISTORY) - 1):  # down
@@ -203,7 +211,7 @@ def getline():
             pointer = len(history_line)
         elif(ord(dch) == 4):  # ctrl+d
             STDIN_STREAM = b''
-            print("quit\n", end="")
+            print(color.cyan("quit\n"), end="")
             cmd = 'quit'
             break
         elif(ord(dch) == 3):  # ctrl+c
