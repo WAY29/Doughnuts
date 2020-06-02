@@ -55,7 +55,6 @@ class Loop_init:
             gset(k + ".pf", pf)
             gset(k + ".commands", commands)
             gset(k + ".command_number", len(commands))
-            print("test", commands)
         gset("history_commands", gget(f"{init_namespace}.commands"))
         for k, v in self.set_prompts().items():
             gset(k + ".prompt", v)
