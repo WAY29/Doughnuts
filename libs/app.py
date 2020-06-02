@@ -220,11 +220,14 @@ def getline():
                 stdout.flush()
                 STDIN_STREAM = b''
                 break
+            stream_len = len(STDIN_STREAM)
+            history_len = len(HISTORY)
+            history_line_len = len(history_line)
             stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)
             print(color.cyan(STDIN_STREAM.decode()), end="")
             if (end):  # 结束输入
                 if (history_line):  # 如果存在历史命令，清除
-                    stdout.write(" " * (len(history_line) - len(STDIN_STREAM)))
+                    stdout.write(" " * (history_line_len - stream_len))
                 stdout.write('\n')
                 stdout.flush()
                 cmd = STDIN_STREAM.decode()
@@ -236,10 +239,10 @@ def getline():
                 temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
                 if (len(temp_history_lines)):  # 若有历史命令，输出剩余的部分
                     history_line = min(temp_history_lines)
-                    stdout.write(history_line[len(STDIN_STREAM):].decode() + "\b" * (len(history_line) - len(STDIN_STREAM)))
-                stdout.write("\b" * (len(STDIN_STREAM) - pointer))
+                    stdout.write(history_line[stream_len:].decode() + "\b" * (history_line_len - stream_len))
+                stdout.write("\b" * (stream_len - pointer))
                 stdout.flush()
-        if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
+        if (cmd and not FROM_HISTORY and (not history_len or (history_len and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
             HISTORY.append(cmd.encode())
         HISTORY_POINTER = len(HISTORY)
     except Exception:
