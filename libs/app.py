@@ -214,7 +214,6 @@ def getline():
             break
         stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)
         print(color.cyan(STDIN_STREAM.decode()), end="")
-        stdout.write("\b" * (len(STDIN_STREAM) - pointer))
         if (history_line):
             history_line = b''
         if (pointer > 0):
@@ -223,6 +222,7 @@ def getline():
                     stdout.write(line[len(STDIN_STREAM):].decode() + "\b" * (len(line) - len(STDIN_STREAM)))
                     history_line = line
                     break
+        stdout.write("\b" * (len(STDIN_STREAM) - pointer))
         stdout.flush()
     if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):
         HISTORY.append(cmd.encode())
