@@ -216,12 +216,10 @@ def getline():
         print(color.cyan(STDIN_STREAM.decode()), end="")
         if (history_line):
             history_line = b''
-        if (pointer > 0):
-            for line in reversed(HISTORY):
-                if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line):
-                    stdout.write(line[len(STDIN_STREAM):].decode() + "\b" * (len(line) - len(STDIN_STREAM)))
-                    history_line = line
-                    break
+        temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
+        if (len(temp_history_lines)):
+            history_line = min(temp_history_lines)
+            stdout.write(history_line[len(STDIN_STREAM):].decode() + "\b" * (len(history_line) - len(STDIN_STREAM)))
         stdout.write("\b" * (len(STDIN_STREAM) - pointer))
         stdout.flush()
     if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):
