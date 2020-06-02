@@ -148,94 +148,104 @@ except ImportError:
 def getline():
     global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
     cmd = ''
+    end = False
     pointer = 0
     history_line = b''
     HISTORY = gget("history_commands")
     HISTORY_POINTER = gget("history_pointer")
-    while 1:
-        if (history_line):
-            old_stream_len = len(history_line)
-        else:
-            old_stream_len = len(STDIN_STREAM)
-        old_pointer = pointer
-        try:
-            ch = getchar()
-        except Exception:
-            print(f"\nGetchar error\n")
-            cmd = ''
-            break
-        if (isinstance(ch, bytes)):
+    try:
+        while 1:
+            if (history_line):
+                old_stream_len = len(history_line)
+            else:
+                old_stream_len = len(STDIN_STREAM)
+            old_pointer = pointer
             try:
-                dch = ch.decode()
-            except UnicodeDecodeError:
-                continue
-        if (isinstance(ch, str)):
-            read_history = False
-            if (ch == "up" and HISTORY_POINTER > gget(f"{gget('namespace')}.command_number")):  # up
-                HISTORY_POINTER -= 1
-                read_history = True
-            elif (ch == "down" and HISTORY_POINTER < len(HISTORY) - 1):  # down
-                HISTORY_POINTER += 1
-                read_history = True
-            elif (ch == "left" and pointer > 0):  # left
+                ch = getchar()
+            except Exception:
+                print(f"\nGetchar error\n")
+                cmd = ''
+                break
+            if (isinstance(ch, bytes)):
+                try:
+                    dch = ch.decode()
+                except UnicodeDecodeError:
+                    continue
+            if (isinstance(ch, str)):
+                read_history = False
+                if (ch == "up" and HISTORY_POINTER > gget(f"{gget('namespace')}.command_number")):  # up
+                    HISTORY_POINTER -= 1
+                    read_history = True
+                elif (ch == "down" and HISTORY_POINTER < len(HISTORY) - 1):  # down
+                    HISTORY_POINTER += 1
+                    read_history = True
+                elif (ch == "left" and pointer > 0):  # left
+                    pointer -= 1
+                elif (ch == "right"):  # right
+                    if (pointer < len(STDIN_STREAM)):
+                        pointer += 1
+                    elif (history_line):
+                        STDIN_STREAM = history_line
+                        pointer = len(history_line)
+                if ((ch == "up" or ch == "down") and read_history):
+                    STDIN_STREAM = HISTORY[HISTORY_POINTER]
+                    pointer = len(STDIN_STREAM)
+                    FROM_HISTORY = True
+            elif (32 <= ord(dch) <= 127):
+                if (pointer == len(STDIN_STREAM)):
+                    STDIN_STREAM += ch
+                else:
+                    STDIN_STREAM = STDIN_STREAM[:pointer] + ch + STDIN_STREAM[pointer:]
+                if (FROM_HISTORY):
+                    FROM_HISTORY = False
+                pointer += 1
+            elif(ch == b'\r' or ch == b'\n'):  # enter
+                end = True
+            elif(ord(dch) == 8 and pointer > 0):  # \b
+                if (pointer == len(STDIN_STREAM)):
+                    STDIN_STREAM = STDIN_STREAM[:-1]
+                else:
+                    STDIN_STREAM = STDIN_STREAM[:pointer] + STDIN_STREAM[pointer+1:]
                 pointer -= 1
-            elif (ch == "right"):  # right
-                if (pointer < len(STDIN_STREAM)):
-                    pointer += 1
-                elif (history_line):
-                    STDIN_STREAM = history_line
-                    pointer = len(history_line)
-            if ((ch == "up" or ch == "down") and read_history):
-                STDIN_STREAM = HISTORY[HISTORY_POINTER]
-                pointer = len(STDIN_STREAM)
-                FROM_HISTORY = True
-        elif (32 <= ord(dch) <= 127):
-            if (pointer == len(STDIN_STREAM)):
-                STDIN_STREAM += ch
-            else:
-                STDIN_STREAM = STDIN_STREAM[:pointer] + ch + STDIN_STREAM[pointer:]
-            if (FROM_HISTORY):
-                FROM_HISTORY = False
-            pointer += 1
-        elif(ch == b'\r' or ch == b'\n'):  # enter
-            stdout.write('\n')
-            stdout.flush()
-            cmd = STDIN_STREAM.decode()
-            STDIN_STREAM = b''
-            break
-        elif(ord(dch) == 8 and pointer > 0):  # \b
-            if (pointer == len(STDIN_STREAM)):
-                STDIN_STREAM = STDIN_STREAM[:-1]
-            else:
-                STDIN_STREAM = STDIN_STREAM[:pointer] + STDIN_STREAM[pointer+1:]
-            pointer -= 1
-        elif(ch == b'\t' and history_line):  # \t
-            STDIN_STREAM = history_line
-            pointer = len(history_line)
-        elif(ord(dch) == 4):  # ctrl+d
-            STDIN_STREAM = b''
-            print(color.cyan("quit\n"), end="")
-            cmd = 'quit'
-            break
-        elif(ord(dch) == 3):  # ctrl+c
-            print(color.cyan('^C'))
-            stdout.flush()
-            STDIN_STREAM = b''
-            break
-        stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)
-        print(color.cyan(STDIN_STREAM.decode()), end="")
-        if (history_line):
-            history_line = b''
-        if (STDIN_STREAM):
-            temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
-            if (len(temp_history_lines)):
-                history_line = min(temp_history_lines)
-                stdout.write(history_line[len(STDIN_STREAM):].decode() + "\b" * (len(history_line) - len(STDIN_STREAM)))
-            stdout.write("\b" * (len(STDIN_STREAM) - pointer))
-            stdout.flush()
-    if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):
-        HISTORY.append(cmd.encode())
-    HISTORY_POINTER = len(HISTORY)
+            elif(ch == b'\t' and history_line):  # \t
+                STDIN_STREAM = history_line
+                pointer = len(history_line)
+            elif(ord(dch) == 4):  # ctrl+d
+                STDIN_STREAM = b''
+                print(color.cyan("quit\n"), end="")
+                cmd = 'quit'
+                break
+            elif(ord(dch) == 3):  # ctrl+c
+                print(color.cyan('^C'))
+                stdout.flush()
+                STDIN_STREAM = b''
+                break
+            stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)
+            print(color.cyan(STDIN_STREAM.decode()), end="")
+            if (end):  # 结束输入
+                if (history_line):  # 如果存在历史命令，清除
+                    stdout.write(" " * (len(history_line) - len(STDIN_STREAM)))
+                stdout.write('\n')
+                stdout.flush()
+                cmd = STDIN_STREAM.decode()
+                STDIN_STREAM = b''
+                break
+            if (history_line):
+                history_line = b''
+            if (STDIN_STREAM):
+                temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
+                if (len(temp_history_lines)):  # 若有历史命令，输出剩余的部分
+                    history_line = min(temp_history_lines)
+                    stdout.write(history_line[len(STDIN_STREAM):].decode() + "\b" * (len(history_line) - len(STDIN_STREAM)))
+                stdout.write("\b" * (len(STDIN_STREAM) - pointer))
+                stdout.flush()
+        if (cmd and not FROM_HISTORY and (not len(HISTORY) or (len(HISTORY) and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
+            HISTORY.append(cmd.encode())
+        HISTORY_POINTER = len(HISTORY)
+    except Exception:
+        print(color.red('Error'))
+        cmd = ''
+        STDIN_STREAM = b''
     return cmd
 
 
