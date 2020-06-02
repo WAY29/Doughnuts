@@ -168,7 +168,6 @@ def getline():
                 read_history = True
             elif (ch == "left" and pointer > 0):  # left
                 pointer -= 1
-                # print(STDIN_STREAM.decode())
             elif (ch == "right"):  # right
                 if (pointer < len(STDIN_STREAM)):
                     pointer += 1
@@ -208,7 +207,7 @@ def getline():
             cmd = 'quit'
             break
         elif(ord(dch) == 3):  # ctrl+c
-            stdout.write('^C\n')
+            print(color.cyan('^C'))
             stdout.flush()
             STDIN_STREAM = b''
             break
