@@ -33,7 +33,8 @@ def conver_args(arg_dict: dict, arg_name_dict: dict) -> dict:  # 别名转换
 def set_namespace(namespace: str = "main", callback: bool = True, clean_history: bool = True) -> None:  # 改变名称空间
     gset("namespace", namespace, True)
     if (clean_history):
-        gset("history_commands", gget(f"general.commands") + gget(f"{namespace}.commands"), True)
+        gset("history_commands", gget("general.commands") + gget(namespace + ".commands"), True)
+        gset("history_pointer", gget(namespace + ".command_number"), True)
     if (not callback):
         return
     for func in NAMESPACE_CALLBACK_LIST:

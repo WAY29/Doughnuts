@@ -12,7 +12,7 @@ def run(order: str = ""):
     eg: help {order}
     """
     if (order == ""):
-        set_namespace(gget("namespace"))
+        set_namespace(gget("namespace"), True, False)
         return
     pf = None
     gpf = gget(f"general.pf")

@@ -38,4 +38,4 @@ def run():
             if (not res):
                 return
             print("\n" + res.r_text.strip() + "\n")
-    set_namespace("webshell", False)
+    set_namespace("webshell", False, False)

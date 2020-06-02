@@ -57,7 +57,8 @@ class Loop_init:
             gset(k + ".command_number", len(commands))
         for k in platforms.keys():
             gset(k + ".command_number", gget(k + ".command_number") + gget("general.command_number"), True)
-        gset("history_commands", gget(f"general.commands") + gget(f"{init_namespace}.commands"))
+        gset("history_commands", gget("general.commands") + gget(f"{init_namespace}.commands"))
+        gset("history_pointer", gget(init_namespace + ".command_number"))
         for k, v in self.set_prompts().items():
             gset(k + ".prompt", v)
 
@@ -150,6 +151,7 @@ def getline():
     pointer = 0
     history_line = b''
     HISTORY = gget("history_commands")
+    HISTORY_POINTER = gget("history_pointer")
     while 1:
         if (history_line):
             old_stream_len = len(history_line)
