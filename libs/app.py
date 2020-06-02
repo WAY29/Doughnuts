@@ -199,7 +199,7 @@ def getline():
             else:
                 STDIN_STREAM = STDIN_STREAM[:pointer] + STDIN_STREAM[pointer+1:]
             pointer -= 1
-        elif(ch == b'\t' and pointer > 0 and history_line):  # \t
+        elif(ch == b'\t' and history_line):  # \t
             STDIN_STREAM = history_line
             pointer = len(history_line)
         elif(ord(dch) == 4):  # ctrl+d
