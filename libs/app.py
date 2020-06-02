@@ -239,7 +239,7 @@ def getline():
                 temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
                 if (len(temp_history_lines)):  # 若有历史命令，输出剩余的部分
                     history_line = min(temp_history_lines)
-                    stdout.write(history_line[stream_len:].decode() + "\b" * (history_line_len - stream_len))
+                    stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
                 stdout.write("\b" * (stream_len - pointer))
                 stdout.flush()
         if (cmd and not FROM_HISTORY and (not history_len or (history_len and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
