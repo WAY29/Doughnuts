@@ -151,9 +151,9 @@ def getline():
     pointer = 0
     history_line = b''
     HISTORY = gget("history_commands")
+    HISTORY_POINTER = gget("history_pointer")
     try:
         while 1:
-            HISTORY_POINTER = gget("history_pointer")
             if (history_line):
                 old_stream_len = len(history_line)
             else:
@@ -172,19 +172,14 @@ def getline():
                     continue
             if (isinstance(ch, str)):
                 read_history = False
-                end_history = False
                 if (ch == "up"):  # up
-                    if (HISTORY_POINTER > 0):
+                    if (HISTORY_POINTER >= 0):
                         HISTORY_POINTER -= 1
                         read_history = True
-                    else:
-                        end_history = True
                 elif (ch == "down"):  # down
-                    if (HISTORY_POINTER < len(HISTORY) - 1):
+                    if (HISTORY_POINTER <= len(HISTORY) - 1):
                         HISTORY_POINTER += 1
                         read_history = True
-                    else:
-                        end_history = True
                 elif (ch == "left" and pointer > 0):  # left
                     pointer -= 1
                 elif (ch == "right"):  # right
@@ -194,13 +189,18 @@ def getline():
                         STDIN_STREAM = history_line
                         pointer = len(history_line)
                 if ((ch == "up" or ch == "down")):
+                    history_len = len(HISTORY)
                     if (read_history):
-                        STDIN_STREAM = HISTORY[HISTORY_POINTER]
-                        pointer = len(STDIN_STREAM)
-                        FROM_HISTORY = True
-                    elif (end_history):
-                        STDIN_STREAM = b''
-                        pointer = 0
+                        if (HISTORY_POINTER > -1 and HISTORY_POINTER < history_len):
+                            STDIN_STREAM = HISTORY[HISTORY_POINTER]
+                            pointer = len(STDIN_STREAM)
+                            FROM_HISTORY = True
+                        elif (HISTORY_POINTER == -1):
+                            STDIN_STREAM = b''
+                            pointer = 0
+                        elif (HISTORY_POINTER == history_len):
+                            STDIN_STREAM = b''
+                            pointer = 0
             elif (32 <= ord(dch) <= 127):
                 if (pointer == len(STDIN_STREAM)):
                     STDIN_STREAM += ch
@@ -233,7 +233,7 @@ def getline():
             stream_len = len(STDIN_STREAM)
             history_len = len(HISTORY)
             history_line_len = len(history_line)
-            stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)
+            stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)  # 清空原本输出
             print(color.cyan(STDIN_STREAM.decode()), end="")
             if (end):  # 结束输入
                 if (history_line):  # 如果存在历史命令，清除
@@ -241,7 +241,10 @@ def getline():
                 stdout.write('\n')
                 stdout.flush()
                 cmd = STDIN_STREAM.decode()
+                if (cmd and not FROM_HISTORY and (not history_len or (history_len and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
+                    HISTORY.append(cmd.encode())
                 STDIN_STREAM = b''
+                gset("history_pointer", len(HISTORY), True)
                 break
             if (history_line):
                 history_line = b''
@@ -252,9 +255,6 @@ def getline():
                     stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
                 stdout.write("\b" * (stream_len - pointer))
                 stdout.flush()
-        if (cmd and not FROM_HISTORY and (not history_len or (history_len and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
-            HISTORY.append(cmd.encode())
-        gset("history_pointer", len(HISTORY))
     except Exception:
         print(color.red('Error'))
         cmd = ''
