@@ -153,6 +153,7 @@ def getline():
     cmd = ''
     namespace = gget('namespace')
     wordlist = gget(namespace + ".wordlist")
+    wordlist["arg_wordlist"] = []
     end = False
     pointer = 0
     history_line = b''
@@ -271,7 +272,8 @@ def getline():
                 command = stream_list[0].decode()
                 if (len(stream_list) > 1):
                     arg_wordlist = gget(command + ".arg_wordlist", namespace, [])
-                    wordlist["arg_wordlist"] = arg_wordlist
+                    if (wordlist["arg_wordlist"] != arg_wordlist):
+                        wordlist["arg_wordlist"] = arg_wordlist
                 word = stream_list[-1]
                 if (word):
                     temp_word_lines = [line for line in chain.from_iterable(wordlist.values()) if (line.startswith(word.decode()) and word != line)]
