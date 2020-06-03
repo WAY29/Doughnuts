@@ -3,6 +3,7 @@ from os import _exit
 from re import compile as re_compile
 from sys import exc_info, path, stdout
 from traceback import print_exception
+from itertools import chain
 
 from Myplugin import Platform
 
@@ -51,11 +52,14 @@ class Loop_init:
         gset("folders_namespace", {v: k for k, v in platforms.items()})
         for k, v in platforms.items():
             pf = import_platform(v, api)
-            commands = [s.encode() for s in pf.names()]
             gset(k + ".pf", pf)
-            gset(k + ".commands", commands)
-            gset(k + ".command_number", len(commands))
-            gset(k + ".wordlist", [])
+            gset(k + ".wordlist", {"command_wordlist": list(pf.names())})
+        general_wordlist = gget("general.wordlist")["command_wordlist"]
+        for k in platforms.keys():
+            if (k == "general"):
+                continue
+            wordlist = gget(k + ".wordlist")
+            wordlist["command_wordlist"] += general_wordlist
         gset("history_commands", [])
         gset("history_pointer", 0)
         for k, v in self.set_prompts().items():
@@ -148,7 +152,7 @@ def getline():
     global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
     cmd = ''
     namespace = gget('namespace')
-    commands = gget(f"{namespace}.commands") + gget("general.commands")
+    wordlist = gget(namespace + ".wordlist")
     end = False
     pointer = 0
     history_line = b''
@@ -211,6 +215,12 @@ def getline():
                 if (FROM_HISTORY):
                     FROM_HISTORY = False
                 pointer += 1
+                if (ch == b' '):
+                    word = STDIN_STREAM.split(b" ")[0].decode()
+                    args_wordlist = gget(word + ".arg_wordlist", namespace)
+                    # print("test", args_wordlist)
+                    if (args_wordlist):
+                        wordlist["arg_wordlist"] = args_wordlist
             elif(ch == b'\r' or ch == b'\n'):  # enter
                 end = True
             elif(ord(dch) == 8 and pointer > 0):  # \b
@@ -252,14 +262,19 @@ def getline():
                 history_line = b''
             if (not STDIN_STREAM):
                 continue
-            temp_history_lines = [line for line in reversed(HISTORY + commands) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
+            temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
             if (temp_history_lines):  # 若有历史命令，输出剩余的部分
                 history_line = min(temp_history_lines)
                 stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
             else:  # 若有补全单词，输出剩余的部分
-                word = STDIN_STREAM.split(b" ")[-1]
+                stream_list = STDIN_STREAM.split(b" ")
+                command = stream_list[0].decode()
+                if (len(stream_list) > 1):
+                    arg_wordlist = gget(command + ".arg_wordlist", namespace, [])
+                    wordlist["arg_wordlist"] = arg_wordlist
+                word = stream_list[-1]
                 if (word):
-                    temp_word_lines = [line for line in reversed(gget(f"{namespace}.wordlist")) if (line.startswith(word.decode()) and word != line)]
+                    temp_word_lines = [line for line in chain.from_iterable(wordlist.values()) if (line.startswith(word.decode()) and word != line)]
                     if (temp_word_lines):
                         min_word = min(temp_word_lines)
                         reamaining = min_word[len(word):]
@@ -269,6 +284,9 @@ def getline():
             stdout.flush()
     except Exception:
         print(color.red('Error'))
+        if 0:
+            exc_type, exc_value, exc_tb = exc_info()
+            print_exception(exc_type, exc_value, exc_tb)
         cmd = ''
         STDIN_STREAM = b''
     return cmd
