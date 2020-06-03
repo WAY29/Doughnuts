@@ -55,6 +55,7 @@ class Loop_init:
             gset(k + ".pf", pf)
             gset(k + ".commands", commands)
             gset(k + ".command_number", len(commands))
+            gset(k + ".wordlist", [])
         gset("history_commands", [])
         gset("history_pointer", 0)
         for k, v in self.set_prompts().items():
@@ -146,7 +147,8 @@ except ImportError:
 def getline():
     global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
     cmd = ''
-    commands = gget(f"{gget('namespace')}.commands") + gget("general.commands")
+    namespace = gget('namespace')
+    commands = gget(f"{namespace}.commands") + gget("general.commands")
     end = False
     pointer = 0
     history_line = b''
@@ -248,13 +250,23 @@ def getline():
                 break
             if (history_line):
                 history_line = b''
-            if (STDIN_STREAM):
-                temp_history_lines = [line for line in reversed(HISTORY + commands) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
-                if (len(temp_history_lines)):  # 若有历史命令，输出剩余的部分
-                    history_line = min(temp_history_lines)
-                    stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
-                stdout.write("\b" * (stream_len - pointer))
-                stdout.flush()
+            if (not STDIN_STREAM):
+                continue
+            temp_history_lines = [line for line in reversed(HISTORY + commands) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
+            if (temp_history_lines):  # 若有历史命令，输出剩余的部分
+                history_line = min(temp_history_lines)
+                stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
+            else:  # 若有补全单词，输出剩余的部分
+                word = STDIN_STREAM.split(b" ")[-1]
+                if (word):
+                    temp_word_lines = [line for line in reversed(gget(f"{namespace}.wordlist")) if (line.startswith(word.decode()) and word != line)]
+                    if (temp_word_lines):
+                        min_word = min(temp_word_lines)
+                        reamaining = min_word[len(word):]
+                        stdout.write(reamaining + "\b" * (len(min_word) - len(word)))
+                        history_line = STDIN_STREAM + reamaining.encode()
+            stdout.write("\b" * (stream_len - pointer))
+            stdout.flush()
     except Exception:
         print(color.red('Error'))
         cmd = ''

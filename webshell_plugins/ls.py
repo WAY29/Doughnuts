@@ -1,4 +1,4 @@
-from libs.config import alias, color
+from libs.config import alias, color, gget, gset
 from libs.myapp import send
 
 
@@ -79,8 +79,11 @@ def run(path: str = "."):
         return
     info_list = res.r_text.strip().split('\n')
     print('\n'.join(info_list[:3]))
+    wordlist = []
     for line in info_list[3:]:
         info = line.split(" ")
+        if (len(info) < 7):
+            continue
         prems, name = info[0], info[-1]
         if (prems[0] == 'd'):
             info[-1] = color.cyan(name)
@@ -88,3 +91,5 @@ def run(path: str = "."):
         elif ('x' in prems):
             info[-1] = color.green(name)
         print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
+        wordlist.append(info[6])
+    gset(f"{gget('namespace')}.wordlist", wordlist, True)
