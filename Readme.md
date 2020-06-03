@@ -71,6 +71,10 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ## 更新日志
 
 
+### V2.4
+- 继续优化输入,现在支持历史命令补全,命令补全以及执行ls之后的文件(夹)名补全
+
+
 ### V2.3
 - 尝试绕过disable_functions寻找可执行的系统命令函数
 - 请求错误处理
