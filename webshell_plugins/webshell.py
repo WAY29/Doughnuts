@@ -1,4 +1,4 @@
-from libs.config import gget, alias, color, set_namespace
+from libs.config import gget, gset, alias, color, set_namespace
 from libs.myapp import send, base64_encode
 from libs.app import getline
 
@@ -12,11 +12,15 @@ def run():
     """
     print(color.cyan("Eenter interactive temporary webshell...\n\nUse 'back' command to return doughnuts.\n"))
     pwd = send(f'print(getcwd());').r_text.strip()
+    set_namespace("webshell", False, True)
+    wordlist = gget("webshell.wordlist")
+    gset("webshell.wordlist", {}, True)
     while gget("loop"):
         print(f"webshell:{pwd} >> ", end="")
         data = getline()
         lower_data = data.lower()
         if (lower_data.lower() in ['exit', 'quit', 'back']):
+            print()
             break
         if (data == ''):
             print()
@@ -34,4 +38,4 @@ def run():
             if (not res):
                 return
             print("\n" + res.r_text.strip() + "\n")
-    set_namespace("webshell", False, False)
+    gset("webshell.wordlist", wordlist, True)

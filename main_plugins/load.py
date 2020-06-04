@@ -22,7 +22,12 @@ def run(id: int = 0):
         if (id <= 0):
             line_num = pf["show"].run()
             load_id = input("choose:>")
-            load_id = int(load_id) if load_id.isdigit() else 1
+            # load_id = int(load_id) if load_id.isdigit() else 1
+            if (load_id.isdigit()):
+                load_id = int(load_id)
+            else:
+                print(color.red("\nInput Error\n"))
+                return
         else:
             load_id = id
             line_num = len(lines)

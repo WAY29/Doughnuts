@@ -1,4 +1,4 @@
-from libs.config import gget, alias, color, set_namespace
+from libs.config import gget, gset, alias, color, set_namespace
 from libs.myapp import send, base64_encode, is_windows, get_system_code
 from libs.app import getline
 
@@ -13,6 +13,9 @@ def run():
     print(color.cyan("Eenter interactive temporary shell...\n\nUse 'back' command to return doughnuts.\n"))
     res = send(f'print(shell_exec("whoami")."@".$_SERVER["SERVER_NAME"]."|".getcwd());').r_text.strip()
     prompt, pwd = res.split("|")
+    set_namespace("webshell", False, True)
+    wordlist = gget("webshell.wordlist")
+    gset("webshell.wordlist", {}, True)
     if is_windows():
         prompt = "%s> "
     else:
@@ -22,6 +25,7 @@ def run():
         data = getline()
         lower_data = data.lower()
         if (lower_data.lower() in ['exit', 'quit', 'back']):
+            print()
             break
         if (data == ''):
             print()
@@ -38,4 +42,4 @@ def run():
             if (not res):
                 return
             print("\n" + res.r_text.strip() + "\n")
-    set_namespace("webshell", False, False)
+    gset("webshell.wordlist", wordlist, True)

@@ -270,7 +270,7 @@ def getline():
             else:  # 若有补全单词，输出剩余的部分
                 stream_list = STDIN_STREAM.split(b" ")
                 command = stream_list[0].decode()
-                if (len(stream_list) > 1):
+                if (len(stream_list) > 1):  # 临时修改参数列表
                     arg_wordlist = gget(command + ".arg_wordlist", namespace, [])
                     if (wordlist["arg_wordlist"] != arg_wordlist):
                         wordlist["arg_wordlist"] = arg_wordlist
@@ -364,6 +364,8 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
     while gget("loop"):
         try:
             sleep(10)
-        except (KeyboardInterrupt, EOFError):
+        except KeyboardInterrupt:
+            continue
+        except EOFError:
             break
     sys_exit()
