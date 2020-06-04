@@ -100,7 +100,10 @@ def send(data: str, raw: bool = False, **extra_params):
     except requests.RequestException:
         print(color.red("\nRequest Error\n"))
         return
-    req.encoding = req.apparent_encoding
+    if (req.apparent_encoding):
+        req.encoding = encoding = req.apparent_encoding
+    else:
+        encoding = "utf-8"
     text = req.text
     content = req.content
     text_head_offset = text.find(head)
@@ -109,8 +112,8 @@ def send(data: str, raw: bool = False, **extra_params):
         offset if (text_head_offset != -1) else 0
     text_tail_offset = text_tail_offset if (
         text_tail_offset != -1) else len(text)
-    con_head_offset = content.find(bytes(head, req.encoding))
-    con_tail_offset = content.find(bytes(tail, req.encoding))
+    con_head_offset = content.find(head.encode(encoding))
+    con_tail_offset = content.find(tail.encode(encoding))
     con_head_offset = con_head_offset + \
         offset if (con_head_offset != -1) else 0
     con_tail_offset = con_tail_offset if (
@@ -123,6 +126,7 @@ def send(data: str, raw: bool = False, **extra_params):
         req.r_json = ''
     if 0:  # DEBUG
         print(f"[debug] {params_dict}")
+        print(f"[debug] {url}")
         print(f"[debug] [{req}] [len:{len(content)}] {text}")
     return req
 
@@ -195,7 +199,8 @@ def has_env(env: str, remote: bool = True):
             flag = gget("webshell.has_%s" % env, "webshell")
     else:
         if (not gget("has_%s")):
-            p = subprocess.Popen([command, env], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen(
+                [command, env], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             flag = p.stdout.read()
             gset("has_%s" % env, flag)
         else:
