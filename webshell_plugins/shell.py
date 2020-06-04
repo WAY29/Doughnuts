@@ -2,6 +2,72 @@ from libs.config import gget, gset, alias, color, set_namespace
 from libs.myapp import send, base64_encode, is_windows, get_system_code
 from libs.app import getline
 
+NEW_WINDOWS_WORDLIST = {"common_wordlist": [
+    "echo",
+    "dir",
+    "cd",
+    "md",
+    "rd",
+    "tree",
+    "type",
+    "ren",
+    "copy",
+    "move",
+    "del",
+    "replace",
+    "attrib",
+    "cls",
+    "ver",
+    "ver",
+    "time",
+    "systeminfo",
+    "start",
+    "exit",
+    "wmic",
+    "net",
+    "start",
+    "stop",
+    "share",
+    "use",
+    "view",
+    "tasklist",
+    "ipconfig",
+    "netstat",
+    "arp",
+]}
+
+NEW_UNIX_WORDLIST = {"common_wordlist": [
+    "echo",
+    "ls",
+    "ls -al",
+    "rm",
+    "cp",
+    "mv",
+    "cat",
+    "chmod",
+    "chown",
+    "mkdir",
+    "uname",
+    "whereis",
+    "which",
+    "date",
+    "curl",
+    "wget",
+    "dir",
+    "cd",
+    "pwd",
+    "mkdir",
+    "ps",
+    "ps aux",
+    "free",
+    "df",
+    "kill",
+    "find",
+    "gzip",
+    "tar",
+    "grep",
+]}
+
 
 @alias(func_alias="s")
 def run():
@@ -15,7 +81,7 @@ def run():
     prompt, pwd = res.split("|")
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
-    gset("webshell.wordlist", {}, True)
+    gset("webshell.wordlist", NEW_WINDOWS_WORDLIST if (is_windows()) else NEW_UNIX_WORDLIST, True)
     if is_windows():
         prompt = "%s> "
     else:

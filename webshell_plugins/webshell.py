@@ -2,6 +2,38 @@ from libs.config import gget, gset, alias, color, set_namespace
 from libs.myapp import send, base64_encode
 from libs.app import getline
 
+NEW_WORDLIST = {"common_wordlist": [
+    "trim",
+    "dirname",
+    "strtolower",
+    "strtoupper",
+    "strcmp",
+    "str_replace",
+    "strstr",
+    "md5",
+    "array",
+    "fopen",
+    "is_readable",
+    "is_writable",
+    "is_executable",
+    "fwrite",
+    "file_put_contents",
+    "file_get_contents",
+    "fputs",
+    "file",
+    "basename",
+    "scandir",
+    "echo",
+    "print_r",
+    "var_dump",
+    "mkdir",
+    "rmdir",
+    "unlink",
+    "copy",
+    "rename",
+    "chdir",
+]}
+
 
 @alias(func_alias="ws")
 def run():
@@ -14,10 +46,10 @@ def run():
     pwd = send(f'print(getcwd());').r_text.strip()
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
-    gset("webshell.wordlist", {}, True)
+    gset("webshell.wordlist", NEW_WORDLIST, True)
     while gget("loop"):
         print(f"webshell:{pwd} >> ", end="")
-        data = getline()
+        data = getline(b"(")
         lower_data = data.lower()
         if (lower_data.lower() in ['exit', 'quit', 'back']):
             print()

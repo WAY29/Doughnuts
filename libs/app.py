@@ -148,7 +148,7 @@ except ImportError:
             return firstChar
 
 
-def getline():
+def getline(other_delimiter: bytes = b""):
     global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
     cmd = ''
     namespace = gget('namespace')
@@ -275,6 +275,8 @@ def getline():
                     if (wordlist["arg_wordlist"] != arg_wordlist):
                         wordlist["arg_wordlist"] = arg_wordlist
                 word = stream_list[-1]
+                if (other_delimiter):
+                    word = word.split(other_delimiter)[-1]
                 if (word):
                     temp_word_lines = [line for line in chain.from_iterable(wordlist.values()) if (line.startswith(word.decode()) and word != line)]
                     if (temp_word_lines):
@@ -302,10 +304,6 @@ def sys_exit():
 def loop_main():
     """
     run_loop main function
-
-    Args:
-        api (str, optional): The name of the entry function that is common to all plugins. Defaults to 'run'.
-        prompt (str, optional): Command Prompt. Defaults to ':>'.
     """
     gpf = gget("general.pf")
     api = gget("api")
