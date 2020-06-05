@@ -22,6 +22,7 @@
     - 网站目录打包下载
     - 寻找可写的PHP文件(以树状结构显示)
     - 寻找配置文件(文件名中包含cfg/config/db/database) 也可以通过修改代码来支持寻找更多的文件(以树状结构显示)
+    - 数据库管理
     - 输出disbale_functions
     - 端口扫描
     - 内网网页文本式浏览代理，可自定义请求方法和数据
@@ -33,6 +34,7 @@
 - Python3.6+
 - Python-requests
 - Python-colorama
+- Python-prettytable
 
 ## 安装方法
 
@@ -40,7 +42,7 @@
 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 进入Doughnuts目录下
-pip install -r requirements.txt 或 pip install requests colorma
+pip install -r requirements.txt 或 pip install requests colorma prettytable
 python doughnuts.py
 enjoy it!
 ```
@@ -69,6 +71,17 @@ connect http://localhost/test.php GET 2333 rot13 base64
 灵感源自https://github.com/WangYihang/Webshell-Sniper
 
 ## 更新日志
+
+### V2.5
+- 新增依赖 prettytable
+- 添加一系列数据库管理命令
+    - db_init 初始化数据库连接
+    - db_info 输出数据库信息
+    - db_use 修改当前所在数据库
+    - db_dbs 输出所有数据库信息
+    - db_tables 输出某个数据库的所有表信息
+    - db_columns 输出某个表的所有字段信息
+    - db_shell 获得一个临时的sql shell
 
 
 ### V2.4

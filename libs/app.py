@@ -169,7 +169,7 @@ def getline(other_delimiter: bytes = b""):
             try:
                 ch = getchar()
             except Exception:
-                print(f"\nGetchar error\n")
+                print(f"\nGetline error\n")
                 cmd = ''
                 break
             if (isinstance(ch, bytes)):
@@ -219,7 +219,6 @@ def getline(other_delimiter: bytes = b""):
                 if (ch == b' '):
                     word = STDIN_STREAM.split(b" ")[0].decode()
                     args_wordlist = gget(word + ".arg_wordlist", namespace)
-                    # print("test", args_wordlist)
                     if (args_wordlist):
                         wordlist["arg_wordlist"] = args_wordlist
             elif(ch == b'\r' or ch == b'\n'):  # enter
@@ -265,7 +264,7 @@ def getline(other_delimiter: bytes = b""):
                 continue
             temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
             if (temp_history_lines):  # 若有历史命令，输出剩余的部分
-                history_line = min(temp_history_lines)
+                history_line = min(temp_history_lines, key=len)
                 stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
             else:  # 若有补全单词，输出剩余的部分
                 stream_list = STDIN_STREAM.split(b" ")
@@ -280,7 +279,7 @@ def getline(other_delimiter: bytes = b""):
                 if (word):
                     temp_word_lines = [line for line in chain.from_iterable(wordlist.values()) if (line.startswith(word.decode()) and word != line)]
                     if (temp_word_lines):
-                        min_word = min(temp_word_lines)
+                        min_word = min(temp_word_lines, key=len)
                         reamaining = min_word[len(word):]
                         stdout.write(reamaining + "\b" * (len(min_word) - len(word)))
                         history_line = STDIN_STREAM + reamaining.encode()
