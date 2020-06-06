@@ -27,6 +27,13 @@ $con->close();
 }""" % get_connect_code(host, username, password, dbname, port)
 
 
+def print_db_info():
+    database = gget("db_dbname", "webshell")
+    print(f"\nCurrenct User:\n    {gget('db_current_user', 'webshell')}\n")
+    print(f"\nCurrenct Database:\n    {database if database else 'None'}\n")
+    print(f"\nMysql Version:\n    {gget('db_version', 'webshell')}\n")
+
+
 @alias(True, h="host", u="username", pwd="password", p="port")
 def run(host: str, username: str, password: str, dbname: str = "", port: int = 0):
     """
@@ -51,9 +58,8 @@ def run(host: str, username: str, password: str, dbname: str = "", port: int = 0
         if (info):
             info_list = info.split("\n")
             try:
-                print(f"\nCurrenct User:\n  {info_list[0]}\n")
-                print(f"\nMysql Version:\n  {info_list[1]}\n")
                 gset("db_current_user", info_list[0], True, "webshell")
                 gset("db_version", info_list[1], True, "webshell")
+                print_db_info()
             except IndexError:
                 print("\n" + color.red("Select data error") + "\n")

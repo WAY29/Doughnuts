@@ -1,9 +1,12 @@
-from libs.config import gget, gset, alias, color, set_namespace
-from prettytable import PrettyTable
-from libs.myapp import send, base64_encode
-from webshell_plugins.db_init import get_connect_code
-from libs.app import getline
+from re import match
 
+from prettytable import PrettyTable
+
+from libs.app import getline
+from libs.config import alias, color, gget, gset, set_namespace
+from libs.myapp import base64_encode, send
+from webshell_plugins.db_init import get_connect_code
+from webshell_plugins.db_use import get_php as check_database
 
 NEW_SQL_WORDLIST = {"common_wordlist": [
     "use",
@@ -83,9 +86,22 @@ def run():
                 print()
                 continue
             if (lower_command.startswith("use ") and len(lower_command) > 4):
-                database = lower_command.strip(";")[4:]
+                try:
+                    temp_database = match("use ([^;]*);?", lower_command).group(1)
+                    res = send(check_database(temp_database))
+                    if ("Connect error" in res.r_text):
+                        print("\n" + color.red(res.r_text.strip()) + "\n")
+                    else:
+                        database = temp_database
+                        print("\n" + color.green(f"Change current database: {database}") + "\n")
+                except (IndexError, AttributeError):
+                    print("\n" + color.red("SQL syntax error") + "\n")
             else:
-                print(execute_sql_command(command, database))
+                form = execute_sql_command(command, database)
+                if (form == ''):
+                    print("\n" + color.red("Connection Error / SQL syntax error") + "\n")
+                else:
+                    print(execute_sql_command(command, database))
     finally:
         gset("db_dbname", database, True, "webshell")
         gset("webshell.wordlist", wordlist, True)

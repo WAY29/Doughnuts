@@ -1,4 +1,5 @@
 from libs.config import alias, color, gget
+from webshell_plugins.db_init import print_db_info
 
 
 @alias()
@@ -11,5 +12,4 @@ def run():
     if (not gget("db_connected", "webshell")):
         print(color.red("Please run db_init command first"))
         return
-    print(f"\nCurrenct User:\n  {gget('db_current_user', 'webshell')}\n")
-    print(f"\nMysql Version:\n  {gget('db_version', 'webshell')}\n")
+    print_db_info()

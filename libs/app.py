@@ -233,14 +233,12 @@ def getline(other_delimiter: bytes = b""):
                 STDIN_STREAM = history_line
                 pointer = len(history_line)
             elif(ord(dch) == 4):  # ctrl+d
-                STDIN_STREAM = b''
                 print(color.cyan("quit\n"), end="")
                 cmd = 'quit'
                 break
             elif(ord(dch) == 3):  # ctrl+c
                 print(color.cyan('^C'))
                 stdout.flush()
-                STDIN_STREAM = b''
                 break
             stream_len = len(STDIN_STREAM)
             history_len = len(HISTORY)
@@ -255,7 +253,6 @@ def getline(other_delimiter: bytes = b""):
                 cmd = STDIN_STREAM.decode()
                 if (cmd and not FROM_HISTORY and (not history_len or (history_len and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
                     HISTORY.append(cmd.encode())
-                STDIN_STREAM = b''
                 gset("history_pointer", len(HISTORY), True)
                 break
             if (history_line):
@@ -263,7 +260,7 @@ def getline(other_delimiter: bytes = b""):
             if (not STDIN_STREAM):
                 continue
             temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
-            if (temp_history_lines):  # 若有历史命令，输出剩余的部分
+            if (temp_history_lines and temp_history_lines[0]):  # 若有历史命令，输出剩余的部分
                 history_line = min(temp_history_lines, key=len)
                 stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
             else:  # 若有补全单词，输出剩余的部分
@@ -278,7 +275,7 @@ def getline(other_delimiter: bytes = b""):
                     word = word.split(other_delimiter)[-1]
                 if (word):
                     temp_word_lines = [line for line in chain.from_iterable(wordlist.values()) if (line.startswith(word.decode()) and word != line)]
-                    if (temp_word_lines):
+                    if (temp_word_lines and temp_word_lines[0]):
                         min_word = min(temp_word_lines, key=len)
                         reamaining = min_word[len(word):]
                         stdout.write(reamaining + "\b" * (len(min_word) - len(word)))
@@ -287,11 +284,11 @@ def getline(other_delimiter: bytes = b""):
             stdout.flush()
     except Exception:
         print(color.red('Error'))
-        if 0:
+        if 1:
             exc_type, exc_value, exc_tb = exc_info()
             print_exception(exc_type, exc_value, exc_tb)
         cmd = ''
-        STDIN_STREAM = b''
+    STDIN_STREAM = b''
     return cmd
 
 
