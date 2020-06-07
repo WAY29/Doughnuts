@@ -216,11 +216,6 @@ def getline(other_delimiter: bytes = b""):
                 if (FROM_HISTORY):
                     FROM_HISTORY = False
                 pointer += 1
-                if (ch == b' '):
-                    word = STDIN_STREAM.split(b" ")[0].decode()
-                    args_wordlist = gget(word + ".arg_wordlist", namespace)
-                    if (args_wordlist):
-                        wordlist["arg_wordlist"] = args_wordlist
             elif(ch == b'\r' or ch == b'\n'):  # enter
                 end = True
             elif(ord(dch) == 8 and pointer > 0):  # \b
