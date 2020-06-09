@@ -279,7 +279,7 @@ def getline(other_delimiter: bytes = b""):
             stdout.flush()
     except Exception:
         print(color.red('Error'))
-        if 1:
+        if 0:
             exc_type, exc_value, exc_tb = exc_info()
             print_exception(exc_type, exc_value, exc_tb)
         cmd = ''

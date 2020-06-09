@@ -5,40 +5,11 @@ from libs.myapp import send
 def get_php(path):
     return """function getprems($file){
 $perms = fileperms($file);
-switch ($perms & 0xF000) {
-case 0xC000:
-    $info = 's';
-    break;
-case 0xA000:
-    $info = 'l';
-    break;
-case 0x8000:
-    $info = '-';
-    break;
-case 0x6000:
-    $info = 'b';
-    break;
-case 0x4000:
-    $info = 'd';
-    break;
-case 0x2000:
-    $info = 'c';
-    break;
-case 0x1000:
-    $info = 'p';
-    break;
-default:
-    $info = 'u';
+$info='upcudubu-ulusuuuuu'[($perms&0xF000)>>12];
+for($bit=8;$bit>=0;$bit--){
+  $info .= ($perms&0x01ff)>>$bit & 1 ? ( !($bit%%3) ? (((($perms >> 9) & 0x7) >> ($bit / 3)) & 1 ? 'tss'[$bit/3] :'x') :'wr'[($bit-1)%%3] ): ( !($bit%%3) ? (((($perms >> 9) & 0x7) >> ($bit / 3)) & 1 ? 'TSS'[$bit/3] : '-'):'-');
 }
-$info .= (($perms & 0x0100)?'r':'-');
-$info .= (($perms & 0x0080)?'w':'-');
-$info .= (($perms & 0x0040)?(($perms & 0x0800)?'s':'x'):(($perms & 0x0800)?'S':'-'));
-$info .= (($perms & 0x0020)?'r':'-');
-$info .= (($perms & 0x0010)?'w':'-');
-$info .= (($perms & 0x0008)?(($perms & 0x0400)?'s':'x'):(($perms & 0x0400)?'S':'-'));
-$info .= (($perms & 0x0004)?'r':'-');
-$info .= (($perms & 0x0002)?'w':'-');
-$info .= (($perms & 0x0001)?(($perms & 0x0200)?'t':'x'):(($perms & 0x0200)?'T':'-'));
+
 return $info;
 }
 function getfilesize($file){
