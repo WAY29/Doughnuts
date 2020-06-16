@@ -1,19 +1,21 @@
 import json
 from os import _exit
 from re import compile as re_compile
-from sys import exc_info, path, stdout
+from sys import exc_info, path
 from traceback import print_exception
-from itertools import chain
 
+from libs.readline import LovelyReadline
 from Myplugin import Platform
 
-from .config import gget, gset, order_alias, set_namespace, color
+from .config import gget, gset, order_alias, set_namespace
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
 STDIN_STREAM = b''
 HISTORY = None
 HISTORY_POINTER = 0
 FROM_HISTORY = False
+readline = LovelyReadline()
+readline.init({}, {})
 
 """
 api ['']
@@ -54,14 +56,14 @@ class Loop_init:
             pf = import_platform(v, api)
             gset(k + ".pf", pf)
             gset(k + ".wordlist", {"command_wordlist": list(pf.names())})
+            gset(k + ".prefix_wordlist", {command: gget(command + ".arg_wordlist", k)
+                                          for command in gget(k + ".wordlist")["command_wordlist"]})
         general_wordlist = gget("general.wordlist")["command_wordlist"]
-        for k in platforms.keys():
+        for k in platforms.keys():  # 往其他插件平台添加general平台的命令列表
             if (k == "general"):
                 continue
             wordlist = gget(k + ".wordlist")
             wordlist["command_wordlist"] += general_wordlist
-        gset("history_commands", [])
-        gset("history_pointer", 0)
         for k, v in self.set_prompts().items():
             gset(k + ".prompt", v)
 
@@ -112,181 +114,6 @@ def args_parse(args: list) -> dict:
     return arg_dict
 
 
-try:
-    # POSIX system: Create and return a getch that manipulates the tty
-    import termios
-    import sys, tty
-
-    def getch():
-        fd = sys.stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
-        try:
-            tty.setraw(fd)
-            ch = sys.stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-            return ch
-
-    #  Read arrow keys correctly
-    def getchar():
-        firstChar = getch()
-        if firstChar == '\x1b':
-            return {"[A": "up", "[B": "down", "[C": "right", "[D": "left"}[getch() + getch()]
-        else:
-            return firstChar.encode()
-
-except ImportError:
-    # Non-POSIX: Return msvcrt's (Windows') getch
-    from msvcrt import getch
-
-    # Read arrow keys correctly
-    def getchar():
-        firstChar = getch()
-        if firstChar == b'\xe0':
-            return {b"H": "up", b"P": "down", b"M": "right", b"K": "left"}[getch()]
-        else:
-            return firstChar
-
-
-def getline(other_delimiter: bytes = b""):
-    global STDIN_STREAM, HISTORY, HISTORY_POINTER, FROM_HISTORY
-    cmd = ''
-    namespace = gget('namespace')
-    wordlist = gget(namespace + ".wordlist")
-    wordlist["arg_wordlist"] = []
-    end = False
-    pointer = 0
-    history_line = b''
-    HISTORY = gget("history_commands")
-    HISTORY_POINTER = gget("history_pointer")
-    try:
-        while 1:
-            if (history_line):
-                old_stream_len = len(history_line)
-            else:
-                old_stream_len = len(STDIN_STREAM)
-            old_pointer = pointer
-            try:
-                ch = getchar()
-            except Exception:
-                print(f"\nGetline error\n")
-                cmd = ''
-                break
-            if (isinstance(ch, bytes)):
-                try:
-                    dch = ch.decode()
-                except UnicodeDecodeError:
-                    continue
-            if (isinstance(ch, str)):
-                read_history = False
-                if (ch == "up"):  # up
-                    if (HISTORY_POINTER >= 0):
-                        HISTORY_POINTER -= 1
-                        read_history = True
-                elif (ch == "down"):  # down
-                    if (HISTORY_POINTER <= len(HISTORY) - 1):
-                        HISTORY_POINTER += 1
-                        read_history = True
-                elif (ch == "left" and pointer > 0):  # left
-                    pointer -= 1
-                elif (ch == "right"):  # right
-                    if (pointer < len(STDIN_STREAM)):
-                        pointer += 1
-                    elif (history_line):
-                        STDIN_STREAM = history_line
-                        pointer = len(history_line)
-                if ((ch == "up" or ch == "down")):
-                    history_len = len(HISTORY)
-                    if (read_history):
-                        if (HISTORY_POINTER > -1 and HISTORY_POINTER < history_len):
-                            STDIN_STREAM = HISTORY[HISTORY_POINTER]
-                            pointer = len(STDIN_STREAM)
-                            FROM_HISTORY = True
-                        elif (HISTORY_POINTER == -1):
-                            STDIN_STREAM = b''
-                            pointer = 0
-                        elif (HISTORY_POINTER == history_len):
-                            STDIN_STREAM = b''
-                            pointer = 0
-            elif (32 <= ord(dch) <= 127):
-                if (pointer == len(STDIN_STREAM)):
-                    STDIN_STREAM += ch
-                else:
-                    STDIN_STREAM = STDIN_STREAM[:pointer] + ch + STDIN_STREAM[pointer:]
-                if (FROM_HISTORY):
-                    FROM_HISTORY = False
-                pointer += 1
-            elif(ch == b'\r' or ch == b'\n'):  # enter
-                end = True
-            elif(ord(dch) == 8 and pointer > 0):  # \b
-                if (pointer == len(STDIN_STREAM)):
-                    STDIN_STREAM = STDIN_STREAM[:-1]
-                else:
-                    STDIN_STREAM = STDIN_STREAM[:pointer] + STDIN_STREAM[pointer+1:]
-                pointer -= 1
-            elif(ch == b'\t' and history_line):  # \t
-                STDIN_STREAM = history_line
-                pointer = len(history_line)
-            elif(ord(dch) == 4):  # ctrl+d
-                print(color.cyan("quit\n"), end="")
-                cmd = 'quit'
-                break
-            elif(ord(dch) == 3):  # ctrl+c
-                print(color.cyan('^C'))
-                stdout.flush()
-                break
-            stream_len = len(STDIN_STREAM)
-            history_len = len(HISTORY)
-            history_line_len = len(history_line)
-            stdout.write("\b" * old_pointer + " " * old_stream_len + "\b" * old_stream_len)  # 清空原本输出
-            print(color.cyan(STDIN_STREAM.decode()), end="")
-            if (end):  # 结束输入
-                if (history_line):  # 如果存在历史命令，清除
-                    stdout.write(" " * (history_line_len - stream_len))
-                stdout.write('\n')
-                stdout.flush()
-                cmd = STDIN_STREAM.decode()
-                if (cmd and not FROM_HISTORY and (not history_len or (history_len and HISTORY[-1] != cmd.encode()))):  # 加入历史命令
-                    HISTORY.append(cmd.encode())
-                gset("history_pointer", len(HISTORY), True)
-                break
-            if (history_line):
-                history_line = b''
-            if (not STDIN_STREAM):
-                continue
-            temp_history_lines = [line for line in reversed(HISTORY) if (line.startswith(STDIN_STREAM) and STDIN_STREAM != line)]
-            if (temp_history_lines and temp_history_lines[0]):  # 若有历史命令，输出剩余的部分
-                history_line = min(temp_history_lines, key=len)
-                stdout.write(history_line[stream_len:].decode() + "\b" * (len(history_line) - stream_len))
-            else:  # 若有补全单词，输出剩余的部分
-                stream_list = STDIN_STREAM.split(b" ")
-                command = stream_list[0].decode()
-                if (len(stream_list) > 1):  # 临时修改参数列表
-                    arg_wordlist = gget(command + ".arg_wordlist", namespace, [])
-                    if (wordlist["arg_wordlist"] != arg_wordlist):
-                        wordlist["arg_wordlist"] = arg_wordlist
-                word = stream_list[-1]
-                if (other_delimiter):
-                    word = word.split(other_delimiter)[-1]
-                if (word):
-                    temp_word_lines = [line for line in chain.from_iterable(wordlist.values()) if (line.startswith(word.decode()) and word != line)]
-                    if (temp_word_lines and temp_word_lines[0]):
-                        min_word = min(temp_word_lines, key=len)
-                        reamaining = min_word[len(word):]
-                        stdout.write(reamaining + "\b" * (len(min_word) - len(word)))
-                        history_line = STDIN_STREAM + reamaining.encode()
-            stdout.write("\b" * (stream_len - pointer))
-            stdout.flush()
-    except Exception:
-        print(color.red('Error'))
-        if 0:
-            exc_type, exc_value, exc_tb = exc_info()
-            print_exception(exc_type, exc_value, exc_tb)
-        cmd = ''
-    STDIN_STREAM = b''
-    return cmd
-
-
 def sys_exit():
     print('\n' + gget("leave_message"))
     _exit(0)
@@ -298,13 +125,19 @@ def loop_main():
     """
     gpf = gget("general.pf")
     api = gget("api")
+    old_namespace = ''
     while gget("loop"):
         namespace = gget("namespace")
         tpf = None
         npf = gget(f"{namespace}.pf")
+        if (namespace != old_namespace):
+            wordlist = gget(namespace + ".wordlist")
+            prefix_wordlist = gget(namespace + ".prefix_wordlist")
+            readline.set_wordlist(wordlist)
+            readline.set_prefix_wordlist(prefix_wordlist)
         # --------------------------------------
         print(gget(f"{namespace}.prompt"), end="")
-        cmd = getline()
+        cmd = readline()
         if (not cmd):
             continue
         args = cmd.split(" ")  # 切割
@@ -326,7 +159,8 @@ def loop_main():
                 arg_dict = args_parse(args)  # 解析参数
                 tpf[order].run(**arg_dict)
             except TypeError as e:
-                print("[TypeError] %s" % str(e).replace("%s()" % api, "%s()" % order))
+                print("[TypeError] %s" % str(e).replace(
+                    "%s()" % api, "%s()" % order))
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
                 if 0:
