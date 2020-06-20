@@ -1,5 +1,6 @@
-from libs.config import alias, color, gget
+from libs.config import alias, color
 from libs.myapp import send
+from libs.app import readline
 
 
 def get_php(path):
@@ -51,7 +52,6 @@ def run(path: str = "."):
     info_list = res.r_text.strip().split('\n')
     print('\n'.join(info_list[:3]))
     ls_wordlist = []
-    wordlist = gget(f"{gget('namespace')}.wordlist")
     for line in info_list[3:]:
         info = line.split(" ")
         if (len(info) < 7):
@@ -64,4 +64,4 @@ def run(path: str = "."):
             info[-1] = color.green(name)
         print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
         ls_wordlist.append(info[6])
-    wordlist["ls_wordlist"] = ls_wordlist
+    readline.add_wordlist("ls_wordlist", ls_wordlist)

@@ -1,6 +1,6 @@
-from libs.config import gget, gset, alias, color, set_namespace
+from libs.config import gget, alias, color, set_namespace
 from libs.myapp import send, base64_encode
-from libs.app import getline
+from libs.app import readline
 
 NEW_WORDLIST = {"common_wordlist": [
     "trim",
@@ -46,11 +46,11 @@ def run():
     pwd = send(f'print(getcwd());').r_text.strip()
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
-    gset("webshell.wordlist", NEW_WORDLIST, True)
+    readline.set_wordlist(NEW_WORDLIST)
     try:
         while gget("loop"):
             print(f"webshell:{pwd} >> ", end="")
-            data = getline(b"(")
+            data = readline(b"(")
             lower_data = data.lower()
             if (lower_data.lower() in ['exit', 'quit', 'back']):
                 print()
@@ -72,4 +72,4 @@ def run():
                     return
                 print("\n" + res.r_text.strip() + "\n")
     finally:
-        gset("webshell.wordlist", wordlist, True)
+        readline.set_wordlist(wordlist)

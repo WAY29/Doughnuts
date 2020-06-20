@@ -1,6 +1,6 @@
-from libs.config import gget, gset, alias, color, set_namespace
+from libs.config import gget, alias, color, set_namespace
 from libs.myapp import send, base64_encode, is_windows, get_system_code
-from libs.app import getline
+from libs.app import readline
 
 NEW_WINDOWS_WORDLIST = {"common_wordlist": [
     "echo",
@@ -81,7 +81,7 @@ def run():
     prompt, pwd = res.split("|")
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
-    gset("webshell.wordlist", NEW_WINDOWS_WORDLIST if (is_windows()) else NEW_UNIX_WORDLIST, True)
+    readline.set_wordlist(NEW_WINDOWS_WORDLIST if (is_windows()) else NEW_UNIX_WORDLIST)
     if is_windows():
         prompt = "%s> "
     else:
@@ -89,7 +89,7 @@ def run():
     try:
         while gget("loop"):
             print(prompt % pwd, end="")
-            data = getline()
+            data = readline()
             lower_data = data.lower()
             if (lower_data.lower() in ['exit', 'quit', 'back']):
                 print()
@@ -110,4 +110,4 @@ def run():
                     return
                 print("\n" + res.r_text.strip() + "\n")
     finally:
-        gset("webshell.wordlist", wordlist, True)
+        readline.set_wordlist(wordlist)

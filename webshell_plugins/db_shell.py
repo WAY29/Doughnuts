@@ -2,7 +2,7 @@ from re import match
 
 from prettytable import PrettyTable
 
-from libs.app import getline
+from libs.app import readline
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.myapp import base64_encode, send
 from webshell_plugins.db_init import get_connect_code
@@ -73,11 +73,11 @@ def run():
     prompt = "mysql (%s) > "
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
-    gset("webshell.wordlist", NEW_SQL_WORDLIST, True)
+    readline.set_wordlist(NEW_SQL_WORDLIST)
     try:
         while gget("loop"):
             print(prompt % color.cyan(database), end="")
-            command = getline()
+            command = readline()
             lower_command = command.lower()
             if (lower_command.lower() in ['exit', 'quit', 'back']):
                 print()
@@ -104,4 +104,4 @@ def run():
                     print(execute_sql_command(command, database))
     finally:
         gset("db_dbname", database, True, "webshell")
-        gset("webshell.wordlist", wordlist, True)
+        readline.set_wordlist(wordlist)
