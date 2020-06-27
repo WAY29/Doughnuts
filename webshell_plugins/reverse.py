@@ -177,6 +177,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
                     "The target host does not exist or cannot be found in the python environment."
                 )
             )
+            return
     else:
         print(color.red("Reverse type Error."))
         return
