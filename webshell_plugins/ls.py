@@ -34,6 +34,7 @@ $files=glob("%s/*");
 echo "Listing: ".realpath("%s")."\\n";
 echo "==============================\\n";
 echo "MODE        UID   GID     Size  MTIME         NAME\\n";
+echo getinfo(".")."\\n";
 foreach($files as $file) {echo getinfo($file)."\\n";}""" % (path, path)
 
 

@@ -143,6 +143,7 @@ class LovelyReadline:
         cmd = ''
         wordlist = self._wordlist
         wordlist["prefix_wordlist"] = []
+        chain_wordlist = set(chain.from_iterable(wordlist.values()))
         end = False
         completion = False
         if (self.CONTINUE_POINTER is not None):
@@ -289,8 +290,7 @@ class LovelyReadline:
                     word = word.split(other_delimiter)[-1]
                 if (word):
                     word_len = len(word)
-                    temp_word_lines = [line[word_len:].encode() for line in chain.from_iterable(
-                        wordlist.values()) if (line.startswith(word.decode()) and word != line)]
+                    temp_word_lines = [line[word_len:].encode() for line in chain_wordlist if (line.startswith(word.decode()))]
                     if (temp_word_lines and temp_word_lines[0]):
                         temp_remaining = min(temp_word_lines, key=len)
                         temp_history_line = self.STDIN_STREAM + temp_remaining

@@ -16,7 +16,7 @@ def run(web_file_path: str):
     eg: write {web_file_path}
     """
     file_name = path.split(web_file_path)[1]
-    file_path = gget("webshell.download_path", "webshell")
+    file_path = gget("webshell.download_path", "webshell").replace(":", "_")
     if not path.exists(file_path):
         makedirs(file_path)
     real_file_path = path.join(file_path, file_name)
