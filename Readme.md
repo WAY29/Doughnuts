@@ -76,6 +76,10 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ## 更新日志
 
+### V2.7
+- 修改核心逻辑
+
+
 ### V2.6
 - 修复bug
 - 修改命令

