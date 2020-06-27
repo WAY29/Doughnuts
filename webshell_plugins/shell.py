@@ -80,7 +80,7 @@ def run(command: str = ""):
         res = send(get_system_code(command))
         if (not res):
             return
-        print(color.green("\nResult:\n      ") + res.r_text.strip() + "\n")
+        print(color.green("\nResult:\n") + res.r_text.strip() + "\n")
         return
     print(color.cyan("Eenter interactive temporary shell...\n\nUse 'back' command to return doughnuts.\n"))
     res = send(f'print(shell_exec("whoami")."@".$_SERVER["SERVER_NAME"]."|".getcwd());').r_text.strip()

@@ -28,5 +28,5 @@ def run():
         if (not res):
             return
         text = res.r_text.strip()
-        print(color.green("\nResult:\n      ") + text + "\n")
+        print(color.green("\nResult:\n") + text + "\n")
     remove(real_file_path)
