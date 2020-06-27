@@ -76,6 +76,16 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ## 更新日志
 
+### V2.6
+- 修复bug
+- 修改命令
+    - shell 可以非交互运行一句系统命令
+    - webshell 可以非交互运行一句webshell代码
+- 添加命令
+    - execute 调用notepad/vi运行一段自定义的php代码
+    - getenv 获取php环境变量
+
+
 ### V2.5
 - 新增依赖 prettytable
 - 添加一系列数据库管理命令
