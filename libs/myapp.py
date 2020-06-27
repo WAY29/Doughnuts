@@ -96,7 +96,7 @@ $cwd=getcwd();
 $ndir="./%s";
 if($dir === false){
 $r=mkdir($ndir);
-if($r === true){$dir=$ndir;}
+if($r === true){$dir=$ndir;}}
 chdir($dir);
 ini_set("open_basedir","..");
 $c=substr_count(getcwd(), "/");
