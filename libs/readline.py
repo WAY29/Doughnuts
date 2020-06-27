@@ -143,7 +143,6 @@ class LovelyReadline:
         cmd = ''
         wordlist = self._wordlist
         wordlist["prefix_wordlist"] = []
-        chain_wordlist = set(chain.from_iterable(wordlist.values()))
         end = False
         completion = False
         if (self.CONTINUE_POINTER is not None):
@@ -282,7 +281,7 @@ class LovelyReadline:
                 command = self.STDIN_STREAM.strip().decode()
                 if (command in self._prefix_wordlist):
                     prefix_wordlist = self._prefix_wordlist.get(command, [])
-                    if (wordlist["prefix_wordlist"] != prefix_wordlist):
+                    if (prefix_wordlist and wordlist["prefix_wordlist"] != prefix_wordlist):
                         wordlist["prefix_wordlist"] = prefix_wordlist
                 # 若有补全单词，输出剩余的部分
                 word = stream_list[-1]
@@ -290,7 +289,7 @@ class LovelyReadline:
                     word = word.split(other_delimiter)[-1]
                 if (word):
                     word_len = len(word)
-                    temp_word_lines = [line[word_len:].encode() for line in chain_wordlist if (line.startswith(word.decode()))]
+                    temp_word_lines = [line[word_len:].encode() for line in set(chain.from_iterable(wordlist.values())) if (line.startswith(word.decode()))]
                     if (temp_word_lines and temp_word_lines[0]):
                         temp_remaining = min(temp_word_lines, key=len)
                         temp_history_line = self.STDIN_STREAM + temp_remaining
@@ -314,7 +313,7 @@ class LovelyReadline:
                 stdout.flush()
         except Exception:
             print_red('Error')
-            if 0:
+            if 1:
                 exc_type, exc_value, exc_tb = exc_info()
                 print_exception(exc_type, exc_value, exc_tb)
             cmd = ''
@@ -324,21 +323,4 @@ class LovelyReadline:
 
 
 if (__name__ == "__main__"):
-    test_wordlist = {"command_wordlist": ["apt", "make"]}
-    test_prefix_wordlist = {"apt": ["install"],
-                            "make": ["build"],
-                            "apt install": ["foo.txt"],
-                            "make build": ["bar.txt"]}
-    readline = LovelyReadline()
-    readline.init(test_wordlist, test_prefix_wordlist, exit_command="quit")
-
-    while True:
-        stdout.write(":>")
-        stdout.flush()
-        cmd = readline()
-        if (cmd == ""):
-            continue
-        elif (cmd == "quit"):
-            break
-        else:
-            print("cmd:", cmd)
+    pass

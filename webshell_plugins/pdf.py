@@ -1,7 +1,8 @@
-from libs.config import color
+from libs.config import color, alias
 from libs.myapp import gget
 
 
+@alias()
 def run():
     """
     pdf

@@ -35,13 +35,19 @@ NEW_WORDLIST = {"common_wordlist": [
 ]}
 
 
-@alias(func_alias="ws")
-def run():
+@alias(True, func_alias="ws")
+def run(command: str = ""):
     """
     webshell
 
-    Get a webshell of target system.
+    Get a webshell of target system or just run a webshell command.
     """
+    if (len(command)):
+        res = send((command))
+        if (not res):
+            return
+        print(color.green("\nResult:\n      ") + res.r_text.strip() + "\n")
+        return
     print(color.cyan("Eenter interactive temporary webshell...\n\nUse 'back' command to return doughnuts.\n"))
     pwd = send(f'print(getcwd());').r_text.strip()
     set_namespace("webshell", False, True)

