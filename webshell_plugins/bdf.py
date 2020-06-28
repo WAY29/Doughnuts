@@ -28,7 +28,7 @@ def run(mode: int = 0):
     """
     if (mode in mode_to_desc_dict):
         print(
-            f"\nbypass disable_functions: {mode_to_desc_dict}\n")
+            f"\nbypass disable_functions: {mode_to_desc_dict[mode]}\n")
         gset("webshell.bypass_df", mode, True, "webshell")
     else:
         print(color.red("Mode error."))
