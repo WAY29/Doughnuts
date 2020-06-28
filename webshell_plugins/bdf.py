@@ -80,7 +80,7 @@ def run(mode: int = 0):
             if (not res):
                 return
             text = res.r_text.strip()
-            if ("success" not in text):
+            if ("exist" not in text):
                 print(color.red("\nNo FFI extension!\n"))
                 return
         print(
