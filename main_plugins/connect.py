@@ -24,10 +24,10 @@ webshell.from_log ['webshell'] Whether connect from log
 
 
 def get_detectd_exec_php():
-    return """$a=array('system', 'exec', 'shell_exec', 'passthru', 'proc_open', 'popen', 'pcntl_exec');
+    return """$a=array('system', 'exec', 'shell_exec', 'passthru', 'proc_open', 'popen');
 $disabled = explode(',', ini_get('disable_functions'));
 foreach ($a as $v){
-    if (is_callable($v) && !in_array($v, $disabled)){
+    if (function_exists($v) && !in_array($v, $disabled)){
         echo $v;
         break;
     }
