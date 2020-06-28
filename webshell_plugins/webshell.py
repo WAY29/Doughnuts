@@ -42,7 +42,7 @@ def run(*commands):
 
     Get a webshell of target system or just run a webshell command.
     """
-    command = gget("raw_command")
+    command = gget("raw_command_args")
     if (command):
         res = send((command))
         if (not res):

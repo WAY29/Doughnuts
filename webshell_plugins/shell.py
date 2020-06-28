@@ -76,7 +76,7 @@ def run(*commands):
 
     Get a temporary shell of target system by system function or just run a shell command.
     """
-    command = gget("raw_command")
+    command = gget("raw_command_args")
     if (command):
         res = send(get_system_code(command))
         if (not res):

@@ -138,6 +138,7 @@ def loop_main():
         # --------------------------------------
         print(gget(f"{namespace}.prompt"), end="")
         cmd = readline()
+        gset("raw_command", cmd, True)
         if (not cmd):
             continue
         args = cmd.split(" ")  # 切割
@@ -146,7 +147,7 @@ def loop_main():
         else:
             order = cmd
         del args[0]
-        gset("raw_command", " ".join(args), True)
+        gset("raw_command_args", " ".join(args), True)
         order = order_alias(order)  # 解析别名
         # --------------------------------------
         if order in npf:  # 命令存在

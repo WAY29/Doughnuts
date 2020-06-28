@@ -76,6 +76,10 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ## 更新日志
 
+### V2.8
+- 系统执行函数遗漏了pcntl_exec,已补上
+
+
 ### V2.7
 - 一些细微的调整
 - 修改核心逻辑

