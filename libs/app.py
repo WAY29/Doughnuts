@@ -146,6 +146,7 @@ def loop_main():
         else:
             order = cmd
         del args[0]
+        gset("raw_command", " ".join(args), True)
         order = order_alias(order)  # 解析别名
         # --------------------------------------
         if order in npf:  # 命令存在

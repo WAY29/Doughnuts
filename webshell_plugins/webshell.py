@@ -42,8 +42,8 @@ def run(*commands):
 
     Get a webshell of target system or just run a webshell command.
     """
-    if (len(commands)):
-        command = " ".join((str(c) for c in commands))
+    command = gget("raw_command")
+    if (command):
         res = send((command))
         if (not res):
             return

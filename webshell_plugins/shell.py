@@ -69,15 +69,16 @@ NEW_UNIX_WORDLIST = {"common_wordlist": [
 ]}
 
 
-@alias(True, func_alias="s", c="command")
+@alias(True, func_alias="s")
 def run(*commands):
     """
     shell
 
     Get a temporary shell of target system by system function or just run a shell command.
     """
-    if (len(commands)):
-        command = " ".join((str(c) for c in commands))
+    command = gget("raw_command")
+    print("Test", command)
+    if (command):
         res = send(get_system_code(command))
         if (not res):
             return
