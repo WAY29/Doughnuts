@@ -432,7 +432,7 @@ $o=hex2bin($d);
     elif (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
-        return """print("No system execute function!\\n")"""
+        return """print("No system execute function!\\n");"""
 
 
 def is_windows(remote: bool = True):
