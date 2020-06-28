@@ -77,7 +77,11 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ## 更新日志
 
 ### V2.7
+- 一些细微的调整
 - 修改核心逻辑
+- 添加命令
+    - bdf 尝试绕过disable_functions.目前只支持php7-backtrace这个模式
+    - bobd 尝试利用ini_set与chdir绕过open_basedir.
 
 
 ### V2.6

