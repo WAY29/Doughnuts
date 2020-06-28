@@ -51,9 +51,9 @@ def run(mode: int = 0):
     if (mode in mode_to_desc_dict and (mode not in mode_linux_dict or not is_windows())):
         if (mode == 2 and not gget("webshell.ld_preload_path", "webshell", False)):
             disable_func_list = gget("webshell.disable_functions", "webshell")
-            filename = "/tmp/%s" % str(uuid4())
+            filename = "/tmp/%s.so" % str(uuid4())
             upload_result = upload(
-                path.join(getcwd(), "lauxiliary", "ld_preload_x86_64.so"), filename, True)
+                path.join(getcwd(), "auxiliary", "ld_preload_x86_64.so"), filename, True)
             if (not upload_result):
                 return
             if ("putenv" in disable_func_list):

