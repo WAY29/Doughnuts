@@ -77,7 +77,12 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ## 更新日志
 
 ### V2.8
-- 系统执行函数遗漏了pcntl_exec,已补上
+- 修复一堆bug
+- 新增bdf命令模式
+    - mode2 LD_PRELOAD
+        - 利用ld_preload绕过disable_functions,需要上传编译好的.so文件,若自带的.so文件不起效,请在auxiliary找到ld_preload.c自行在于目标近似的环境下编译并覆盖原文件
+    - mode3 FFI
+        - 利用FFI扩展绕过disable_functions,需要PHP7.4及以上
 
 
 ### V2.7
