@@ -67,6 +67,7 @@ def change_prompt():
         print("\n[OTHER]\n")
         print(color.yellow("[ag|agent]     ") + color.cyan("Intranet agent"))
         print(color.yellow("[bobd]         ") + color.cyan("(Only for *unix) Try to bypass open_basedir by ini_set and chdir"))
+        print(color.yellow("[bdf]          ") + color.cyan("(Only for php7.0-7.4) Try to bypass disable_functions by php7-backtrace"))
         print(color.yellow("[env|getenv]   ") + color.cyan("print PHP environment variables by ini_get"))
         print(color.yellow("[t|touch]      ") + color.cyan("(Only for *unix) Specify a file whose modification time stamp is the same as a random file in the current directory"))
         print(color.yellow("[ps|portscan]  ") + color.cyan("Scan intranet ports"))
