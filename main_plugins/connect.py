@@ -71,6 +71,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
         namespace="webshell",
     )
     gset("webshell.pwd", ".", namespace="webshell")
+    gset("webshell.bypass_df", -1, namespace="webshell")
     res = send('print("c4ca4238a0b923820d|".phpversion()."|cc509a6f75849b");', raw=True)
     if (not res or "c4ca4238a0b923820d" not in res.r_text):
         print(color.red("Connect failed..."))

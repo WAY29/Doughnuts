@@ -97,6 +97,20 @@ connect http://localhost/test.php POST 2333 rot13 base64
 
 ## 更新日志
 
+
+### V3.0
+- 重新修改了bdf的顺序,添加了新模式
+    - -1:close
+    - auto: 自动识别
+    - 0(默认):查看bdf当前状态
+    - 1:php7-backtrace
+    - 2:php7-gc
+    - 3:php7-json
+    - 4:LD_PRELOAD
+    - 5:FFI
+    - 6:COM
+
+
 ### V2.9
 - 修改了bdf模式顺序,原模式2-3顺移为3-4,新增bdf命令模式
     - mode2 php7-json

