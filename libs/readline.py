@@ -171,7 +171,7 @@ class LovelyReadline:
                     try:
                         dch = ch.decode()
                     except UnicodeDecodeError:
-                        dch = "\x00"
+                        continue
                 if (ch == "Del"):
                     ch = b"\b"
                     dch = "\b"
@@ -220,7 +220,7 @@ class LovelyReadline:
                     pointer += 1
                 elif(ch == b'\r' or ch == b'\n'):  # enter
                     end = True
-                elif((ch == b'\b' or ord(dch) == 127) and pointer > 0):  # \b
+                elif((ch == b'\b' or (dch and ord(dch) == 127)) and pointer > 0):  # \b
                     if (pointer == len(self.STDIN_STREAM)):
                         self.STDIN_STREAM = self.STDIN_STREAM[:-1]
                     else:
