@@ -4,6 +4,7 @@ from re import compile as re_compile
 from sys import exc_info, path
 from traceback import print_exception
 
+from libs.debug import DEBUG_LOOP
 from libs.readline import LovelyReadline
 from Myplugin import Platform
 
@@ -164,11 +165,14 @@ def loop_main():
                 arg_dict = args_parse(args)  # 解析参数
                 tpf[order].run(**arg_dict)
             except TypeError as e:
+                exc_type, exc_value, exc_tb = exc_info()
                 print("[TypeError] %s" % str(e).replace(
                     "%s()" % api, "%s()" % order))
+                if DEBUG_LOOP:
+                    print_exception(exc_type, exc_value, exc_tb)
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
-                if 0:
+                if DEBUG_LOOP:
                     print_exception(exc_type, exc_value, exc_tb)
                 print("[%s] %s" % (exc_type.__name__, e))
 

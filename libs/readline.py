@@ -209,7 +209,7 @@ class LovelyReadline:
                             elif (self.HISTORY_POINTER == history_len):
                                 self.STDIN_STREAM = b''
                                 pointer = 0
-                elif (dch and 32 <= ord(dch) <= 127):
+                elif (dch and 32 <= ord(dch) < 127):
                     if (pointer == len(self.STDIN_STREAM)):
                         self.STDIN_STREAM += ch
                     else:
@@ -220,7 +220,7 @@ class LovelyReadline:
                     pointer += 1
                 elif(ch == b'\r' or ch == b'\n'):  # enter
                     end = True
-                elif(ch == b'\b' and pointer > 0):  # \b
+                elif((ch == b'\b' or ord(dch) == 127) and pointer > 0):  # \b
                     if (pointer == len(self.STDIN_STREAM)):
                         self.STDIN_STREAM = self.STDIN_STREAM[:-1]
                     else:

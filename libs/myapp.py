@@ -8,6 +8,7 @@ from uuid import uuid4
 import requests
 from urllib3 import disable_warnings
 
+from libs.debug import DEBUG_SEND
 from libs.config import color, gset, gget
 
 level = []
@@ -141,7 +142,7 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         req.r_json = json.loads(req.r_text)
     except json.JSONDecodeError:
         req.r_json = ''
-    if 0:  # DEBUG
+    if DEBUG_SEND:  # DEBUG
         print(f"[debug_dict] {params_dict}")
         print(f"[debug-extra_parms] {extra_params}")
         print(f"[debug_url] {url}")
