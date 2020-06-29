@@ -78,11 +78,12 @@ def import_platform(platform_name: str, api: str):
     return Platform(platform_name, api)
 
 
-def value_translation(arg):
-    def is_numberic(string):
-        global NUMBER_PATTERN
-        return True if (NUMBER_PATTERN.match(string)) else False
+def is_numberic(string):
+    global NUMBER_PATTERN
+    return True if (NUMBER_PATTERN.match(string)) else False
 
+
+def value_translation(arg):
     if is_numberic(arg):
         arg = float(arg) if "." in arg else int(arg)
     else:
@@ -100,6 +101,8 @@ def args_parse(args: list) -> dict:
         if each.startswith("-"):
             if len(each) > 2 and each[1] == "-":
                 arg_name = each[2:]
+            elif (is_numberic(each)):
+                arg_dict[""].append(value_translation(each))
             else:
                 arg_name = each[1:]
         else:

@@ -146,12 +146,12 @@ def run(mode: str = '0'):
             if (set_mode(test_mode, True)):
                 res = send(get_system_code("whoami", mode=test_mode))
                 if (res and len(res.r_text)):
-                    print(color.green("\nSuccess\n"))
+                    print(color.green("\n    Success\n"))
                     print(f"Set bypass disable_functions: {test_mode} {mode_to_desc_dict[test_mode]}\n")
                     gset("webshell.bypass_df", test_mode, True, "webshell")
                     break
                 else:
-                    print(color.red("\nFailed!\n"))
+                    print(color.red("\n    Failed!\n"))
                     continue
     else:
         try:
