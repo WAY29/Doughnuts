@@ -61,7 +61,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     webshell_netloc = urlparse(url).netloc
     gset("url", url, namespace="webshell")
     gset("webshell.params_dict", params_dict, namespace="webshell")
-    gset("webshell.password", pwd, namespace="webshell")
+    gset("webshell.password", str(pwd), namespace="webshell")
     gset("webshell.method", raw_key, namespace="webshell")
     gset("webshell.encode_functions", encode_functions, namespace="webshell")
     gset("webshell.netloc", webshell_netloc, namespace="webshell")
