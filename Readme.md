@@ -19,7 +19,9 @@
 - 支持编码payload(已内置base64,str_rot13,hex三种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
 - 支持绕过open_basedir
 - 支持多种方式绕过disable_functions
+    - 自动识别
     - php7-backtrace
+    - php7-gc
     - php7-json
     - LD_PRELOAD
     - FFI
