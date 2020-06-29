@@ -77,12 +77,6 @@ connect http://localhost/test.php GET 2333 rot13 base64
 
 ## 更新日志
 
-### V2.9
-- 新增bdf命令模式
-    - mode4 COM
-        - 利用windows组件绕过disable_functions
-
-
 ### V2.8
 - 修复一堆bug
 - 新增bdf命令模式
