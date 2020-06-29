@@ -1,4 +1,5 @@
 import json
+import shlex
 from os import _exit
 from re import compile as re_compile
 from sys import exc_info, path
@@ -141,17 +142,18 @@ def loop_main():
             readline.set_prefix_wordlist(prefix_wordlist)
         # --------------------------------------
         print(gget(f"{namespace}.prompt"), end="")
-        cmd = readline()
+        cmd = readline().strip()
         gset("raw_command", cmd, True)
         if (not cmd):
             continue
-        args = cmd.split(" ")  # 切割
+        args = shlex.split(cmd)  # 切割
         if " " in cmd:  # 输入的命令
             order = args[0]
         else:
             order = cmd
         del args[0]
-        gset("raw_command_args", " ".join(args), True)
+        raw_command_args = " ".join(args)
+        gset("raw_command_args", raw_command_args, True)
         order = order_alias(order)  # 解析别名
         # --------------------------------------
         if order in npf:  # 命令存在

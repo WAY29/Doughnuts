@@ -111,6 +111,7 @@ connect http://localhost/test.php POST 2333 rot13 base64
     - 4:LD_PRELOAD
     - 5:FFI
     - 6:COM
+- 修改命令参数解析,使用shlex库进行解析
 
 
 ### V2.9
