@@ -4,8 +4,12 @@ from uuid import uuid4
 from libs.myapp import is_windows, send
 from webshell_plugins.upload import run as upload
 
-mode_to_desc_dict = {0: color.red("closed"), 2: color.green(
-    "php7-backtrace"), 3: color.green("LD_PRELOAD"), 4: color.green("FFI"), 5: color.green("COM")}
+mode_to_desc_dict = {0: color.red("closed"), 
+                     1: color.green("php7-backtrace"),
+                     2: color.green("php7-json"),
+                     3: color.green("LD_PRELOAD"),
+                     4: color.green("FFI"),
+                     5: color.green("COM")}
 mode_linux_dict = (3, 4)
 
 
