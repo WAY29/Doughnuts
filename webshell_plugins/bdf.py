@@ -68,7 +68,7 @@ def set_mode(mode: int, test: bool = False):
             print(color.red("\nNo com_dotnet extension!\n"))
             return False
     if (not test):
-        print(f"\nSet bypass disable_functions: {mode} {mode_to_desc_dict[mode]}\n")
+        print(f"\nSet bypass disable_functions: {mode}-{mode_to_desc_dict[mode]}\n")
         gset("webshell.bypass_df", mode, True, "webshell")
     return True
 
@@ -144,10 +144,10 @@ def run(mode: str = '0'):
         for test_mode in test_list:
             print(f"Try Mode {test_mode} {mode_to_desc_dict[test_mode]}:")
             if (set_mode(test_mode, True)):
-                res = send(get_system_code("whoami", mode=test_mode))
-                if (res and len(res.r_text)):
+                res = send(get_system_code("echo 6ac2ed344113c07c0028327388553273", mode=test_mode))
+                if (res and "6ac2ed344113c07c0028327388553273" in res.r_text):
                     print(color.green("\n    Success\n"))
-                    print(f"Set bypass disable_functions: {test_mode} {mode_to_desc_dict[test_mode]}\n")
+                    print(f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
                     gset("webshell.bypass_df", test_mode, True, "webshell")
                     break
                 else:
