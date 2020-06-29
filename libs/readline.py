@@ -245,7 +245,6 @@ class LovelyReadline:
                     elif (isinstance(history_line, list)):
                         cmd = ''
                         self.CONTINUE_POINTER = pointer
-                        
                         word = self.STDIN_STREAM.split(b" ")[-1]
                         if (other_delimiter):
                             word = word.split(other_delimiter)[-1]
@@ -280,7 +279,7 @@ class LovelyReadline:
                 if (temp_history_lines and temp_history_lines[0]):
                     remaining = min(temp_history_lines, key=len)
                 stream_list = self.STDIN_STREAM.split(b" ")
-                command = self.STDIN_STREAM.strip().decode()
+                command = b" ".join(stream_list[:-1]).decode()
                 if (command in self._prefix_wordlist):
                     prefix_wordlist = self._prefix_wordlist.get(command, [])
                     if (prefix_wordlist and wordlist["prefix_wordlist"] != prefix_wordlist):
