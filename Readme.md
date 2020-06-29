@@ -78,9 +78,12 @@ connect http://localhost/test.php GET 2333 rot13 base64
 ## 更新日志
 
 ### V2.9
-- 新增bdf命令模式
-    - mode4 COM
+- 修改了bdf模式顺序,原模式2~3顺移为3~4,新增bdf命令模式
+    - mode2 php7-json
+        - 利用php-json反序列化绕过disable_functions
+    - mode5 COM
         - 利用windows组件绕过disable_functions
+
 
 
 ### V2.8
