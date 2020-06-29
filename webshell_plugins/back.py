@@ -1,4 +1,4 @@
-from libs.config import alias, gget, color, set_namespace
+from libs.config import alias, gget, gset, color, set_namespace
 from libs.myapp import send, get_system_code, is_windows, base64_encode
 
 
@@ -29,4 +29,6 @@ def run():
                 print(color.green("Clean success\n"))
             else:
                 print(color.red("Clean failed\n"))
+    gset("webshell.ld_preload_path", None, True, "webshell")
+    gset("webshell.ld_preload_func", None, True, "webshell")
     set_namespace("main")
