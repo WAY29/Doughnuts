@@ -158,6 +158,7 @@ class LovelyReadline:
                 if (self.CONTINUE_POINTER is not None):
                     ch, dch = b'', ''
                     self.CONTINUE_POINTER = None
+                    wordlist["prefix_wordlist"] = self.CONTINUE_WORDLIST
                 else:
                     old_stream_len = len(self.STDIN_STREAM)
                     old_pointer = pointer
@@ -244,6 +245,7 @@ class LovelyReadline:
                     elif (isinstance(history_line, list)):
                         cmd = ''
                         self.CONTINUE_POINTER = pointer
+                        
                         word = self.STDIN_STREAM.split(b" ")[-1]
                         if (other_delimiter):
                             word = word.split(other_delimiter)[-1]
@@ -283,6 +285,7 @@ class LovelyReadline:
                     prefix_wordlist = self._prefix_wordlist.get(command, [])
                     if (prefix_wordlist and wordlist["prefix_wordlist"] != prefix_wordlist):
                         wordlist["prefix_wordlist"] = prefix_wordlist
+                        self.CONTINUE_WORDLIST = prefix_wordlist
                 # 若有补全单词，输出剩余的部分
                 word = stream_list[-1]
                 if (other_delimiter):
