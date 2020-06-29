@@ -17,6 +17,7 @@
 - 支持连接,记录,管理webshell,方便下一次连接
 - 基于eval的连接,支持GET,POST,COOKIE,HEADER四种连接方式
 - 支持编码payload(已内置base64,str_rot13,hex三种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
+- 支持多种方式绕过disable_functions和open_basedir
 - 核心功能
     - 获取网站,系统信息
     - 获取一个临时的非完全交互式shell和webshell
@@ -75,6 +76,12 @@ connect http://localhost/test.php GET 2333 rot13 base64
 灵感源自https://github.com/WangYihang/Webshell-Sniper
 
 ## 更新日志
+
+### V2.9
+- 新增bdf命令模式
+    - mode4 COM
+        - 利用windows组件绕过disable_functions
+
 
 ### V2.8
 - 修复一堆bug
