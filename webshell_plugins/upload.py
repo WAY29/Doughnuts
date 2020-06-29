@@ -29,12 +29,12 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         web_file_path = path.basename(file_path)
         flag = False
     try:
-        data = open(file_path, "rb").read()
+        fp = open(file_path, "rb")
     except FileNotFoundError:
         print("\n" + color.red("Local File not exist") + "\n")
         return
     php = get_php(web_file_path, force)
-    res = send(php, files={"file": data})
+    res = send(php, files={"file": fp})
     if (not res):
         return
     text = res.r_text.strip()
