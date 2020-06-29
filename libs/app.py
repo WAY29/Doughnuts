@@ -5,11 +5,10 @@ from re import compile as re_compile
 from sys import exc_info, path
 from traceback import print_exception
 
+from libs.config import gget, gset, order_alias, set_namespace
 from libs.debug import DEBUG_LOOP
 from libs.readline import LovelyReadline
 from Myplugin import Platform
-
-from .config import gget, gset, order_alias, set_namespace
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
 STDIN_STREAM = b''

