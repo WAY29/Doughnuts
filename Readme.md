@@ -112,6 +112,8 @@ connect http://localhost/test.php POST 2333 rot13 base64
     - 5:FFI
     - 6:COM
 - 修改命令参数解析,使用shlex库进行解析
+- 修复了一些在终端输入的bug
+- 使用LD_PRELOAD来绕过disable_functions,在退出后会尝试自动清理
 
 
 ### V2.9
