@@ -171,7 +171,7 @@ class LovelyReadline:
                     try:
                         dch = ch.decode()
                     except UnicodeDecodeError:
-                        continue
+                        dch = "\x00"
                 if (ch == "Del"):
                     ch = b"\b"
                     dch = "\b"
