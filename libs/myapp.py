@@ -71,7 +71,7 @@ def base64_decode(data: str):
     return b64decode(data.encode()).decode()
 
 
-def send(data: str, raw: bool = False, **extra_params):
+def send(data: str, raw: bool = False, files=None, **extra_params):
     offset = 8
 
     def randstr(offset):
@@ -114,7 +114,7 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
             data = encode_pf[func].run(data)
     params_dict[raw_key][password] = data
     try:
-        req = requests.post(url, verify=False, **params_dict)
+        req = requests.post(url, verify=False, files=files, **params_dict)
     except requests.RequestException:
         print(color.red("\nRequest Error\n"))
         return
@@ -145,6 +145,7 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
     if DEBUG_SEND:  # DEBUG
         print(f"[debug_dict] {params_dict}")
         print(f"[debug-extra_parms] {extra_params}")
+        print(f"[debug-files] {files}")
         print(f"[debug_url] {url}")
         print(f"[debug_res] [{req}] [len:{len(content)}] {text}")
     return req
