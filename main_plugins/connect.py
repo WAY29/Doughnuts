@@ -67,7 +67,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
     gset("webshell.netloc", webshell_netloc, namespace="webshell")
     gset(
         "webshell.download_path",
-        path.join(gget("root_path"), "target", webshell_netloc),
+        path.join(gget("root_path"), "target", webshell_netloc.replace(":", "_")),
         namespace="webshell",
     )
     gset("webshell.pwd", ".", namespace="webshell")
