@@ -52,14 +52,29 @@
 
 - 使用pip安装
 
-```
+```sh
 python3 -m pip install doughnuts -i https://pypi.org/simple/
 python3 -m doughnuts
+enjoy it!
 ```
+
+- 通过poetry安装
+
+```sh
+pyton3 -m pip install poetry # 或其他方法安装python-poetry
+git clone https://github.com/WAY29/Doughnuts.git
+cd Doughnuts
+apt-get install python3-venv # debian/ubuntu系统需要运行此命令
+poetry install
+poetry run python3 Doughnuts/doughnuts.py
+enjoy it!
+```
+
+
 
 - 直接安装
 
-```
+```sh
 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
