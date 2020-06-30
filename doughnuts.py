@@ -1,3 +1,5 @@
+from os import path, chdir
+
 from libs.app import Loop_init, run_loop
 from libs.myapp import banner
 from libs.config import gget, color, add_namespace_callback
@@ -77,4 +79,5 @@ def change_prompt():
 
 if __name__ == "__main__":
     banner()
+    chdir(path.split(path.realpath(__file__))[0])
     run_loop(My_Loop_init(), leave_message="Bye! Doughnuts:)")
