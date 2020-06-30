@@ -2,15 +2,13 @@
 
 *一个基于Python3.6+的PHPwebshell管理器*
 
-![1](https://i.loli.net/2020/06/06/fYeQvPR8L4tjZ52.png)
+![1](https://i.loli.net/2020/06/30/AURc6HN3PokZKWY.png) 
 
-![image-20200606123015596](https://i.loli.net/2020/06/06/3fSh6kg5PzbRLpY.png)
+![2](https://i.loli.net/2020/06/30/op9R7JWtsBKXm6Z.png)
 
-![3](https://i.loli.net/2020/06/06/I2yP1gUWeapMzvK.png)
+![3](https://i.loli.net/2020/06/30/VdAMHCyFIrle5wW.png)
 
-![4](https://i.loli.net/2020/06/06/v4hEBUOXbuoy2jc.png)
-
-
+![4](https://i.loli.net/2020/06/30/TpARQcw358XJx1I.png)
 
 ## 特征
 
