@@ -1,9 +1,9 @@
 from libs.config import alias, color
-from libs.myapp import send
+from libs.myapp import send, base64_encode
 
 
 def get_php(web_file_path):
-    return """if(unlink("%s")){echo 'success';}""" % web_file_path
+    return """if(unlink(base64_decode("%s"))){echo 'success';}""" % base64_encode(web_file_path)
 
 
 @alias(True, func_alias="rm")

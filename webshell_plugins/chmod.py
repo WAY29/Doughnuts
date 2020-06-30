@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.myapp import send, is_windows
+from libs.myapp import send, is_windows, base64_encode
 
 
 @alias(True, f="web_file_path", m="mode")
@@ -18,8 +18,7 @@ def run(mode: str, *web_file_paths):
     if (len(mode) < 4):
         mode = "0" + mode
     for each_file_path in web_file_paths:
-        print(f"print(chmod('{each_file_path}', {mode}));")
-        res = send(f"print(chmod('{each_file_path}', {mode}));")
+        res = send(f"print(chmod(base64_decode('{base64_encode(each_file_path)}'), {mode}));")
         if (not res):
             return
         text = res.r_text.strip()

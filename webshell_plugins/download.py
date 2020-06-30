@@ -1,5 +1,5 @@
 from libs.config import alias, color, gget
-from libs.myapp import send
+from libs.myapp import send, base64_encode
 from os import path, makedirs
 
 
@@ -13,9 +13,9 @@ header("Content-Disposition: attachment; filename=" . $fileinfo["basename"]);
 @readfile($fd);
 }
 }
-download("%s");
+download(base64_decode("%s"));
 """
-        % web_file_path
+        % base64_encode(web_file_path)
     )
 
 

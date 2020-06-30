@@ -1,7 +1,5 @@
 from libs.config import alias, color, gset, gget
-from libs.myapp import send
-
-from base64 import b64encode
+from libs.myapp import send, base64_encode
 
 
 @alias(True, d="dir")
@@ -11,8 +9,7 @@ def run(directory: str = ''):
 
     Change the working directory.
     """
-    directory = b64encode(str(directory).encode()).decode()
-    res = send(f"chdir(base64_decode('{directory}'));print(getcwd());")
+    res = send(f"chdir(base64_decode('{base64_encode(str(directory))}'));print(getcwd());")
     if (not res):
         return
     pwd = res.r_text.strip()

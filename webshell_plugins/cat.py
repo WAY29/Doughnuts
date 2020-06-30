@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.myapp import send
+from libs.myapp import send, base64_encode
 
 
 @alias(True, func_alias="c")
@@ -12,7 +12,7 @@ def run(*web_file_paths):
     eg: cat {web_file_path1} {web_file_path2} ..
     """
     for each_file_path in web_file_paths:
-        res = send(f"print(file_get_contents('{each_file_path}'));")
+        res = send(f"print(file_get_contents(base64_decode('{base64_encode(each_file_path)}')));")
         if (not res):
             return
         text = res.r_text.strip()
