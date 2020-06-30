@@ -1,11 +1,11 @@
 **/__pycache__/
-
+dist/
+doughnuts.egg-info/
+f_/
 target/
 
 .vscode/
 settings.json
-
-target/
 
 .gitignore
 tempCodeRunnerFile.py
