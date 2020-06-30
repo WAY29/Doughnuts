@@ -64,6 +64,8 @@ def set_mode(mode: int, test: bool = False):
             print(color.red(f"\nNo {ext} extension!\n"))
             return False
     if (not test):
+        if (mode == 7):
+            print(color.yellow(f"\nYou may need to wait 1 second to get the result..\n"))
         print(f"\nSet bypass disable_functions: {mode}-{mode_to_desc_dict[mode]}\n")
         gset("webshell.bypass_df", mode, True, "webshell")
     return True
