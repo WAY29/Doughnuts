@@ -10,9 +10,11 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      3: color.green("php7-json"),
                      4: color.green("LD_PRELOAD"),
                      5: color.green("FFI"),
-                     6: color.green("COM")}
+                     6: color.green("COM"),
+                     7: color.green("imap_open")}
 mode_linux_set = {1, 2, 4, 5}
 mode_windows_set = {6, }
+mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap"}
 
 total_test_list = set(mode_to_desc_dict.keys()) - {-1}
 windows_test_list = total_test_list - mode_linux_set
@@ -52,21 +54,14 @@ def set_mode(mode: int, test: bool = False):
             if (not ld_preload_func):
                 print(color.red("\nNo ld_preload function!\n"))
                 return False
-    if (mode == 5):
-        res = send(get_detectd_ext("FFI"))
+    if (mode in mode_require_ext_dict):
+        ext = mode_require_ext_dict[mode]
+        res = send(get_detectd_ext(ext))
         if (not res):
             return False
         text = res.r_text.strip()
         if ("exist" not in text):
-            print(color.red("\nNo FFI extension!\n"))
-            return False
-    if (mode == 6):
-        res = send(get_detectd_ext("com_dotnet"))
-        if (not res):
-            return False
-        text = res.r_text.strip()
-        if ("exist" not in text):
-            print(color.red("\nNo com_dotnet extension!\n"))
+            print(color.red(f"\nNo {ext} extension!\n"))
             return False
     if (not test):
         print(f"\nSet bypass disable_functions: {mode}-{mode_to_desc_dict[mode]}\n")
@@ -135,6 +130,11 @@ def run(mode: str = '0'):
 
         Need:
         - com_dotnet extension
+
+    Mode 7 imap_open:
+
+        Need:
+        - imap extension
 
     """
     if (mode == "auto"):

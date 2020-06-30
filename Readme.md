@@ -26,6 +26,7 @@
     - LD_PRELOAD
     - FFI
     - COM
+    - imap_open
 - 核心功能
     - 获取网站,系统信息
     - 输出disbale_functions

