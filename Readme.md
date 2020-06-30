@@ -30,6 +30,7 @@
     - 输出disbale_functions
     - 寻找可写的PHP文件(以树状结构显示)
     - 寻找配置文件(文件名中包含cfg/config/db/database) 也可以通过修改代码来支持寻找更多的文件(以树状结构显示)
+    - 执行自定义的php代码
     - 获取一个临时的非完全交互式shell和webshell
     - 正向/反弹shell
     - (仅限双方均为*unix)获取完全交互式的反弹shell
