@@ -48,14 +48,23 @@
 - Python-colorama
 - Python-prettytable
 
-## 安装方法
+## 安装/运行方法
+
+- 使用pip安装
+
+```
+python3 -m pip install doughnuts -i https://pypi.org/simple/
+python3 -m doughnuts
+```
+
+- 直接安装
 
 ```
 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
-进入Doughnuts目录下
-pip install -r requirements.txt 或 pip install requests colorma prettytable
-python doughnuts.py
+cd Doughnuts/doughnuts
+pip3 install -r requirements.txt 或 pip3 install requests colorma prettytable
+python3 doughnuts.py
 enjoy it!
 ```
 
