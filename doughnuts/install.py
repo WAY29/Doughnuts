@@ -2,17 +2,21 @@ from os import path, chmod, system
 
 cpath = path.split(path.realpath(__file__))[0]
 
-from sys import path as pyfpath, executable
+from sys import path as pyfpath, executable, argv
 pyfpath.append(cpath)
 
 from libs.config import color
 from libs.myapp import is_windows
 
-
 pypath = executable
+filename = "doughnuts"
+
+
+if (len(argv) == 2 and argv[1] != ""):
+    filename = argv[1]
 
 if (not is_windows(False)):
-    fpath = "/usr/local/bin/doughnuts"
+    fpath = "/usr/local/bin/" + filename
     print(color.green(f"Try to generate {fpath}"))
     with open(fpath, "w+") as f:
         f.write(f"#!/bin/sh\n{pypath} {cpath}/doughnuts.py")
@@ -22,24 +26,11 @@ if (not is_windows(False)):
     else:
         print(color.red("generate error!"))
 else:
-    import ctypes
-
-    def is_admin():
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except Exception:
-            return False
-    if is_admin():
-        fpath = "C:\\windows\\System32\\doughnuts.bat"
-        print(color.green(f"Try to generate {fpath}"))
-        with open(fpath, "w+") as f:
-            f.write(f"@echo off\n{pypath} {cpath}\\doughnuts.py")
-        if (path.exists(fpath)):
-            print(color.green("generate success!"))
-        else:
-            print(color.red("generate error!"))
-        system("pause")
-        # 将要运行的代码加到这里
+    fpath = path.dirname(pypath)+"\\" + filename + ".bat"
+    print(color.green(f"Try to generate {fpath}"))
+    with open(fpath, "w+") as f:
+        f.write(f"@echo off\n{pypath} {cpath}\\doughnuts.py")
+    if (path.exists(fpath)):
+        print(color.green("generate success!"))
     else:
-        ctypes.windll.shell32.ShellExecuteW(
-            None, "runas", executable, __file__, None, 1)
+        print(color.red("generate error!"))
