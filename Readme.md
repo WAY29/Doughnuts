@@ -54,7 +54,8 @@
 
 ```sh
 python3 -m pip install doughnuts -i https://pypi.org/simple/
-python3 -m doughnuts
+python3 -m doughnuts # 应该对所有系统生效
+python3 -m doughnuts.install && doughnuts # (仅*unix)添加一个可调用的sh文件到/usr/local/bin中,以方便调用
 enjoy it!
 ```
 
@@ -66,7 +67,7 @@ git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts
 apt-get install python3-venv # debian/ubuntu系统需要运行此命令
 poetry install
-poetry run python3 Doughnuts/doughnuts.py
+poetry run python3 Doughnuts/doughnuts.py # 应该对所有系统生效
 enjoy it!
 ```
 
@@ -79,7 +80,8 @@ enjoy it!
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
 pip3 install -r requirements.txt 或 pip3 install requests colorma prettytable
-python3 doughnuts.py
+python3 doughnuts.py # 应该对所有系统生效
+python3 install.py && doughnuts # (仅*unix)添加一个可调用的sh文件到/usr/local/bin中,以方便调用
 enjoy it!
 ```
 
