@@ -6,9 +6,10 @@ from libs.app import readline
 def get_php(path):
     return """function getprems($file){
 $perms = fileperms($file);
-$info='upcudubu-ulusuuuuu'[($perms&0xF000)>>12];
+$strs='upcudubu-ulusuuuuu';$tstrs='tss';$Tstrs='TSS';$wrstrs='wr';
+$info=$strs[($perms&0xF000)>>12];
 for($bit=8;$bit>=0;$bit--){
-  $info .= ($perms&0x01ff)>>$bit & 1 ? ( !($bit%%3) ? (((($perms >> 9) & 0x7) >> ($bit / 3)) & 1 ? 'tss'[$bit/3] :'x') :'wr'[($bit-1)%%3] ): ( !($bit%%3) ? (((($perms >> 9) & 0x7) >> ($bit / 3)) & 1 ? 'TSS'[$bit/3] : '-'):'-');
+  $info .= ($perms&0x01ff)>>$bit & 1 ? ( !($bit%3) ? (((($perms >> 9) & 0x7) >> ($bit / 3)) & 1 ? $tstrs[$bit/3] :'x') :$wrstrs[($bit-1)%3] ): ( !($bit%3) ? (((($perms >> 9) & 0x7) >> ($bit / 3)) & 1 ? $Tstrs[$bit/3] : '-'):'-');
 }
 
 return $info;
