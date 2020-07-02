@@ -25,13 +25,13 @@ class Logger(object):
 
 
 @alias(True)
-def run(filepath="./log/log.txt"):
+def run(filepath="log.txt"):
     """
     log
 
     (Only for *unix) Write input and output to the log.
 
-    eg: log {filepath="./log/log.txt"}
+    eg: log {filepath="log.txt"}
     """
     if (is_windows(False)):
         print(color.red("\nYour system isn't *unix\n"))

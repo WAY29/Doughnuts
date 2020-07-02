@@ -13,10 +13,12 @@ def run(id: int = 0):
     eg: load {_id}
     """
     pf = gget("main.pf")
-    if (not path.exists("webshell.log")):
+    root_path = gget("root_path")
+    webshell_log_path = path.join(root_path, "webshell.log")
+    if (not path.exists(webshell_log_path)):
         print(color.red("No webshell.log"))
         return
-    f = open("webshell.log", "r+")
+    f = open(webshell_log_path, "r+")
     lines = f.readlines()
     try:
         if (id <= 0):
