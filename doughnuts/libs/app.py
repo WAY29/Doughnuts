@@ -1,6 +1,7 @@
 import json
 import shlex
-from os import _exit
+from os import _exit, chdir, getcwd
+from os import path as opath
 from re import compile as re_compile
 from sys import exc_info, path
 from traceback import print_exception
@@ -53,8 +54,9 @@ class Loop_init:
         gset("root_path", path[0])
         gset("namespace_folders",  platforms)
         gset("folders_namespace", {v: k for k, v in platforms.items()})
+        root_path = gget("root_path")
         for k, v in platforms.items():
-            pf = import_platform(v, api)
+            pf = import_platform(opath.join(root_path, v), api)
             gset(k + ".pf", pf)
             gset(k + ".wordlist", {"command_wordlist": list(pf.names())})
             gset(k + ".prefix_wordlist", {command: gget(command + ".arg_wordlist", k)
@@ -67,6 +69,7 @@ class Loop_init:
             wordlist["command_wordlist"] += general_wordlist
         for k, v in self.set_prompts().items():
             gset(k + ".prompt", v)
+ 
 
     def set_platforms(self) -> dict:
         return {"main": "main_plugins"}
@@ -75,8 +78,8 @@ class Loop_init:
         return {"main": ":>"}
 
 
-def import_platform(platform_name: str, api: str):
-    return Platform(platform_name, api)
+def import_platform(platform_path: str, api: str):
+    return Platform(platform_path, api)
 
 
 def is_numberic(string):

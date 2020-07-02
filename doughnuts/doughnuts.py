@@ -1,13 +1,13 @@
-from os import path, chdir
+from os import path
 
 from libs.app import Loop_init, run_loop
 from libs.myapp import banner
-from libs.config import gget, color, add_namespace_callback
+from libs.config import gset, gget, color, add_namespace_callback
 
 
 def main():
     banner()
-    chdir(path.split(path.realpath(__file__))[0])
+    gset("root_path", path.split(path.realpath(__file__))[0])
     run_loop(My_Loop_init(), leave_message="Bye! Doughnuts:)")
 
 
