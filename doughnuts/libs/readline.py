@@ -3,6 +3,8 @@ from sys import exc_info, stdout
 from traceback import print_exception
 from typing import List, Tuple, Union
 
+from libs.config import gget
+
 TUPLE_OR_LIST = Union[List, Tuple]
 
 
@@ -86,6 +88,7 @@ class LovelyReadline:
     def __init__(self):
         self.STDIN_STREAM = b''
         self.CONTINUE_POINTER = None
+        self.CONTINUE_WORDLIST = []
         self.HISTORY = []
         self.HISTORY_POINTER = 0
         self.FROM_HISTORY = False
@@ -248,15 +251,15 @@ class LovelyReadline:
                         word = self.STDIN_STREAM.split(b" ")[-1]
                         if (other_delimiter):
                             word = word.split(other_delimiter)[-1]
-                        print("\n" + b"  ".join(word +
-                                                last_word for last_word in history_line).decode())
+                        stdout.write("\n" + b"  ".join(word +
+                                                       last_word for last_word in history_line).decode() + "\n")
                         break
                 stream_len = len(self.STDIN_STREAM)
                 history_len = len(self.HISTORY)
                 remaining_len = len(remaining)
                 clean_len = old_stream_len + remaining_len
-                print("\b" * old_pointer + " " * clean_len +
-                      "\b" * clean_len, end="")  # 清空原本输入
+                stdout.write("\b" * old_pointer + " " * clean_len +
+                             "\b" * clean_len)  # 清空原本输入
                 print_cyan(self.STDIN_STREAM.decode(), end="")
                 if (remaining):
                     remaining = ""
@@ -291,7 +294,8 @@ class LovelyReadline:
                     word = word.split(other_delimiter)[-1]
                 if (word):
                     word_len = len(word)
-                    temp_word_lines = [line[word_len:].encode() for line in set(chain.from_iterable(wordlist.values())) if (line.startswith(word.decode()))]
+                    temp_word_lines = [line[word_len:].encode() for line in set(
+                        chain.from_iterable(wordlist.values())) if (line.startswith(word.decode()))]
                     if (temp_word_lines and temp_word_lines[0]):
                         temp_remaining = min(temp_word_lines, key=len)
                         temp_history_line = self.STDIN_STREAM + temp_remaining
@@ -321,6 +325,11 @@ class LovelyReadline:
             cmd = ''
         if (self.CONTINUE_POINTER is None):
             self.STDIN_STREAM = b''
+        log_filepath = gget("log_filepath")
+        if (log_filepath):
+            f = open(log_filepath, "a")
+            f.write(cmd + "\n")
+            f.close()
         return cmd
 
 

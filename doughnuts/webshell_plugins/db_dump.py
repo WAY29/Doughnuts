@@ -35,6 +35,8 @@ def run(database: str = "", web_file_path: str = "", encoding: str = "utf8"):
     db_dump
 
     Dump a database to a file, Default file name is {database}.sql.
+
+    eg: db_init {database=current_database} {web_file_path={database}.sql} {encoding="utf-8"}
     """
     if (not gget("db_connected", "webshell")):
         print(color.red("Please run db_init command first"))

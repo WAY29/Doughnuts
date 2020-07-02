@@ -8,6 +8,8 @@ def run(directory: str = ''):
     cd
 
     Change the working directory.
+
+    eg: cd {directory=""}
     """
     res = send(f"chdir(base64_decode('{base64_encode(str(directory))}'));print(getcwd());")
     if (not res):

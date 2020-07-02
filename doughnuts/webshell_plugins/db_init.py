@@ -40,6 +40,8 @@ def run(host: str, username: str, password: str, dbname: str = "", port: int = 0
     db_init
 
     Initialize the database connection.
+
+    eg: db_init {host} {username} {password} {dbname=''} {port=0}
     """
     res = send(get_php(host, username, password, dbname, port))
     if (not res):

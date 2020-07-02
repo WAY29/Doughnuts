@@ -35,6 +35,9 @@ def change_prompt():
               color.cyan("Connect to a webshell"))
         print(color.yellow("[check]            ") +
               color.cyan("Check if each webshell is alive"))
+        print(color.yellow("[rm|remove]        ") +
+              color.cyan("Remove a webshell log"))
+        print(color.yellow("[log]              ") + color.cyan("(Only for *unix) Write input and output to the log"))
         print(color.yellow("[cls|clear]        ") + color.cyan("Clear screen"))
         print(color.yellow("[q|quit]           ") +
               color.cyan("Quit this program"))
@@ -52,6 +55,7 @@ def change_prompt():
               color.cyan("Print the name of the current working directory"))
         print(color.yellow("[cd]           ") +
               color.cyan("Change the working directory"))
+        print(color.yellow("[log]          ") + color.cyan("(Only for *unix) Write input and output to the log"))
         print(color.yellow("[cls|clear]    ") + color.cyan("Clear screen"))
         print(color.yellow("[b|back]       ") +
               color.cyan("Back to main menu"))

@@ -120,6 +120,9 @@ def args_parse(args: list) -> dict:
 
 def sys_exit():
     print('\n' + gget("leave_message"))
+    if (gget("log_filepath")):
+        gget("log_stdout").log.close()
+        gget("log_stderr").log.close()
     _exit(0)
 
 

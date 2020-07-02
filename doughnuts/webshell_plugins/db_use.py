@@ -15,6 +15,8 @@ def run(database: str):
     db_use
 
     Change current database.
+    
+    eg: db_use {database}
     """
     if (not gget("db_connected", "webshell")):
         print(color.red("Please run db_init command first"))

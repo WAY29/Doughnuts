@@ -78,13 +78,17 @@ def alias(none_named_arg: bool = False, func_alias: str = "", **alias):  # Âà´Âê
             reverse_alias,
             namespace=folders_namespace[func_folder],
         )
-        arg_wordlist = ["-" + name for name in alias.keys()] + ["--" + name for name in getfullargspec(func)[0]]
-        gset(func_name + ".arg_wordlist", arg_wordlist, namespace=folders_namespace[func_folder])
+        arg_wordlist = ["-" + name for name in alias.keys()] + \
+            ["--" + name for name in getfullargspec(func)[0]]
+        gset(func_name + ".arg_wordlist", arg_wordlist,
+             namespace=folders_namespace[func_folder])
         if len(func_alias):
-            func_alias_dict = gget("order_alias", namespace=folders_namespace[func_folder])
+            func_alias_dict = gget(
+                "order_alias", namespace=folders_namespace[func_folder])
             if not func_alias_dict:
                 func_alias_dict = {}
-                gset("order_alias", func_alias_dict, namespace=folders_namespace[func_folder])
+                gset("order_alias", func_alias_dict,
+                     namespace=folders_namespace[func_folder])
             func_alias_dict[func_alias] = func_name
 
         @functools.wraps(func)

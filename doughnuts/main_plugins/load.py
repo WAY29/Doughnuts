@@ -1,5 +1,6 @@
 from libs.config import alias, color, gset, gget
-from os import path, SEEK_SET
+from libs.app import readline
+from os import path
 
 
 @alias(True, "l")
@@ -17,12 +18,11 @@ def run(id: int = 0):
         return
     f = open("webshell.log", "r+")
     lines = f.readlines()
-    f.seek(0, SEEK_SET)
     try:
         if (id <= 0):
             line_num = pf["show"].run()
-            load_id = input("choose:>")
-            # load_id = int(load_id) if load_id.isdigit() else 1
+            print("choose:>", end="")
+            load_id = readline()
             if (load_id.isdigit()):
                 load_id = int(load_id)
             else:
@@ -36,12 +36,13 @@ def run(id: int = 0):
             gset("webshell.from_log", True, namespace="webshell")
             connect = pf["connect"].run(*data)
             if (not connect):
-                print("This webshell seems to no longer working, do you want to delete it?")
+                print("\nThis webshell seems to no longer working, do you want to delete it?")
                 flag = input("(YES/no) >")
                 if (flag.lower() in ['n', 'no']):
                     return
                 del lines[load_id - 1]
-                print("".join(lines))
+                f.seek(0)
+                f.truncate()
                 f.write("".join(lines))
         else:
             print(color.red("ID error"))

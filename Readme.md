@@ -126,6 +126,12 @@ connect http://localhost/test.php POST 2333 rot13 base64
 ## 更新日志
 
 
+### V3.1
+- 新增命令
+    - rm命令(初始界面) 删除指定webshell记录
+    - log命令(通用) (只支持*unix)将输入与输出记录到日志中
+
+
 ### V3.0
 - 重新修改了bdf的顺序,添加了新模式
     - -1:close
