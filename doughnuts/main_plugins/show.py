@@ -11,6 +11,7 @@ def run():
     """
     root_path = gget("root_path")
     webshell_log_path = path.join(root_path, "webshell.log")
+    print("test", webshell_log_path)
     if not path.exists(webshell_log_path):
         print(color.red("No webshell.Log"))
         return 0

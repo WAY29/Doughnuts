@@ -114,9 +114,10 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encode_functions):
             disable_function_list.remove('')
         gset("webshell.obd", info[6], namespace="webshell")
         gset("webshell.disable_functions", disable_function_list, namespace="webshell")
+        root_path = gget("root_path")
         from_log = gget("webshell.from_log", "webshell")
         if not from_log:
-            with open("webshell.log", "a+") as f:
+            with open(path.join(root_path, "webshell.log"), "a+") as f:
                 f.write(f"{url}|{method}|{pwd}|{'|'.join(encode_functions)}\n")
         else:
             gset("webshell.from_log", False, True, "webshell")
