@@ -1,0 +1,4 @@
+DEBUG = {}
+DEBUG["LOOP"] = 0
+DEBUG["SEND"] = 0
+DEBUG["DEV"] = 0

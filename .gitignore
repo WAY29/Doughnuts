@@ -1,11 +1,11 @@
 **/__pycache__/
-
+dist/
+doughnuts.egg-info/
+f_/
 target/
 
 .vscode/
 settings.json
-
-target/
 
 .gitignore
 tempCodeRunnerFile.py
@@ -15,3 +15,6 @@ upadte.txt
 webshell2.log
 Doughnuts.zip
 libs/reverse_server_light_bak
+webshell2.csv
+publish.py
+doughnuts/log/log.txt
