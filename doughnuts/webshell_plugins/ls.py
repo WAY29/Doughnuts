@@ -80,6 +80,5 @@ def run(path: str = ".", mode: int = 1):
             info[-1] = color.green(name)
         print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
         ls_wordlist.append(info[6])
-   
-    for prefix in prefix_list:
+    for prefix in PREFIX_LIST:
         readline.add_prefix_wordlist(prefix, ls_wordlist)
