@@ -6,7 +6,7 @@ from sys import exc_info, path
 from traceback import print_exception
 
 from libs.config import gget, gset, order_alias, set_namespace
-from libs.debug import DEBUG_LOOP
+from libs.debug import DEBUG
 from libs.readline import LovelyReadline
 from Myplugin import Platform
 
@@ -114,7 +114,7 @@ def args_parse(args: list) -> dict:
             if arg_name == "":
                 arg_dict[""].append(value_translation(each))
             elif arg_name in arg_dict:
-                arg_dict[arg_name] = "%s %s" % (arg_dict[arg_name], each)
+                arg_dict[arg_name] = f"{arg_dict[arg_name]} {each}"
             else:
                 arg_dict[arg_name] = value_translation(each)
     if (not len(arg_dict[""])):
@@ -147,8 +147,15 @@ def loop_main():
             readline.set_wordlist(wordlist)
             readline.set_prefix_wordlist(prefix_wordlist)
         # --------------------------------------
-        print(gget(f"{namespace}.prompt"), end="")
-        cmd = readline().strip()
+        if (gget("preload_command")):
+            cmd = gget("preload_command")
+            gset("preload_command", None, True)
+        else:
+            print(gget(f"{namespace}.prompt"), end="")
+            if (gget("raw_input") is True):
+                cmd = input().strip()
+            else:
+                cmd = readline().strip()
         gset("raw_command", cmd, True)
         if (not cmd):
             continue
@@ -176,11 +183,11 @@ def loop_main():
                 exc_type, exc_value, exc_tb = exc_info()
                 print("[TypeError] %s" % str(e).replace(
                     "%s()" % api, "%s()" % order))
-                if DEBUG_LOOP:
+                if DEBUG["LOOP"]:
                     print_exception(exc_type, exc_value, exc_tb)
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
-                if DEBUG_LOOP:
+                if DEBUG["LOOP"]:
                     print_exception(exc_type, exc_value, exc_tb)
                 print("[%s] %s" % (exc_type.__name__, e))
 
@@ -196,7 +203,7 @@ def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):
     from threading import Thread
     from time import sleep
 
-    set_namespace("main")
+    set_namespace("main", callback=False if gget("preload_command") else True)
     gset("leave_message", leave_message)
     t = Thread(target=loop_main)
     t.setDaemon(True)

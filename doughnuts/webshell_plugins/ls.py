@@ -1,9 +1,13 @@
-from libs.config import alias, color
+from libs.config import alias, color, order_alias
 from libs.myapp import send
 from libs.app import readline
 
+PREFIX_LIST = []
 
-def get_php(path):
+def get_php(path, mode):
+    scan_code = f'$files=scandir("{path}");sort($files);'
+    if (mode == 2):
+        scan_code = f'$files=glob("{path}/*");$pfiles=glob("{path}/.*");$files=array_merge($files,$pfiles);sort($files);'
     return """function getprems($file){
 $perms = fileperms($file);
 $strs='upcudubu-ulusuuuuu';$tstrs='tss';$Tstrs='TSS';$wrstrs='wr';
@@ -23,32 +27,42 @@ function getfilesize($file){
 function getmtime($file){
     return date("m-d H:i",filemtime($file));
 }
-function getinfo($file){
+function getinfo($file,$filter=true){
     $islinux = strtoupper(substr(PHP_OS,0,3))==='WIN'?FALSE:TRUE;
     $format="%%s %%s %%s %%s %%s %%s";
     $filename=!is_link($file)?basename($file):basename($file).' -> '.readlink($file);
+    if($filter && in_array($filename, array(".", ".."))){return "";}
     $owner=fileowner($file);
     $group=filegroup($file);
     return sprintf($format, getprems($file), $owner, $group, getfilesize($file),getmtime($file),$filename);
 }
-$files=glob("%s/*");
+%s
 echo "Listing: ".realpath("%s")."\\n";
 echo "==============================\\n";
 echo "MODE        UID   GID     Size  MTIME         NAME\\n";
-echo getinfo(".")."\\n";
-foreach($files as $file) {echo getinfo($file)."\\n";}""" % (path, path)
+echo getinfo(".", false)."\\n";
+echo getinfo("..", false)."\\n";
+foreach($files as $file) {echo getinfo($file)."\\n";}""" % (scan_code, path)
 
 
-@alias(True, func_alias="dir", p="path")
-def run(path: str = "."):
+@alias(True, func_alias="dir", p="path", m="mode")
+def run(path: str = ".", mode: int = 1):
     """
     ls
 
     List information about the files.
 
-    eg: ls {path=.}
+    eg: ls {path=.} {mode=1}
+
+    mode:
+      - 1 : scandir
+      - 2 : glob
     """
-    res = send(get_php(path))
+    global PREFIX_LIST
+    if (not PREFIX_LIST):
+        prefix_list = ["c", "w", "e", "u", "d", "mv", "rm", "chmod", "touch"]
+        PREFIX_LIST = prefix_list + [order_alias(c) for c in prefix_list]
+    res = send(get_php(path, mode))
     if (not res):
         return
     info_list = res.r_text.strip().split('\n')
@@ -66,4 +80,6 @@ def run(path: str = "."):
             info[-1] = color.green(name)
         print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
         ls_wordlist.append(info[6])
-    readline.add_wordlist("ls_wordlist", ls_wordlist)
+   
+    for prefix in prefix_list:
+        readline.add_prefix_wordlist(prefix, ls_wordlist)

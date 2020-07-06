@@ -43,7 +43,7 @@ def set_mode(mode: int, test: bool = False):
             filename = "/tmp/%s.so" % str(uuid4())
             ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
             upload_result = upload(
-                path.join(getcwd(), "auxiliary", "ld_preload_x86_64.so"), filename, True)
+                path.join(getcwd(), "auxiliary", "ld_preload", "ld_preload_x86_64.so"), filename, True)
             if (not upload_result):
                 return
             gset("webshell.ld_preload_path", filename, True, "webshell")
@@ -78,9 +78,17 @@ def run(mode: str = '0'):
 
     Try to bypass disable_functions by php7-backtrace-bypass.
 
+    Mode -1 / Mode close:
+
+        Close bdf
+
+    Mode auto:
+
+        Automatically filter and test all bdf modes
+
     Mode 0:
 
-        close
+        Display the current bdf mode
 
     Mode 1 php7-backtrace(Only for php7.0-7.4 and *unix) :
 
@@ -139,6 +147,8 @@ def run(mode: str = '0'):
         - imap extension
 
     """
+    if (mode == "close"):
+        mode = -1
     if (mode == "auto"):
         test_list = windows_test_list if is_windows() else linux_test_list
         php_version = gget("webshell.php_version", "webshell")

@@ -26,9 +26,9 @@ def run(
     """
     download
 
-    Download file(s) from target system.
+    Download file from target system.
 
-    eg: download {web_file_path} {local_path=./site.com/...}
+    eg: download {web_file_path} {local_path=doughnuts/target/site.com/...}
     """
     php = get_php(web_file_path)
     res = send(php)
@@ -40,7 +40,7 @@ def run(
         file_name = path.split(web_file_path)[1]
         if not path.exists(download_path):
             makedirs(download_path)
-        file_path = path.join(download_path, file_name)
+        file_path = path.join(download_path, file_name).replace("\\", "/")
         with open(file_path, "wb") as f:
             f.write(content)
         print(color.green(f"Downloaded file has been saved to {file_path}"))

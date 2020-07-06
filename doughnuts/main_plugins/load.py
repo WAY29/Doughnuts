@@ -10,7 +10,7 @@ def run(id: int = 0):
 
     Load a webshell from log.
 
-    eg: load {_id}
+    eg: load {id}
     """
     pf = gget("main.pf")
     root_path = gget("root_path")
@@ -38,8 +38,8 @@ def run(id: int = 0):
             gset("webshell.from_log", True, namespace="webshell")
             connect = pf["connect"].run(*data)
             if (not connect):
-                print("\nThis webshell seems to no longer working, do you want to delete it?")
-                flag = input("(YES/no) >")
+                print("\nThis webshell seems to no longer working, do you want to delete it?\n\n(YES/no) >", end="")
+                flag = input()
                 if (flag.lower() in ['n', 'no']):
                     return
                 del lines[load_id - 1]

@@ -6,11 +6,11 @@ from os import path
 @alias(True, func_alias="mv")
 def run(web_file_path: str, new_file_path: str):
     """
-    chmod
+    move
 
     Rename file or move it to new_file_path like linux mv command.
 
-    eg: chmod {web_file_path} {new_file_path}
+    eg: move {web_file_path} {new_file_path}
     """
     if (new_file_path.endswith("/")):
         new_file_path += path.basename(web_file_path)

@@ -11,7 +11,6 @@ def run():
     """
     root_path = gget("root_path")
     webshell_log_path = path.join(root_path, "webshell.log")
-    print("test", webshell_log_path)
     if not path.exists(webshell_log_path):
         print(color.red("No webshell.Log"))
         return 0
@@ -22,9 +21,11 @@ def run():
             if (len(data) < 3):
                 continue
             data[2] = f"$ {data[2]} $"
-            for func in data[3:]:
+            encoders = (e for e in data[3:] if ":" not in e)
+            extra_params = " ".join(e for e in data[3:] if ":" in e)
+            for func in encoders:
                 data[2] = f"{func}({data[2]})"
             print(
-                f"[{color.blue(str(index))}] [{color.yellow(data[1])}] {data[0]}  {color.green(data[2])}"
+                f"[{color.cyan(str(index))}] [{color.yellow(data[1])}] {data[0]}  {color.green(data[2])} {extra_params}"
             )
         return len(lines)

@@ -1,2 +1,4 @@
-DEBUG_LOOP = 0
-DEBUG_SEND = 0
+DEBUG = {}
+DEBUG["LOOP"] = 0
+DEBUG["SEND"] = 0
+DEBUG["DEV"] = 0

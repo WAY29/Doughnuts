@@ -1,7 +1,6 @@
 import sys
-from itertools import chain
 from os import W_OK, access, path
-from re import findall, split, sub
+from re import sub
 
 from libs.config import alias, color, gset
 from libs.myapp import is_windows
@@ -37,11 +36,11 @@ def run(filepath="log.txt"):
         print(color.red("\nYour system isn't *unix\n"))
         return
     if access(path.dirname(filepath), W_OK):
-        print(color.green(f"\nset log in {filepath}\n"))
+        print(color.green(f"\nSet log in {filepath}\n"))
         sys.stdout = Logger(filepath, sys.__stdout__)
         sys.stderr = Logger(filepath, sys.__stderr__)
         gset("log_filepath", filepath, True)
         gset("log_stdout", sys.stdout, True)
         gset("log_stderr", sys.stderr, True)
     else:
-        print(color.red("\nfile path is invalid\n"))
+        print(color.red("\nFile path is invalid\n"))

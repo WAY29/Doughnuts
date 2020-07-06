@@ -58,4 +58,4 @@ def run(order: str = ""):
         else:
             desc = "[?] %s" % desc[0]
             arg = "%s(*)" % arg
-        print("%s%-20s%s%s\n" % (block_two, arg, block_two, desc))
+        print("%s%-25s%s%s\n" % (block_two, arg, block_two, desc))

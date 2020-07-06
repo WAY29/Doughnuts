@@ -26,7 +26,7 @@ $zip->addFile($path.$sp.$filename);
 }
 @closedir($path);
 }
-if (!class_exists("ZipArchive")){
+if (class_exists("ZipArchive")){
 $zip = new ZipArchive();
 $file_name = $_SERVER["HTTP_HOST"].".zip";
 if ($zip->open($file_name, ZipArchive::CREATE) === TRUE) {
@@ -82,7 +82,7 @@ def run(web_file_path: str, local_path: str = "", _use_raw_php_to_zip: bool = Tr
         )
         if not path.exists(download_path):
             makedirs(download_path)
-        file_path = path.join(download_path, file_name)
+        file_path = path.join(download_path, file_name).replace("\\", "/")
         with open(file_path, "wb") as f:
             f.write(content)
         print(color.green(f"Downloaded file has been saved to {file_path}"))

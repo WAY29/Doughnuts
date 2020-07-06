@@ -24,18 +24,16 @@ getch = _GetchUnix()
 FD = None
 OLD_SETTINGS = None
 CONN = None
-CONNECTED = 0
 CONN_ONLINE = 1
 CLOSED = 0
 STDOUT = sys.stdout.buffer
 
 
 def init():
-    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN, CONNECTED
+    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN
     FD = None
     OLD_SETTINGS = None
     CONN = None
-    CONNECTED = 0
     CONN_ONLINE = 1
     CLOSED = 0
 
@@ -47,7 +45,7 @@ def stdprint(message):
 
 def close_socket():
     import os
-    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN, CONNECTED
+    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN
     if (CLOSED):
         return
     CLOSED = 1
@@ -62,9 +60,6 @@ def close_socket():
     sys.stderr = sys.__stderr__
     os.system("reset")
     os.system("clear")
-    if (CONNECTED):
-        stdprint("Prese Enter to continue:")
-    CONNECTED = 0
 
 
 def recv_daemon(conn):
@@ -96,8 +91,8 @@ def input_deamon(talk):
             break
 
 
-def main(port, mode: bool):
-    global CONN, CONNECTED
+def main(port, mode: int):
+    global CONN
     init()
     CONN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     CONN.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -116,7 +111,6 @@ def main(port, mode: bool):
         set_size = False
     try:
         talk, addr = CONN.accept()
-        CONNECTED = 1
         stdprint("Connect from %s.\n" % addr[0])
         t = Thread(target=recv_daemon, args=(talk, ))
         t.start()
@@ -143,3 +137,7 @@ def main(port, mode: bool):
         stdprint("Connection close...\n")
         close_socket()
         return True
+
+
+if (__name__ == "__main__"):
+    main(int(sys.argv[1]), int(sys.argv[2]))

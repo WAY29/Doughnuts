@@ -1,8 +1,11 @@
 from libs.config import alias, color
-from libs.myapp import send
+from libs.myapp import send, is_windows
 
 
-def get_php(pattern: str):
+sep = "\\" if is_windows() else "/"
+
+
+def get_php(web_file_path: str, pattern: str):
     return """function rglob($pattern, $flags = 0) {
     $files = glob($pattern, $flags);
     foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir) {
@@ -10,23 +13,32 @@ def get_php(pattern: str):
     }
     return $files;
 }
-print(join("\\n",rglob("%s")));""" % pattern
+foreach(rglob("%s/*") as $v){
+    if(preg_match("/%s/", $v)){print(str_replace(realpath("%s")."\\\\","",realpath($v))."\\n");}
+}
+""" % (web_file_path, pattern, web_file_path)
 
 
-@alias(True, p="pattern")
-def run(pattern: str):
+@alias(True, w="web_file_path", p="pattern")
+def run(pattern: str, web_file_path: str = "."):
     """
-    read
+    search
 
-    Search file(s) from target system.
+    Search file(s) from target system (Support regular expression).
 
-    eg: search {pattern}
+    eg: search {pattern} {web_file_path="."}
     """
-    res = send(get_php(pattern))
+    web_file_path = str(web_file_path)
+    res = send(get_php(web_file_path, pattern))
     if (not res):
         return
     files = res.r_text.strip()
     if (len(files)):
-        print("\n" + color.green("Search Result:") + "\n    " + files.replace("./", "").replace("\n", "\n    ") + "\n")
+        print(f"\n{color.green('Search Result:')}")
+        if (web_file_path == "./"):
+            web_file_path = ""
+        for f in files.split("\n"):
+            print("    " + (f"{web_file_path}{sep}{f}" if web_file_path != "." else f))
+        print()
     else:
-        print("\n" + color.red("File not exist / Search error") + "\n")
+        print(f"\n{color.red('File not exist / Search error')}\n")
