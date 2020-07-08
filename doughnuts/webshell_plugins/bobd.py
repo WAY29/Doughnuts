@@ -16,10 +16,9 @@ def run():
         print(color.red("Target system is windows."))
         return
     if (needle_functions & set(disable_func_list)):
-        print(color.red("ini_set or chdir function is disabled."))
+        print("\n" + color.red("ini_set or chdir function is disabled.") + "\n")
         return
     switch = not gget("webshell.bypass_obd", "webshell", default=False)
     print(
         f"\nbypass open_basedir: {color.green('On') if switch else color.red('Off')}\n")
     gset("webshell.bypass_obd", switch, True, "webshell")
-

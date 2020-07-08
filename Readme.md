@@ -20,7 +20,8 @@
 
 - 支持连接,记录,管理webshell,方便下一次连接
 - 基于eval的连接,支持GET,POST,COOKIE,HEADER四种连接方式
-- 支持编码payload(已内置base64,str_rot13,hex三种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
+- 请求伪装
+- 支持编码payload(已内置base64,str_rot13,hex,doughnuts四种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
 - 支持绕过open_basedir
 - 支持多种方式绕过disable_functions
     - 自动识别
@@ -41,7 +42,7 @@
     - 正向/反弹shell
     - (仅限双方均为*unix)获取完全交互式的反弹shell
     - 读/写/上传/下载/删除/搜索文件,目录打包
-    - mysql数据库管理
+    - 数据库管理
     - 端口扫描
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
@@ -51,6 +52,7 @@
 
 - Python3.6+
 - Python-requests
+- Python-pysocks
 - Python-colorama
 - Python-prettytable
 
@@ -62,15 +64,15 @@
 
 ```sh
 # 安装
-python3 -m pip install doughnuts -i https://pypi.org/simple/
-# 应该对所有系统生效
-python3 -m doughnuts
+python3 -m pip install doughnuts --user -i https://pypi.org/simple/
 # (windows)添加一个bat文件到python根目录下
 # (*unix)添加一个可执行文件到/usr/local/bin下
-# 以方便调用
+# 安装启动器,以方便调用
 python3 -m doughnuts.install
 # 运行
 doughnuts
+# 或
+python3 -m doughnuts
 # enjoy it!
 ```
 
@@ -95,15 +97,15 @@ poetry run python3 Doughnuts/doughnuts.py # 应该对所有系统生效
 # 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
-pip3 install -r requirements.txt 或 pip3 install requests colorma prettytable
-# 应该对所有系统生效
-python3 doughnuts.py
+pip3 install -r requirements.txt 或 pip3 install requests pysocks colorma prettytable
 # (windows)添加一个bat文件到python根目录下
 # (*unix)添加一个可执行文件到/usr/local/bin下
-# 以方便调用
+# 安装启动器,以方便调用
 python3 install.py
 # 运行
 doughnuts
+# 或
+python3 doughnuts.py
 # enjoy it!
 ```
 
@@ -175,6 +177,22 @@ doughnuts
 - https://github.com/epinna/weevely3
 
 ## 更新日志
+
+
+### 3.3
+- 请求时添加随机Referer与UA进行伪装
+- 新增依赖 pysocks
+- 新增命令
+    - proxy命令(通用)  设置连接代理,支持socks,http代理
+    - fl命令(通用) 类似于fc命令，寻找access.log与error.log日志
+- 修改命令
+    - db系列命令 现在支持使用PDO扩展来连接其他数据库
+    - db_init 添加参数，支持使用PDO连接其他数据库。参数db_init {host} {username} {password} {dbname=''} {port=0} {dbms='mysql'}
+    - touch命令 增加创建空文件的功能（不限目标系统）
+- 修复bug
+    - 在某些情况下调用外带编辑器失败
+    - ls后输入相关命令无法补全文件夹名
+- 修改文本
 
 
 ### V3.2

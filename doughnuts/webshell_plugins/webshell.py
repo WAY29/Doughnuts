@@ -2,7 +2,7 @@ from libs.config import gget, alias, color, set_namespace
 from libs.myapp import send, base64_encode
 from libs.app import readline
 
-NEW_WORDLIST = {"common_wordlist": [
+NEW_WORDLIST = {"common_wordlist": (
     "trim",
     "dirname",
     "strtolower",
@@ -32,7 +32,7 @@ NEW_WORDLIST = {"common_wordlist": [
     "copy",
     "rename",
     "chdir",
-]}
+)}
 
 
 @alias(True, func_alias="ws")

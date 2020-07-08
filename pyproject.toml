@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "doughnuts"
-version = "3.2.1"
+version = "3.3.1"
 description = "A webshell manager for PHP"
 authors = ["WAY29 <toloveu29@gmail.com>"]
 license = "MIT"
@@ -13,6 +13,7 @@ python = "^3.6"
 requests = "^2.23.0"
 colorama = "^0.4.3"
 prettytable = "^0.7.2"
+pysocks = "^1.7.1"
 
 [tool.poetry.dev-dependencies]
 icecream = "^2.0.0"

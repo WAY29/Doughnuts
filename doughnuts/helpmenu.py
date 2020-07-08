@@ -29,8 +29,8 @@ def register_helpmenu():
                   color.cyan("(Only for *unix) Write input and output to the log"))
             print(color.yellow("[!|lsh]            ") +
                   color.cyan("Run a command on local machine"))
-            print(color.yellow("[cls|clear]        ") +
-                  color.cyan("Clear screen"))
+            print(color.yellow("[proxy]            ") +
+                  color.cyan("Set proxy for requests"))
             print(color.yellow("[q|quit]           ") +
                   color.cyan("Quit this program"))
         elif (namespace == "webshell"):
@@ -82,7 +82,7 @@ def register_helpmenu():
             print(color.yellow("[chmod]        ") +
                   color.cyan("(Only for *unix) Changes file mode"))
             print(color.yellow("[t|touch]      ") + color.cyan(
-                "(Only for *unix) Specify a file whose modification time stamp is the same as a random file in the current directory"))
+                "Create an empty file or (Only for *unix) Specify a file whose modification time stamp is the same as a random file in the current directory"))
             print(color.yellow("[dump]         ") +
                   color.cyan("Package and compress files in a folder and download it"))
             print("\n[DETECT]\n")
@@ -92,7 +92,9 @@ def register_helpmenu():
                   color.cyan("Search writable php file"))
             print(color.yellow("[fc]           ") +
                   color.cyan("Search config file"))
-            print("\n[DATABASE(MYSQL)]\n")
+            print(color.yellow("[fl]           ") +
+                  color.cyan("Search log file (access.log,error.log)"))
+            print("\n[DATABASE]\n")
             print(color.yellow("[db_init]      ") +
                   color.cyan("Initialize the database connection"))
             print(color.yellow("[db_info]      ") +
@@ -121,9 +123,10 @@ def register_helpmenu():
                 "(Only for *unix) Try to bypass open_basedir by ini_set and chdir"))
             print(color.yellow("[bdf]          ") +
                   color.cyan("Try to bypass disable_functions"))
+            print(color.yellow("[proxy]            ") +
+                  color.cyan("Set proxy for requests"))
             print(color.yellow("[ps|portscan]  ") +
                   color.cyan("Scan intranet ports"))
             print(color.yellow("[socks]        ") + color.cyan(
                 "(Only for *unix) Run a socks5 server on the target system by python"))
-
             print()

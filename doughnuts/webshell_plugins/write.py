@@ -28,7 +28,7 @@ def run(web_file_path: str, editor: str = ""):
         if (not res):
             return
         text = res.r_text.strip()
-        if (match(r"\w+", text) and text != '0'):
+        if (match(r"\d+", text)):
             print(color.green(f"\nWrite {web_file_path} success.\n"))
         else:
             print(color.red(f"\nWrite {web_file_path} failed.\n"))

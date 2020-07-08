@@ -44,7 +44,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
     eg: connect {url} {method} {pass} {encoders_or_params...}
     """
     method = str(method).upper()
-    params_dict = {}
+    params_dict = {"headers": {}}
     if method == "GET":
         raw_key = "params"
     elif method == "POST":

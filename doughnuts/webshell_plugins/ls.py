@@ -1,8 +1,10 @@
-from libs.config import alias, color, order_alias
+from libs.config import alias, color
 from libs.myapp import send
 from libs.app import readline
 
-PREFIX_LIST = []
+PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload",
+               "d", "download", "dump", "mv", "rm", "cd", "chmod", "touch"]
+
 
 def get_php(path, mode):
     scan_code = f'$files=scandir("{path}");sort($files);'
@@ -58,10 +60,6 @@ def run(path: str = ".", mode: int = 1):
       - 1 : scandir
       - 2 : glob
     """
-    global PREFIX_LIST
-    if (not PREFIX_LIST):
-        prefix_list = ["c", "w", "e", "u", "d", "mv", "rm", "chmod", "touch"]
-        PREFIX_LIST = prefix_list + [order_alias(c) for c in prefix_list]
     res = send(get_php(path, mode))
     if (not res):
         return
@@ -72,13 +70,14 @@ def run(path: str = ".", mode: int = 1):
         info = line.split(" ")
         if (len(info) < 7):
             continue
+        ls_wordlist.append(info[6])
         prems, name = info[0], info[-1]
         if (prems[0] == 'd'):
             info[-1] = color.cyan(name)
             info[3] = ''
         elif ('x' in prems):
             info[-1] = color.green(name)
-        print("%s  %-4s  %-4s  %6s  %s  %s  %s" % (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
-        ls_wordlist.append(info[6])
+        print("%s  %-4s  %-4s  %6s  %s  %s  %s" %
+              (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
     for prefix in PREFIX_LIST:
         readline.add_prefix_wordlist(prefix, ls_wordlist)

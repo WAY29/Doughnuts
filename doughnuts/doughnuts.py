@@ -4,7 +4,7 @@ from sys import argv
 
 from helpmenu import register_helpmenu
 from libs.app import Loop_init, run_loop
-from libs.config import color, gset
+from libs.config import color, gset, gget
 from libs.debug import DEBUG
 from libs.myapp import banner
 
@@ -23,6 +23,8 @@ def main(print_banner: bool = True):
     if (print_banner):
         banner()
     gset("root_path", path.split(path.realpath(__file__))[0])
+    with open(path.join(gget("root_path"), "auxiliary", "user_agents", "ua.txt"), "r") as f:
+        gset("user_agents", f.readlines())
     register_helpmenu()
     run_loop(My_Loop_init(), leave_message="Bye! Doughnuts:)")
 
