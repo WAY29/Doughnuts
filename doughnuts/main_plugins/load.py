@@ -35,17 +35,17 @@ def run(id: int = 0):
             line_num = len(lines)
         if load_id <= line_num:
             data = lines[load_id - 1].strip().split("|")
-            gset("webshell.from_log", True, namespace="webshell")
+            gset("webshell.from_log", True, True, namespace="webshell")
             connect = pf["connect"].run(*data)
             if (not connect):
                 print("\nThis webshell seems to no longer working, do you want to delete it?\n\n(YES/no) >", end="")
                 flag = input()
-                if (flag.lower() in ['n', 'no']):
-                    return
-                del lines[load_id - 1]
-                f.seek(0)
-                f.truncate()
-                f.write("".join(lines))
+                if (flag.lower() in ['y', 'yes']):
+                    del lines[load_id - 1]
+                    f.seek(0)
+                    f.truncate()
+                    f.write("".join(lines))
+                gset("webshell.from_log", False, True, namespace="webshell")
         else:
             print(color.red("ID error"))
     finally:

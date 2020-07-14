@@ -27,5 +27,6 @@ def run(editor: str = ""):
         if (not res):
             return
         text = res.r_text.strip()
-        print(color.green("\nResult:\n") + text + "\n")
+        status_code = color.green(str(res.status_code)) if res.status_code == 200 else color.yellow(str(res.status_code))
+        print(f"\n{color.green('Result:')}\n[{status_code}] {color.cyan('length')}: {len(text)} \n{text}\n")
     remove(real_file_path)

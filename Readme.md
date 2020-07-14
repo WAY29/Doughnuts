@@ -179,6 +179,32 @@ python3 doughnuts.py
 ## 更新日志
 
 
+### 3.4
+- 修改命令
+   - ls命令现在可以进行二阶补全,并且可以尝试根据UID和GID获取对应用户名称(仅*unix)
+   
+   - exexute命令增加显示状态码和响应长度
+   
+   - reverse|re命令 
+   
+       - 添加bash、powershell(base64编码)、perl的反弹方式
+       - 修改python的反弹模式，直接执行命令而不再上传文件（base64编码）
+   
+       - 修改windows下php的反弹模式：写入一个exe文件进行反弹，并在10秒删除（可能在某些系统下无法成功反弹）
+       - reshell|rs命令 删除了mode2->script
+- 新增命令
+   - reaload命令(通用) 开发者命令，在不退出程序的情况下重新加载插件。
+   - set命令(通用) 设置变量，然后再以后的语句中使用#{varname}来使用它。
+   - get命令(通用) 获取已设置的变量。
+   - save命令(通用) 将已设置好的变量存储于该工具目录下的variables.config文件中，并且每次使用该工具时都会自动读取工具目录下variables.config文件中管道变量配置。
+   - checkvm命令(webshell) 简单的检查目标机器是否是虚拟机。
+   - priv命令(webshell) 寻找拥有suid,属于root的文件,并根据结果显示提权帮助(仅限于*unix)
+- 修复错误
+   - 在非debug-dev模式下调用ic不会再引发错误
+   - 在某些情况下连接成功无法写入记录
+
+
+
 ### 3.3
 - 请求时添加随机Referer与UA进行伪装
 - 新增依赖 pysocks

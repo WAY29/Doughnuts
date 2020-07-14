@@ -71,7 +71,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 3.3\n"))
+    print(color.green("Doughnut Version: 3.4\n"))
 
 
 def base64_encode(data: str, encoding="utf-8"):
@@ -169,6 +169,7 @@ def send(data: str, raw: bool = False, **extra_params):
     tail = randstr("!@#$%^&*()[];,.?", offset)
     pwd_b64 = b64encode(
         gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
+    raw_data = data
     if not raw:
         encode_head = "ob_start();" if encode_recv else ""
         encode_tail = """$ooDoo=ob_get_clean();
@@ -241,9 +242,11 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         for k, v in params_dict.items():
             print(f"{k}: ", end="")
             pprint(v)
-        print(color.green(f"----DEBUG RESPONSE----"))
-        print(req.r_text)
-        if (not req.r_text):
+        print("raw payload:\n" + raw_data)
+        if (req.text):
+            print(color.green(f"----DEBUG RESPONSE----"))
+            print(req.r_text)
+        else:
             print(color.green(f"----DEBUG RAW RESPONSE----"))
             print(req.text)
         print(color.yellow(f"------DEBUG END-------\n"))
@@ -1010,7 +1013,7 @@ unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_comman
     elif (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
-        return """print("No system execute function!\\n");"""
+        return """print("No system execute function\\n");"""
 
 
 def is_windows(remote: bool = True):

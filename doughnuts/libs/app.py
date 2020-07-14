@@ -2,10 +2,12 @@ import json
 import shlex
 from os import _exit, chdir, getcwd
 from re import compile as re_compile
+from re import findall, match
 from sys import exc_info, path
 from traceback import print_exception
+from ast import literal_eval
 
-from libs.config import gget, gset, order_alias, set_namespace
+from libs.config import custom_get, gget, gset, order_alias, set_namespace
 from libs.debug import DEBUG
 from libs.readline import LovelyReadline
 from Myplugin import Platform
@@ -19,17 +21,17 @@ readline = LovelyReadline()
 readline.init({}, {})
 
 """
-api ['']
-history_commands ['']
-leave_message ['']
-namespace ['']
-namespace_folders ['']
-folders_namespace ['']
-root_path ['']
-{platform}.pf ['']
-{platform}.prompt ['']
+api ['main']
+history_commands ['main']
+leave_message ['main']
+namespace ['main']
+namespace_folders ['main']
+folders_namespace ['main']
+root_path ['main']
+{platform}.pf ['main']
+{platform}.prompt ['main']
 
-{module_name}.reverse_alias [namespace]
+{plugin_name}.reverse_alias [namespace]
 order_alias [namespace]
 speical plugin platform:general   general commands
 speical plugin platform:encode    Encoders
@@ -80,7 +82,7 @@ class Loop_init:
 
 
 def import_platform(platform_path: str, api: str):
-    return Platform(platform_path, api)
+    return Platform(platform_path, api, message=True)
 
 
 def is_numberic(string):
@@ -93,9 +95,18 @@ def value_translation(arg):
         arg = float(arg) if "." in arg else int(arg)
     else:
         try:
-            arg = json.loads(arg.replace("'", '"'))
-        except json.JSONDecodeError:
+            arg = literal_eval(arg)
+        except (ValueError, SyntaxError):
             pass
+        if (isinstance(arg, str)):
+            custom_vars = findall("#{(\w+)}", arg)
+            if (match("#{(\w+)}", arg)):
+                arg = custom_get(custom_vars[0], arg)
+            else:
+                if (not custom_vars):
+                    return arg
+                for var in custom_vars:
+                    arg = arg.replace("#{%s}" % var, custom_get(var, ''))
     return arg
 
 
@@ -110,11 +121,12 @@ def args_parse(args: list) -> dict:
                 arg_dict[""].append(value_translation(each))
             else:
                 arg_name = each[1:]
+            arg_dict[arg_name] = True
         else:
             if arg_name == "":
                 arg_dict[""].append(value_translation(each))
             elif arg_name in arg_dict:
-                arg_dict[arg_name] = f"{arg_dict[arg_name]} {each}"
+                arg_dict[arg_name] = f"{arg_dict[arg_name]} {value_translation(each)}"
             else:
                 arg_dict[arg_name] = value_translation(each)
     if (not len(arg_dict[""])):
@@ -151,7 +163,7 @@ def loop_main():
             cmd = gget("preload_command")
             gset("preload_command", None, True)
         else:
-            print(gget(f"{namespace}.prompt"), end="")
+            print(gget(f"{namespace}.prompt"), end="", flush=True)
             if (gget("raw_input") is True):
                 cmd = input().strip()
             else:

@@ -21,8 +21,8 @@ def run():
             if (len(data) < 3):
                 continue
             data[2] = f"$ {data[2]} $"
-            encoders = (e for e in data[3:] if ":" not in e)
-            extra_params = " ".join(e for e in data[3:] if ":" in e)
+            encoders = (e for e in data[3:] if "=" not in e)
+            extra_params = " ".join(e for e in data[3:] if "=" in e)
             for func in encoders:
                 data[2] = f"{func}({data[2]})"
             print(

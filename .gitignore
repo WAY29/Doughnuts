@@ -1,7 +1,6 @@
 **/__pycache__/
 dist/
 doughnuts.egg-info/
-f_/
 target/
 
 .vscode/
@@ -18,3 +17,4 @@ libs/reverse_server_light_bak
 webshell2.csv
 publish.py
 doughnuts/log/log.txt
+doughnuts/variables.config

@@ -1,6 +1,5 @@
-from libs.config import alias, gget, color
+from libs.config import alias, color
 from libs.debug import DEBUG
-
 
 
 @alias(True)
@@ -17,6 +16,7 @@ def run(switch: str = "SEND"):
     switch = switch.upper()
     if (switch in ["LOOP", "SEND"]):
         DEBUG[switch] = not DEBUG[switch]
-        print(f"\nSet DEBUG switch {switch}: {color.green('On') if DEBUG[switch] else color.red('Off')}\n")
+        print(
+            f"\nSet DEBUG switch {switch}: {color.green('On') if DEBUG[switch] else color.red('Off')}\n")
     else:
         print(color.red("\nNo this switch\n"))

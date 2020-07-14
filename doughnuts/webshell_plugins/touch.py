@@ -31,7 +31,7 @@ def run(filename: str = ""):
     text = res.r_text.strip()
     if (match(r"\d+", text)):
         print(color.green(f"\nSuccessfully created an empty file {filename}.\n"))
-    elif ("No system execute function!" in text):
+    elif ("No system execute function" in text):
         print(color.red("\nall the system execute commands are disabled.\n"))
     else:
         print(color.green(f"\nModify time stamp {text} success.\n"))

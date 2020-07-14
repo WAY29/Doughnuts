@@ -1,6 +1,7 @@
 from os import system, chdir, getcwd
 
 from libs.config import alias, gget, color
+from libs.app import value_translation
 
 
 @alias(True,  func_alias="!")
@@ -10,7 +11,7 @@ def run(*coomands):
 
     Run a command on local machine.
     """
-    command = gget("raw_command_args")
+    command = str(value_translation(gget("raw_command_args")))
     if (command):
         if (command.startswith("cd ")):
             chdir(command[3:])
