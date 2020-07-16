@@ -155,9 +155,11 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
             extra = "|".join(encoders_or_params) + \
                 "|" if encoders_or_params else ""
             with open(path.join(root_path, "webshell.log"), "ab+") as f:
-                f.seek(-1, SEEK_END)
-                if f.read(1) != b"\n":
-                    f.write(b"\n")
+                text = f.read()
+                if (text):
+                    f.seek(-1, SEEK_END)
+                    if f.read(1) != b"\n":
+                        f.write(b"\n")
                 f.write(f"{url}|{method}|{pwd}|{extra}\n".encode())
         else:
             gset("webshell.from_log", False, True, "webshell")

@@ -179,6 +179,18 @@ python3 doughnuts.py
 ## 更新日志
 
 
+
+### 3.5
+
+- 修改命令
+    - checkvm命令现在归属于DETECT分类
+    - connect命令 在没有webshell.log或webshell.log没有内容时会存在连接失败的问题
+- 新增命令
+    - av命令 (仅限于windows)检测在目标系统中运行的杀毒软件
+
+
+
+
 ### 3.4
 - 修改命令
    - ls命令现在可以进行二阶补全,并且可以尝试根据UID和GID获取对应用户名称(仅*unix)

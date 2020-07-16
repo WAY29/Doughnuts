@@ -104,6 +104,10 @@ def register_helpmenu():
                   color.cyan("Search log file (access.log,error.log)"))
             print(color.yellow("[priv]         ") +
                   color.cyan("(Only for *unix) Find all files with suid belonging to root and try to get privilege escalation tips"))
+            print(color.yellow("[checkvm]      ") +
+                  color.cyan("Simply check whether the machine is a virtual machine"))
+            print(color.yellow("[av]           ") +
+                  color.cyan("(Only for windows) Detect anti-virus software running on the target system"))
             print("\n[DATABASE]\n")
             print(color.yellow("[db_init]      ") +
                   color.cyan("Initialize the database connection"))
@@ -143,8 +147,6 @@ def register_helpmenu():
                   color.cyan("Set proxy for requests"))
             print(color.yellow("[ps|portscan]  ") +
                   color.cyan("Scan intranet ports"))
-            print(color.yellow("[checkvm]      ") +
-                  color.cyan("Simply check whether the machine is a virtual machine"))
             print(color.yellow("[socks]        ") + color.cyan(
                 "(Only for *unix) Run a socks5 server on the target system by python"))
             print()
