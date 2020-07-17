@@ -5,7 +5,6 @@ from re import compile as re_compile
 from re import findall, match
 from sys import exc_info, path
 from traceback import print_exception
-from ast import literal_eval
 
 from libs.config import custom_get, gget, gset, order_alias, set_namespace
 from libs.debug import DEBUG
@@ -13,7 +12,6 @@ from libs.readline import LovelyReadline
 from Myplugin import Platform
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
-SPEICAL_PATTERN = re_compile(r"^\w+-\w+$")
 STDIN_STREAM = b''
 HISTORY = None
 HISTORY_POINTER = 0
@@ -34,8 +32,8 @@ root_path ['main']
 
 {plugin_name}.reverse_alias [namespace]
 order_alias [namespace]
-speical plugin platform:general   general commands
-speical plugin platform:encode    Encoders
+special plugin platform:general   general commands
+special plugin platform:encode    Encoders
 """
 
 
@@ -96,9 +94,8 @@ def value_translation(arg):
         arg = float(arg) if "." in arg else int(arg)
     else:
         try:
-            if (not SPEICAL_PATTERN.match(arg)):
-                arg = literal_eval(arg)
-        except (ValueError, SyntaxError):
+            arg = json.loads(arg)
+        except json.JSONDecodeError:
             pass
         if (isinstance(arg, str)):
             custom_vars = findall("#{(\w+)}", arg)
