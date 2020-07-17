@@ -192,6 +192,8 @@ python3 doughnuts.py
     - 修改版本提示
     - 更新avlist
     - 修改checkvm的代码逻辑
+- 3.5.2
+    - 更改priv命令的bug曾导致离线抓取的内容并不准确
 
 
 

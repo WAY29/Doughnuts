@@ -40,4 +40,5 @@ def run(find_path: str = "/usr&/bin"):
         if (cmd in priv_tips):
             print(color.yellow(cmd_path) + f" ( https://gtfobins.github.io/gtfobins/{cmd}/ )\n")
             for k, v in priv_tips[cmd].items():
-                print(f"""{color.cyan(k)}\n{color.green(v)}\n""")
+                info = '\n'.join(v)
+                print(f"""{color.cyan(k)}\n{color.green(info)}\n""")
