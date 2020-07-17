@@ -174,7 +174,7 @@ def run(mode: str = '0'):
         try:
             mode = int(mode)
         except ValueError:
-            print(color.red("\nMode error.\n"))
+            print(color.red("\nMode error\n"))
             return
         if (mode == 0):
             print(
@@ -183,4 +183,4 @@ def run(mode: str = '0'):
             set_mode(mode)
             pass
         else:
-            print(color.red("\nMode error.\n"))
+            print(color.red("\nMode error\n"))

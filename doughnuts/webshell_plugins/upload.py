@@ -41,12 +41,12 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
     text = res.r_text.strip()
     if text == "success":
         if (flag):
-            print(color.green(f"\nUpload {file_path} as {web_file_path} success.\n"))
+            print(color.green(f"\nUpload {file_path} as {web_file_path} success\n"))
         else:
-            print(color.green(f"\nUpload {file_path} success.\n"))
+            print(color.green(f"\nUpload {file_path} success\n"))
         return True
     elif text == "exist":
-        print(color.yellow(f"\n{web_file_path} exist.\n"))
+        print(color.yellow(f"\n{web_file_path} exist\n"))
         return True
     else:
         print("\n" + color.red("Upload error / Privileges not enough") + "\n")

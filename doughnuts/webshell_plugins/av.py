@@ -12,7 +12,7 @@ def run(find_path: str = "/usr&/bin"):
     (Only for windows) Detect anti-virus software running on the target system.
     ps: Need to run system commands
 
-    Origin: https://github.com/BrownFly/findAV
+    Origin: https://github.com/BrownFly/findAV, https://github.com/gh0stkey/avList
     """
     if (not is_windows()):
         print(color.red("\nTarget system isn't windows\n"))

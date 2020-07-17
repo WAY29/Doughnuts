@@ -13,7 +13,7 @@ def run():
     """
     disable_func_list = gget("webshell.disable_functions", "webshell")
     if (is_windows()):
-        print(color.red("Target system is windows"))
+        print(color.red("Target system isn't *unix"))
         return
     if (needle_functions & set(disable_func_list)):
         print("\n" + color.red("ini_set or chdir function is disabled") + "\n")

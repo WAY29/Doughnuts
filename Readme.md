@@ -187,6 +187,11 @@ python3 doughnuts.py
     - connect命令 在没有webshell.log或webshell.log没有内容时会存在连接失败的问题
 - 新增命令
     - av命令 (仅限于windows)检测在目标系统中运行的杀毒软件
+- 3.5.1
+    - 修改文件说明
+    - 修改版本提示
+    - 更新avlist
+    - 修改checkvm的代码逻辑
 
 
 
