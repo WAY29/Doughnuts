@@ -13,6 +13,7 @@ from libs.readline import LovelyReadline
 from Myplugin import Platform
 
 NUMBER_PATTERN = re_compile(r"^[-+]?\d*(\.?\d+|)$")
+SPEICAL_PATTERN = re_compile(r"^\w+-\w+$")
 STDIN_STREAM = b''
 HISTORY = None
 HISTORY_POINTER = 0
@@ -94,9 +95,9 @@ def value_translation(arg):
     if is_numberic(arg):
         arg = float(arg) if "." in arg else int(arg)
     else:
-        old_arg = arg
         try:
-            arg = literal_eval(arg)
+            if (not SPEICAL_PATTERN.match(arg)):
+                arg = literal_eval(arg)
         except (ValueError, SyntaxError):
             pass
         if (isinstance(arg, str)):
@@ -108,8 +109,6 @@ def value_translation(arg):
                     return arg
                 for var in custom_vars:
                     arg = arg.replace("#{%s}" % var, custom_get(var, ''))
-        elif is_numberic(arg):
-            arg = old_arg
     return arg
 
 
@@ -129,7 +128,10 @@ def args_parse(args: list) -> dict:
             if arg_name == "":
                 arg_dict[""].append(value_translation(each))
             elif arg_name in arg_dict:
-                arg_dict[arg_name] = f"{arg_dict[arg_name]} {value_translation(each)}"
+                if (arg_dict[arg_name] is True):
+                    arg_dict[arg_name] = value_translation(each)
+                else:
+                    arg_dict[arg_name] = f"{arg_dict[arg_name]} {value_translation(each)}"
             else:
                 arg_dict[arg_name] = value_translation(each)
     if (not len(arg_dict[""])):
