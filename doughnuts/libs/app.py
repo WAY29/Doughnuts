@@ -87,13 +87,14 @@ def import_platform(platform_path: str, api: str):
 
 def is_numberic(string):
     global NUMBER_PATTERN
-    return True if (NUMBER_PATTERN.match(string)) else False
+    return True if (isinstance(string, (int, float)) or NUMBER_PATTERN.match(string)) else False
 
 
 def value_translation(arg):
     if is_numberic(arg):
         arg = float(arg) if "." in arg else int(arg)
     else:
+        old_arg = arg
         try:
             arg = literal_eval(arg)
         except (ValueError, SyntaxError):
@@ -107,6 +108,8 @@ def value_translation(arg):
                     return arg
                 for var in custom_vars:
                     arg = arg.replace("#{%s}" % var, custom_get(var, ''))
+        elif is_numberic(arg):
+            arg = old_arg
     return arg
 
 
