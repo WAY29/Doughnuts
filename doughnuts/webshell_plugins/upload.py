@@ -49,4 +49,4 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         print(color.yellow(f"\n{web_file_path} exist\n"))
         return True
     else:
-        print("\n" + color.red("Upload error / Privileges not enough") + "\n")
+        print("\n" + color.red("Upload error / Over upload_max_filesize / Privileges not enough") + "\n")

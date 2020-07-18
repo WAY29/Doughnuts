@@ -73,12 +73,13 @@ function getinfo($file,$filter=true){
 }
 unamemap();
 %s
-echo "Listing: ".realpath("%s")."\\n";
+$realpath = realpath("%s");
+echo "Listing: ".$realpath."\\n";
 echo "==============================\\n";
 printf("%%-10s  %%-8s  %%-8s  %%6s  %%-12s %%s\\n","MODE","UID","GID","SIZE","MTIME","NAME");
 echo getinfo(".", false)."\\n";
 echo getinfo("..", false)."\\n";
-foreach($files as $file) {echo getinfo($file)."\\n";}""" % (scan_code, path)
+foreach($files as $file) {echo getinfo($realpath.DIRECTORY_SEPARATOR.$file)."\\n";}""" % (scan_code, path)
 
 
 @alias(True, func_alias="dir", p="path", m="mode")

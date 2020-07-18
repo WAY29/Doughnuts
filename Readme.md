@@ -42,10 +42,11 @@
     - 正向/反弹shell
     - (仅限双方均为*unix)获取完全交互式的反弹shell
     - 读/写/上传/下载/删除/搜索文件,目录打包
-    - 数据库管理
+    - 数据库管理,脱库
     - 端口扫描
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
+    - 检测suid文件并给出提权建议 / 检测杀毒软件
 - 易于扩展
 
 ## 依赖
@@ -177,6 +178,24 @@ python3 doughnuts.py
 - https://github.com/epinna/weevely3
 
 ## 更新日志
+
+
+
+### 3.7
+
+- 修改命令
+
+    - ls命令 曾导致在某些情况下无法获取文件的权限
+    - db_shell命令 曾导致在查询的内容多行返回的时候报错
+    - db_dump命令 没有预设pdo的dump,导致完全无法使用
+    - priv命令 使用php命令编写,不再需要运行系统命令
+    - shell webshell命令 曾导致无法进入伪交互界面
+    - reverse命令 
+        - linux下使用php反弹, 假如proc_open被禁用,不再反弹假shell,而是尝试执行系统命令使用php -n -r反弹shell
+        - 修复一个bug曾导致linux下使用python反弹失败
+        - 修复一个bug曾导致bash反弹失败
+    - rs命令 在proc_open被禁用的情况下会尝试执行系统命令使用php -n -r反弹shell
+    - generate命令 曾导致在外部使用时无法生成
 
 
 

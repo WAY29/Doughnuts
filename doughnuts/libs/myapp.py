@@ -71,7 +71,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 3.6\n"))
+    print(color.green("Doughnut Version: 3.7\n"))
 
 
 def base64_encode(data: str, encoding="utf-8"):
@@ -257,6 +257,10 @@ def delay_send(time: float, data: str, raw: bool = False, **extra_params):
     from time import sleep
     sleep(time)
     send(data, raw, **extra_params)
+
+
+def oneline_python(code: str):
+    return '''python -c "exec(\\"exec(__import__('base64').b64decode('%s'.encode()).decode())\\")"''' % base64_encode(code)
 
 
 def print_webshell_info():

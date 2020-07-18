@@ -35,7 +35,7 @@ def register_helpmenu():
                   color.cyan("Get variable(s), use #{varname} to use it"))
             print(color.yellow("[set]              ") +
                   color.cyan("Set variable, use #{varname} to use it"))
-            print(color.yellow("[save]              ") +
+            print(color.yellow("[save]             ") +
                   color.cyan("Save the configuration of the variable(s) to variables.config"))
             print(color.yellow("[reload]           ") +
                   color.cyan("Reload a plugin"))

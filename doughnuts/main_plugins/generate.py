@@ -2,6 +2,7 @@ from libs.config import alias, color
 from os import W_OK, access, path
 from string import ascii_letters, digits
 from random import sample, randint
+from libs.app import value_translation
 from webshell_template import pudding, icecream, popsicle, gululingbo
 
 
@@ -46,6 +47,7 @@ def run(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "",
         print(color.red("\nKeyword error\n"))
         return
     keyword = keyword_dict[raw_keyword]
+    _type = value_translation(_type)
     if (_type not in type_dict):
         print(color.red("\nType error\n"))
         return

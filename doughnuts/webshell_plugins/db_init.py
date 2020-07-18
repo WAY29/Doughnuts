@@ -93,7 +93,7 @@ def run(host: str, username: str, password: str, dbname: str = "", port: int = 0
     - mssql
     - access
 
-    eg: db_init {host} {username} {password} {dbname=''} {port=0} {dbms='mysql'}
+    eg: db_init {host} {username} {password} {dbname=''} {port=default} {dbms='mysql'}
     """
     dbms = dbms.lower()
     db_ext = dbms

