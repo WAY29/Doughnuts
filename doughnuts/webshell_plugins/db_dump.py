@@ -1,6 +1,5 @@
 from libs.config import alias, color, gget
-from libs.myapp import send
-from webshell_plugins.db_init import get_connect_code
+from libs.myapp import send, get_db_connect_code
 
 
 def get_php(database, web_file_path, encoding):
@@ -26,7 +25,7 @@ def get_php(database, web_file_path, encoding):
     }
     file_put_contents('%s',$content);
 }
-Sqldump();""" % (database, database, encoding, database, get_connect_code(dbname=database), encoding, web_file_path)
+Sqldump();""" % (database, database, encoding, database, get_db_connect_code(dbname=database), encoding, web_file_path)
 
 
 @alias(True, db="database")

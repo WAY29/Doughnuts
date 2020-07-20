@@ -1,5 +1,5 @@
 from libs.config import alias, color, gget, gset
-from libs.myapp import send
+from libs.myapp import send, get_db_connect_code
 
 
 PDO_DMBS_EXT_DICT = {"mssql": ("pdo_sqlsrv", "pdo_mssql", "pdo_odbc", "pdo_dblib"), "access": ("pdo_odbc", )}
@@ -12,29 +12,9 @@ foreach ($d as $v){if(extension_loaded($v)){echo $v.",";}}
 """ % ext_str
 
 
-def get_connect_code(host="", username="", password="", dbname="", port=""):
-    host = host if host else gget("db_host", "webshell", "")
-    username = username if username else gget("db_username", "webshell", "")
-    password = password if password else gget("db_password", "webshell", "")
-    dbname = dbname if dbname else gget("db_dbname", "webshell", "")
-    port = port if port else gget("db_port", "webshell", "")
-    connect_type = gget("db_connect_type", "webshell")
-    dbms = gget("db_ext", "webshell")
-    if (connect_type == "pdo"):
-        extra_port = f"port={port};" if port else ""
-        extra_dbname = f"dbname={dbname};" if dbname else ""
-        return f'$dsn="{dbms}:host={host};{extra_port}{extra_dbname}";$con= new PDO($dsn,"{username}","{password}");'
-    elif (connect_type == "mysqli"):
-        connect_code = '$con=mysqli_connect(%s);'
-        temp_code = ",".join([f'"{y}"' for y in filter(
-            lambda x: x, (host, username, password, dbname, port))])
-        return connect_code % temp_code
-    return ""
-
-
 def get_php(host, username, password, dbname, port):
     connect_type = gget("db_connect_type", "webshell")
-    connect_code = get_connect_code(host, username, password, dbname, port)
+    connect_code = get_db_connect_code(host, username, password, dbname, port)
     dbms = gget("db_dbms", "webshell")
     select_user_code = ""
     select_version_code = ""
@@ -53,7 +33,6 @@ $r=$con->query('%s');
 $rr=$r->fetch();echo $rr[0]."\\n";
 $r=$con->query('%s');
 $rr=$r->fetch();echo $rr[0]."\\n";
-$con = null;
 } catch (PDOException $e){
 die("Connect error: ". $e->getMessage());
 }""" % (connect_code, select_user_code, select_version_code)

