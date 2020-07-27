@@ -1,13 +1,14 @@
-from subprocess import check_output, Popen
 from base64 import b64decode, b64encode
+from binascii import b2a_hex
+from locale import getpreferredencoding
 from platform import system
 from pprint import pprint
-from random import randint, sample, choice
+from random import choice, randint, sample
+from string import ascii_letters, digits
+from subprocess import Popen, check_output
 from types import MethodType
 from urllib.parse import quote
-from string import ascii_letters, digits
 from uuid import uuid4
-from locale import getpreferredencoding
 
 import requests
 from prettytable import PrettyTable
@@ -15,7 +16,6 @@ from requests.models import complexjson
 from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
 
-from encode.hex import run as hex_encode
 from libs.config import color, gget, gset
 from libs.debug import DEBUG
 
@@ -82,6 +82,10 @@ def base64_encode(data: str, encoding="utf-8"):
 
 def base64_decode(data: str, encoding="utf-8"):
     return b64decode(data.encode()).decode(encoding=encoding)
+
+
+def hex_encode(data: str):
+    return b2a_hex(data.encode()).decode()
 
 
 def clean_trace():
