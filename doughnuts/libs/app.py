@@ -86,7 +86,7 @@ def import_platform(platform_path: str, api: str):
 
 def is_numberic(string):
     global NUMBER_PATTERN
-    return True if (isinstance(string, (int, float)) or NUMBER_PATTERN.match(string)) else False
+    return True if (len(string) and (isinstance(string, (int, float)) or NUMBER_PATTERN.match(string))) else False
 
 
 def value_translation(arg):
