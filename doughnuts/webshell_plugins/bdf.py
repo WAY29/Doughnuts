@@ -48,7 +48,6 @@ def set_mode(mode: int, test: bool = False):
             upload_result = upload(
                 path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x86_64.so"), filename, True)
             if (not upload_result):
-                print(color.red("\nUpload failed\n"))
                 return
             gset("webshell.ld_preload_path", filename, True, "webshell")
             gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")

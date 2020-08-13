@@ -12,6 +12,8 @@ def get_php(web_file_path: str, force: bool):
     }
     else if (move_uploaded_file($_FILES["file"]["tmp_name"], base64_decode("%s"))){
         print("success");
+    } else {
+        print($_FILES["file"]["error"]);
     }
 }""" % (str(not force).lower(), web_file_path, web_file_path)
 
@@ -39,6 +41,7 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
     if (not res):
         return
     text = res.r_text.strip()
+    print("test", file_path, web_file_path, text)
     if text == "success":
         if (flag):
             print(color.green(f"\nUpload {file_path} as {web_file_path} success\n"))
@@ -49,4 +52,4 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         print(color.yellow(f"\n{web_file_path} exist\n"))
         return True
     else:
-        print("\n" + color.red("Upload error / Privileges not enough") + "\n")
+        print("\n" + color.red("Upload error / Privileges not enough. Error code:") + text + "\n")

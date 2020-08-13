@@ -181,6 +181,12 @@ python3 doughnuts.py
 
 
 
+### 3.9
+
+- 增加对pcntl_exec执行系统命令的支持(Only for *unix)
+
+
+
 ### 3.8
 
 - 修改banner
