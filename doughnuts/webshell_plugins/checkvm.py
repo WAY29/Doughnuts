@@ -18,9 +18,10 @@ def run():
     else:
         commands = (get_system_code(each, True) for each in (
             "dmidecode -s system-product-name", "lshw -class system", "dmesg | grep -i virtual", "lscpu"))
+    isvm = False
     for command in commands:
         result = send(command).r_text
         if (any(vm in result for vm in type_vm)):
-            print(f"\nis VM: {color.green('True')}\n")
-        else:
-            print(f"\nis VM: {color.red('False')}\n")
+            isvm = True
+            break
+    print(f"\nis VM: {color.red('False') if (not isvm) else color.green('True')}\n")

@@ -261,7 +261,7 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     if not raw:
         encode_head = "ob_start();" if encode_recv else ""
         encode_tail = """$ooDoo=ob_get_clean();
-$encode = mb_detect_encoding($ooDoo, array("ASCII",'UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
+$encode = mb_detect_encoding($ooDoo, array('ASCII','UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
 $ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
 print(base64_encode($ooDoo));""" if encode_recv else ""
         phpcode = f"""error_reporting(0);{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + phpcode

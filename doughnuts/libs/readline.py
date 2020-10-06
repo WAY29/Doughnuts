@@ -231,6 +231,9 @@ class LovelyReadline:
                 elif(dch and ord(dch) == 3):  # ctrl+c
                     print_cyan('^C')
                     break
+                elif(dch and ord(dch) == 12):  # ctrl+l
+                    cmd = 'cls'
+                    break
                 if (completion):
                     completion = False
                     if (history_line and isinstance(history_line, bytes)):

@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from os import W_OK, access, path
+from os import path
 from string import ascii_letters, digits
 from random import sample, randint
 from webshell_template import pudding, icecream, popsicle, gululingbo
@@ -19,6 +19,10 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = "", _type: int = 1):
 
 
 def outside_generate(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
+    try:
+        _type = int(_type)
+    except ValueError:
+        print(color.red("\nType error\n"))
     run(file_path, keyword, passwd, salt, _type)
 
 
@@ -52,7 +56,7 @@ def run(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "",
     passwd = passwd if passwd else ranstr(randint(5, 8))
     salt = salt if salt else ranstr(randint(5, 8))
     php = get_php(keyword, passwd, salt, _type)
-    if (access(path.dirname(file_path), W_OK)):
+    if (path.exists(file_path)):
         print(color.red("\nFile path is invalid\n"))
         return
     with open(file_path, "w+") as f:

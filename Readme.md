@@ -184,8 +184,12 @@ python3 doughnuts.py
 ### 3.9
 
 - 增加对pcntl_exec执行系统命令的支持(Only for *unix)
-
-
+- 3.9.2
+    - 修改reverse命令以bash方式反弹shell存在的问题
+    - 删除测试语句
+    - 修改checkvm命令的显示问题
+    - 添加对ctrl+l的支持
+    - 修复在外部调用generate报错的问题
 
 ### 3.8
 
