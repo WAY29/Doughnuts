@@ -1,5 +1,6 @@
 from libs.config import alias, gget
-from libs.myapp import send, print_tree
+from libs.myapp import send, color, print_tree
+from json import JSONDecodeError
 
 
 def get_php(file_path: str):
@@ -34,8 +35,12 @@ def run(web_file_path: str = ''):
     """
     web_file_path = web_file_path if (len(web_file_path)) else gget("webshell.root", "webshell")
     php = get_php(web_file_path)
-    res = send(php)
-    if (not res):
+    try:
+        res = send(php)
+        if (not res):
+            return
+        file_tree = res.r_json()
+    except JSONDecodeError:
+        print(color.red("Parse Error"))
         return
-    file_tree = res.r_json()
     print_tree(web_file_path, file_tree)

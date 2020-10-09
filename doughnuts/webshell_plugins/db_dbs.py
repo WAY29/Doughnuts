@@ -1,5 +1,5 @@
 from libs.config import alias, color, gget
-from webshell_plugins.db_shell import execute_sql_command
+from libs.myapp import execute_sql_command
 
 
 @alias()

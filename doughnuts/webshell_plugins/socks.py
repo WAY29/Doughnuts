@@ -99,6 +99,7 @@ def run(port: int = 8888):
     eg: socks {port=8888}
     """
     if (is_windows()):
+        print(color.red("Target system isn't *unix"))
         return
     flag = has_env("python")
     if flag:

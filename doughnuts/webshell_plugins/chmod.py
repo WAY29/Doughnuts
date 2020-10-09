@@ -12,7 +12,7 @@ def run(mode: str, *web_file_paths):
     eg: chmod {mode} {web_file_path}
     """
     if (is_windows()):
-        print(color.red("Target system is windows."))
+        print(color.red("Target system isn't *unix"))
         return
     mode = str(mode)
     if (len(mode) < 4):

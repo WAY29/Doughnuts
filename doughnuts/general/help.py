@@ -57,5 +57,5 @@ def run(order: str = ""):
                 arg = "%s(*)" % arg
         else:
             desc = "[?] %s" % desc[0]
-            arg = "%s(*)" % arg
+            arg = "%s(?)" % arg
         print("%s%-25s%s%s\n" % (block_two, arg, block_two, desc))

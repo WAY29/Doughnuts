@@ -1,4 +1,5 @@
 from os import listdir, path
+from importlib import reload
 
 
 class Platform():
@@ -30,32 +31,37 @@ class Platform():
         loaded = False
         required = True
         try:
-            plugin = __import__(self.plugin_path + '.' +
-                                pluginName, fromlist=[pluginName])
-            if (self.__require != ''):
-                if (hasattr(plugin, self.__require)):
+            if (pluginName not in self.__plugin_dict):
+                plugin = __import__(self.plugin_path + '.' +
+                                    pluginName, fromlist=[pluginName])
+                if (self.__require != ''):
+                    if (hasattr(plugin, self.__require)):
+                        loaded = True
+                    else:
+                        required = False  # 没有需要的插件
+                else:
                     loaded = True
-                else:
-                    required = False  # 没有需要的插件
+                self.total_plugins += 1
+                if (loaded is True):  # 加载成功
+                    self.__plugin_dict[pluginName] = plugin
+                    self.loaded_plugins += 1
+                if (self.__message is True):  # 需要输出信息
+                    if (required is True):
+                        self.__message_dict[pluginName] = self.plugin_path + \
+                            '.' + pluginName + ' Success Loaded.'
+                    else:
+                        self.__message_dict[pluginName] = self.plugin_path + \
+                            '.' + pluginName + ' Failed Loaded by missing required.'
             else:
+                reload(self.__plugin_dict[pluginName])
                 loaded = True
-            self.total_plugins += 1
-            if (loaded is True):  # 加载成功
-                self.__plugin_dict[pluginName] = plugin
-                self.loaded_plugins += 1
-            if (self.__message is True):  # 需要输出信息
-                if (required is True):
-                    self.__message_dict[pluginName] = self.plugin_path + \
-                        '.' + pluginName + ' Success Loaded.'
-                else:
-                    self.__message_dict[pluginName] = self.plugin_path + \
-                        '.' + pluginName + ' Failed Loaded by missing required.'
-
         except ImportError as e:  # 导入错误
             # print(e)
+            loaded = False
             if (self.__message is True):
                 self.__message_dict[pluginName] = self.plugin_path + \
                     '.' + pluginName + ' Failed Loaded. ' + str(e)
+        return loaded
 
     def load_all(self, plugin_path: str):  # 读取目录下所有插件
         for filename in listdir(plugin_path):
@@ -87,6 +93,11 @@ class Platform():
 
     def get_messages(self):  # 获取所有信息
         return self.__message_dict.values()
+
+    def get_message(self, pluginName):  # 获取某个插件的信息
+        if (pluginName in self.__message_dict):
+            return self.__message_dict[pluginName]
+        return ""
 
     def print_messages(self):  # 输出所有信息
         for v in self.__message_dict.values():

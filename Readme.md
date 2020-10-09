@@ -20,7 +20,8 @@
 
 - 支持连接,记录,管理webshell,方便下一次连接
 - 基于eval的连接,支持GET,POST,COOKIE,HEADER四种连接方式
-- 支持编码payload(已内置base64,str_rot13,hex三种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
+- 请求伪装
+- 支持编码payload(已内置base64,str_rot13,hex,doughnuts四种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
 - 支持绕过open_basedir
 - 支持多种方式绕过disable_functions
     - 自动识别
@@ -41,16 +42,18 @@
     - 正向/反弹shell
     - (仅限双方均为*unix)获取完全交互式的反弹shell
     - 读/写/上传/下载/删除/搜索文件,目录打包
-    - mysql数据库管理
+    - 数据库管理,脱库
     - 端口扫描
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
+    - 检测suid文件并给出提权建议 / 检测杀毒软件
 - 易于扩展
 
 ## 依赖
 
 - Python3.6+
 - Python-requests
+- Python-pysocks
 - Python-colorama
 - Python-prettytable
 
@@ -62,15 +65,15 @@
 
 ```sh
 # 安装
-python3 -m pip install doughnuts -i https://pypi.org/simple/
-# 应该对所有系统生效
-python3 -m doughnuts
+python3 -m pip install doughnuts --user -i https://pypi.org/simple/
 # (windows)添加一个bat文件到python根目录下
 # (*unix)添加一个可执行文件到/usr/local/bin下
-# 以方便调用
+# 安装启动器,以方便调用
 python3 -m doughnuts.install
 # 运行
 doughnuts
+# 或
+python3 -m doughnuts
 # enjoy it!
 ```
 
@@ -95,15 +98,15 @@ poetry run python3 Doughnuts/doughnuts.py # 应该对所有系统生效
 # 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
-pip3 install -r requirements.txt 或 pip3 install requests colorma prettytable
-# 应该对所有系统生效
-python3 doughnuts.py
+pip3 install -r requirements.txt 或 pip3 install requests pysocks colorma prettytable
 # (windows)添加一个bat文件到python根目录下
 # (*unix)添加一个可执行文件到/usr/local/bin下
-# 以方便调用
+# 安装启动器,以方便调用
 python3 install.py
 # 运行
 doughnuts
+# 或
+python3 doughnuts.py
 # enjoy it!
 ```
 
@@ -175,6 +178,109 @@ doughnuts
 - https://github.com/epinna/weevely3
 
 ## 更新日志
+
+
+
+### 3.9
+
+- 增加对pcntl_exec执行系统命令的支持(Only for *unix)
+- 3.9.2
+    - 修改reverse命令以bash方式反弹shell存在的问题
+    - 删除测试语句
+    - 修改checkvm命令的显示问题
+    - 添加对ctrl+l的支持
+    - 修复在外部调用generate报错的问题
+
+### 3.8
+
+- 修改banner
+- 修改命令
+    - bdf命令 添加MYSQL-UDF模式,要求目标数据库是mysql且大于等于5.1,并使用db_init连接至目标数据库(该模式仍处于实验之中)
+    - db_shell命令 曾导致在查询的内容多行返回的时候报错
+
+
+
+### 3.7
+
+- 修改命令
+
+    - ls命令 曾导致在某些情况下无法获取文件的权限
+    - db_shell命令 曾导致在查询的内容多行返回的时候报错
+    - db_dump命令 没有预设pdo的dump,导致完全无法使用
+    - priv命令 使用php命令编写,不再需要运行系统命令
+    - shell webshell命令 曾导致无法进入伪交互界面
+    - reverse命令 
+        - linux下使用php反弹, 假如proc_open被禁用,不再反弹假shell,而是尝试执行系统命令使用php -n -r反弹shell
+        - 修复一个bug曾导致linux下使用python反弹失败
+        - 修复一个bug曾导致bash反弹失败
+    - rs命令 在proc_open被禁用的情况下会尝试执行系统命令使用php -n -r反弹shell
+    - generate命令 曾导致在外部使用时无法生成
+
+
+
+### 3.6
+
+- **修复一个严重的解析错误!!!**
+- 由于种种解析上的意外,将解析回退为稳定版本
+
+### 3.5
+
+- 修改命令
+    - checkvm命令现在归属于DETECT分类
+    - connect命令 在没有webshell.log或webshell.log没有内容时会存在连接失败的问题
+- 新增命令
+    - av命令 (仅限于windows)检测在目标系统中运行的杀毒软件
+- 3.5.1
+    - 修改文件说明
+    - 修改版本提示
+    - 更新avlist
+    - 修改checkvm的代码逻辑
+- 3.5.2
+    - 更改priv命令的bug曾导致离线抓取的内容并不准确
+- 3.5.3(作废)
+    - 修复了在python3.6的情况下某些错误导致参数解析出现问题
+
+
+### 3.4
+- 修改命令
+   - ls命令现在可以进行二阶补全,并且可以尝试根据UID和GID获取对应用户名称(仅*unix)
+   
+   - exexute命令增加显示状态码和响应长度
+   
+   - reverse|re命令 
+   
+       - 添加bash、powershell(base64编码)、perl的反弹方式
+       - 修改python的反弹模式，直接执行命令而不再上传文件（base64编码）
+   
+       - 修改windows下php的反弹模式：写入一个exe文件进行反弹，并在10秒删除（可能在某些系统下无法成功反弹）
+       - reshell|rs命令 删除了mode2->script
+- 新增命令
+   - reaload命令(通用) 开发者命令，在不退出程序的情况下重新加载插件。
+   - set命令(通用) 设置变量，然后再以后的语句中使用#{varname}来使用它。
+   - get命令(通用) 获取已设置的变量。
+   - save命令(通用) 将已设置好的变量存储于该工具目录下的variables.config文件中，并且每次使用该工具时都会自动读取工具目录下variables.config文件中管道变量配置。
+   - checkvm命令(webshell) 简单的检查目标机器是否是虚拟机。
+   - priv命令(webshell) 寻找拥有suid,属于root的文件,并根据结果显示提权帮助(仅限于*unix)
+- 修复错误
+   - 在非debug-dev模式下调用ic不会再引发错误
+   - 在某些情况下连接成功无法写入记录
+
+
+
+### 3.3
+- 请求时添加随机Referer与UA进行伪装
+- 新增依赖 pysocks
+- 新增命令
+    - proxy命令(通用)  设置连接代理,支持socks,http代理
+    - fl命令(通用) 类似于fc命令，寻找access.log与error.log日志
+- 修改命令
+    - db系列命令 现在支持使用PDO扩展来连接其他数据库
+    - db_init 添加参数，支持使用PDO连接其他数据库。参数db_init {host} {username} {password} {dbname=''} {port=0} {dbms='mysql'}
+    - touch命令 增加创建空文件的功能（不限目标系统）
+- 修复bug
+    - 在某些情况下调用外带编辑器失败
+    - ls后输入相关命令无法补全文件夹名
+- 修改文本
 
 
 ### V3.2

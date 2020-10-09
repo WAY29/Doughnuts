@@ -1,8 +1,8 @@
 from libs.config import gget, alias, color, set_namespace
 from libs.myapp import send, base64_encode, is_windows, get_system_code
-from libs.app import readline
+from libs.app import readline, value_translation
 
-NEW_WINDOWS_WORDLIST = {"common_wordlist": [
+NEW_WINDOWS_WORDLIST = {"common_wordlist": (
     "echo",
     "dir",
     "cd",
@@ -34,9 +34,9 @@ NEW_WINDOWS_WORDLIST = {"common_wordlist": [
     "ipconfig",
     "netstat",
     "arp",
-]}
+)}
 
-NEW_UNIX_WORDLIST = {"common_wordlist": [
+NEW_UNIX_WORDLIST = {"common_wordlist": (
     "echo",
     "ls",
     "ls -al",
@@ -66,7 +66,7 @@ NEW_UNIX_WORDLIST = {"common_wordlist": [
     "gzip",
     "tar",
     "grep",
-]}
+)}
 
 
 @alias(True, func_alias="s")
@@ -76,7 +76,7 @@ def run(*commands):
 
     Get a temporary shell of target system by system function or just run a shell command.
     """
-    command = gget("raw_command_args")
+    command = str(value_translation(gget("raw_command_args")))
     if (command):
         res = send(get_system_code(command))
         if (not res):
@@ -96,7 +96,7 @@ def run(*commands):
     try:
         while gget("loop"):
             print(prompt % pwd, end="")
-            command = readline()
+            command = str(value_translation(readline()))
             lower_command = command.lower()
             if (lower_command.lower() in ['exit', 'quit', 'back']):
                 print()

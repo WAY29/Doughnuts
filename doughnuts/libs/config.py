@@ -8,19 +8,31 @@ GLOBAL_DICT = {}
 NAMESPACE_CALLBACK_LIST = []
 
 
-def gget(key, namespace: str = "", default=None) -> Any:
+def gget(key, namespace: str = "main", default=None) -> Any:
     if (namespace not in GLOBAL_DICT):
         return None
     return GLOBAL_DICT[namespace].get(key, default)
 
 
-def gset(key, value, force=False, namespace: str = "") -> bool:
+def gset(key, value, force=False, namespace: str = "main") -> bool:
     if namespace not in GLOBAL_DICT:
         GLOBAL_DICT[namespace] = {}
     if key not in GLOBAL_DICT or (key in GLOBAL_DICT and force):
         GLOBAL_DICT[namespace][key] = value
         return True
     return False
+
+
+def custom_get(key, default=None) -> Any:
+    return gget(key, "custom", default)
+
+
+def custom_gets() -> Any:
+    return GLOBAL_DICT.get("custom", {})
+
+
+def custom_set(key, value) -> Any:
+    return gset(key, value, True, "custom")
 
 
 def conver_args(arg_dict: dict, arg_name_dict: dict) -> dict:  # 别名转换

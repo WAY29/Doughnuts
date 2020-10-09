@@ -1,14 +1,12 @@
 from re import match
 
-from prettytable import PrettyTable
-
 from libs.app import readline
 from libs.config import alias, color, gget, gset, set_namespace
-from libs.myapp import base64_encode, send
-from webshell_plugins.db_init import get_connect_code
+from libs.myapp import send, execute_sql_command
 from webshell_plugins.db_use import get_php as check_database
 
-NEW_SQL_WORDLIST = {"common_wordlist": [
+
+NEW_SQL_WORDLIST = {"common_wordlist": (
     "use",
     "select",
     "from",
@@ -29,32 +27,7 @@ NEW_SQL_WORDLIST = {"common_wordlist": [
     "set",
     "prepare",
     "execute",
-]}
-
-
-def get_php(command, database):
-    return """%s
-$r=$con->query(base64_decode('%s'));
-$rows=$r->fetch_all(MYSQLI_ASSOC);
-foreach($rows[0] as $k=>$v){
-    echo "$k*,";
-}
-echo "\\n";
-foreach($rows as $array){foreach($array as $k=>$v){echo "$v*,";};echo "\\n";}""" % (get_connect_code(dbname=database), base64_encode(command))
-
-
-def execute_sql_command(command, database):
-    res = send(get_php(command, database))
-    if (not res):
-        return ''
-    rows = res.r_text.strip().split("\n")
-    if (len(rows) > 1):
-        info = rows[0].split("*,")[:-1]
-        form = PrettyTable(info)
-        for row in rows[1:]:
-            form.add_row(row.split("*,")[:-1])
-        return form
-    return ''
+)}
 
 
 @alias()
@@ -87,19 +60,22 @@ def run():
                 continue
             if (lower_command.startswith("use ") and len(lower_command) > 4):
                 try:
-                    temp_database = match("use ([^;]*);?", lower_command).group(1)
+                    temp_database = match(
+                        "use ([^;]*);?", lower_command).group(1)
                     res = send(check_database(temp_database))
                     if ("Connect error" in res.r_text):
                         print("\n" + color.red(res.r_text.strip()) + "\n")
                     else:
                         database = temp_database
-                        print("\n" + color.green(f"Change current database: {database}") + "\n")
+                        print(
+                            "\n" + color.green(f"Change current database: {database}") + "\n")
                 except (IndexError, AttributeError):
                     print("\n" + color.red("SQL syntax error") + "\n")
             else:
                 form = execute_sql_command(command, database)
                 if (form == ''):
-                    print("\n" + color.red("Connection Error / SQL syntax error") + "\n")
+                    print(
+                        "\n" + color.red("Connection Error / SQL syntax error") + "\n")
                 else:
                     print(execute_sql_command(command, database))
     finally:

@@ -1,5 +1,5 @@
 from libs.config import alias, color, gget
-from webshell_plugins.db_shell import execute_sql_command
+from libs.myapp import execute_sql_command
 
 
 @alias(True, db="database")
@@ -8,7 +8,7 @@ def run(database: str = ""):
     db_tables
 
     Output all tables of a database.
-    
+
     eg: db_init {database=current_database}
     """
     if (not gget("db_connected", "webshell")):

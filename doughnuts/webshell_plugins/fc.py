@@ -5,7 +5,7 @@ from json import JSONDecodeError
 
 def get_php(file_path: str):
     return """$cfgs=array("cfg","config","db","database");
-function is_cfg($v,$vv){
+function filter($v,$vv){
     return strstr($v, $vv);
 }
 function scan_rescursive($directory) {
@@ -18,7 +18,7 @@ function scan_rescursive($directory) {
             $res[$folder] = scan_rescursive($item);
             continue;
         }
-        else if (count(array_filter(array_map("is_cfg", array_fill(0, count($cfgs), $item), $cfgs)))){
+        else if (count(array_filter(array_map("filter", array_fill(0, count($cfgs), $item), $cfgs)))){
             $res[] = base64_encode(basename($item));
         }
     }
@@ -44,6 +44,6 @@ def run(web_file_path: str = ""):
             return
         file_tree = res.r_json()
     except JSONDecodeError:
-        print(color.red("Null Error"))
+        print(color.red("Parse Error"))
         return
     print_tree(web_file_path, file_tree)

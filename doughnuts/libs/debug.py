@@ -1,4 +1,1 @@
-DEBUG = {}
-DEBUG["LOOP"] = 0
-DEBUG["SEND"] = 0
-DEBUG["DEV"] = 0
+DEBUG = {"LOOP": 0, "SEND": 0, "DEV": 1}
