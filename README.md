@@ -4,6 +4,6 @@
 
 ### Doughnuts 3.9.2
 
-  * 更多细节：[https://www.doughnuts.cc/](https://www.doughnuts.cc/)![](../.gitbook/assets/visitor.png) 
+  * 更多细节：[https://doughnuts.cc/](https://www.doughnuts.cc/)![](../.gitbook/assets/visitor.png) 
 
 ## 
