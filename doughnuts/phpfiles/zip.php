@@ -1,202 +1,172 @@
 <?php
 ini_set('memory_limit', '2048M');
 set_time_limit(0);
-class PHPzip
+class PHPZIP
 {
-var $file_count = 0 ;
-var $datastr_len   = 0;
-var $dirstr_len = 0;
-var $filedata = '';
-var $gzfilename;
-var $fp;
-var $dirstr='';
-var $filefilters = array();
-var $data;
-
-function SetFileFilter($filetype)
-{
-$this->filefilters = explode('|',$filetype);
-}
-function unix2DosTime($unixtime = 0)
-{
-   $timearray = ($unixtime == 0) ? getdate() : getdate($unixtime);
-   if ($timearray['year'] < 1980)
-   {
-    $timearray['year']    = 1980;
-    $timearray['mon']     = 1;
-    $timearray['mday']    = 1;
-    $timearray['hours']   = 0;
-    $timearray['minutes'] = 0;
-    $timearray['seconds'] = 0;
-   }
-   return (($timearray['year'] - 1980) << 25) | ($timearray['mon'] << 21) | ($timearray['mday'] << 16) | ($timearray['hours'] << 11) | ($timearray['minutes'] << 5) | ($timearray['seconds'] >> 1);
-}
-function startfile($path = 'dodo.zip')
-{
-   $this->gzfilename=$path;
-   $mypathdir=array();
-   do
-   {
-    $mypathdir[] = $path = dirname($path);
-   } while($path != '.');
-   @end($mypathdir);
-   do
-   {
-    $path = @current($mypathdir);
-    @mkdir($path);
-   }while(@prev($mypathdir));
-
-   if($this->fp=@fopen($this->gzfilename,"w"))
-   {
-    @fclose($this->fp);
-    return true;
-   }
-   return false;
-}
-function addfile($data, $name)
-{
-   $name = iconv("UTF-8","gbk//TRANSLIT",str_replace('\\', '/', $name));
-   if(strrchr($name,'/')=='/')
-    return $this->adddir($name);
-   if(!empty($this->filefilters))
-   {
-    if (!in_array(end(explode(".",$name)), $this->filefilters))
+    private $ctrl_dir     = array();
+    private $datasec      = array();
+	
+    var $fileList = array();
+    public function visitFile($path)
     {
-     return;
-    }
-   }
-   $dtime = dechex($this->unix2DosTime());
-   $hexdtime = '\x' . $dtime[6] . $dtime[7] . '\x' . $dtime[4] . $dtime[5] . '\x' . $dtime[2] . $dtime[3] . '\x' . $dtime[0] . $dtime[1];
-   eval('$hexdtime = "' . $hexdtime . '";');
-   $unc_len = strlen($data);
-   $crc = crc32($data);
-   $zdata   = gzcompress($data);
-   $c_len   = strlen($zdata);
-   $zdata   = substr(substr($zdata, 0, strlen($zdata) - 4), 2);
-   $datastr = "\x50\x4b\x03\x04";
-   $datastr .= "\x14\x00";            // ver needed to extract
-   $datastr .= "\x00\x00";            // gen purpose bit flag
-   $datastr .= "\x08\x00";            // compression method
-   $datastr .= $hexdtime;             // last mod time and date
-   $datastr .= pack('V', $crc);             // crc32
-   $datastr .= pack('V', $c_len);           // compressed filesize
-   $datastr .= pack('V', $unc_len);         // uncompressed filesize
-   $datastr .= pack('v', strlen($name));    // length of filename
-   $datastr .= pack('v', 0);                // extra field length
-   $datastr .= $name;
-   $datastr .= $zdata;
-   $datastr .= pack('V', $crc);                 // crc32
-   $datastr .= pack('V', $c_len);               // compressed filesize
-   $datastr .= pack('V', $unc_len);             // uncompressed filesize
-   $this->data.=$datastr;
-   $my_datastr_len = strlen($datastr);
-   unset($datastr);
-   $dirstr = "\x50\x4b\x01\x02";
-   $dirstr .= "\x00\x00";                 // version made by
-   $dirstr .= "\x14\x00";                 // version needed to extract
-   $dirstr .= "\x00\x00";                 // gen purpose bit flag
-   $dirstr .= "\x08\x00";                 // compression method
-   $dirstr .= $hexdtime;                  // last mod time & date
-   $dirstr .= pack('V', $crc);            // crc32
-   $dirstr .= pack('V', $c_len);          // compressed filesize
-   $dirstr .= pack('V', $unc_len);        // uncompressed filesize
-   $dirstr .= pack('v', strlen($name) ); // length of filename
-   $dirstr .= pack('v', 0 );              // extra field length
-   $dirstr .= pack('v', 0 );              // file comment length
-   $dirstr .= pack('v', 0 );              // disk number start
-   $dirstr .= pack('v', 0 );              // internal file attributes
-   $dirstr .= pack('V', 32 );             // external file attributes - 'archive' bit set
-   $dirstr .= pack('V',$this->datastr_len ); // relative offset of local header
-   $dirstr .= $name;
-   $this->dirstr .= $dirstr;
-   $this -> file_count ++;
-   $this -> dirstr_len += strlen($dirstr);
-   $this -> datastr_len += $my_datastr_len;
-}
-function adddir($name)
-{
-   $name = str_replace("\\", "/", $name);
-   $datastr = "\x50\x4b\x03\x04\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-   $datastr .= pack("V",0).pack("V",0).pack("V",0).pack("v", strlen($name) );
-   $datastr .= pack("v", 0 ).$name.pack("V", 0).pack("V", 0).pack("V", 0);
-   $this->data.=$datastr;
-   $my_datastr_len = strlen($datastr);
-   unset($datastr);
-   $dirstr = "\x50\x4b\x01\x02\x00\x00\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-   $dirstr .= pack("V",0).pack("V",0).pack("V",0).pack("v", strlen($name) );
-   $dirstr .= pack("v", 0 ).pack("v", 0 ).pack("v", 0 ).pack("v", 0 );
-   $dirstr .= pack("V", 16 ).pack("V",$this->datastr_len).$name;
-   $this->dirstr .= $dirstr;
-   $this -> file_count ++;
-   $this -> dirstr_len += strlen($dirstr);
-   $this -> datastr_len += $my_datastr_len;
-}
-function createfile()
-{
-   $endstr = "\x50\x4b\x05\x06\x00\x00\x00\x00" .
-   pack('v', $this -> file_count) .
-   pack('v', $this -> file_count) .
-   pack('V', $this -> dirstr_len) .
-   pack('V', $this -> datastr_len) .
-   "\x00\x00";
-   return $this->data.$this->dirstr.$endstr;
-}
-}
-function listfiles($dir=".")
-{
-  global $dodozip;
-  $sub_file_num = 0;
-  if(is_file("$dir"))
-  {
-    if(realpath($dodozip ->gzfilename)!=realpath("$dir"))
-    {
-      $dodozip -> addfile(implode('',file("$dir")),"$dir");
-      return 1;
-    }
-    return 0;
-  }
+        global $fileList;
+        $path = str_replace("\\", "/", $path);
+        $fdir = dir($path);
 
-  $handle=opendir("$dir");
-  while ($file = readdir($handle))
-  {
-    if($file=="."||$file==".."){
-      continue;
-    }
+        while(($file = $fdir->read()) !== false)
+        {
+            if($file == '.' || $file == '..'){ continue; }
 
-    if(is_dir("$dir/$file")){
-      $sub_file_num += listfiles("$dir/$file");
-    }else{
-      if(realpath($dodozip ->gzfilename)!=realpath("$dir/$file")){
-        $dodozip -> addfile(implode('',file("$dir/$file")),"$dir/$file");
-        $sub_file_num ++;
-      }
-    }
-  }
-  closedir($handle);
-  if(!$sub_file_num){
-    $dodozip -> addfile("","$dir/");}
-  return $sub_file_num;}
-function Zip_action($dfiles){
-  global $dodozip;
-  $filenum = 0;
-  foreach($dfiles as $file){
-    if(is_file($file)){
-      if(!empty($dodozip -> filefilters)){
-        if (!in_array(end(explode(".",$file)), $dodozip -> filefilters)){
-          continue;
+            $pathSub    = preg_replace("*/{2,}*", "/", $path."/".$file);  // 替换多个反斜杠
+            $fileList[] = is_dir($pathSub) ? $pathSub."/" : $pathSub;
+            if(is_dir($pathSub)){ $this->visitFile($pathSub); }
         }
-      }
+        $fdir->close();
+        return $fileList;
     }
-    $filenum += listfiles($file);
-  }
-   $filecode = $dodozip -> createfile();
-   $filename=$_SERVER['HTTP_HOST'].".zip";
-   header("Content-type: application/unknown");
-   header("Accept-Ranges: bytes");
-   header("Content-Disposition: attachment; filename=$filename");
-   echo $filecode;
+
+
+    private function unix2DosTime($unixtime = 0)
+    {
+        $timearray = ($unixtime == 0) ? getdate() : getdate($unixtime);
+
+        if($timearray['year'] < 1980)
+        {
+            $timearray['year']    = 1980;
+            $timearray['mon']     = 1;
+            $timearray['mday']    = 1;
+            $timearray['hours']   = 0;
+            $timearray['minutes'] = 0;
+            $timearray['seconds'] = 0;
+        }
+
+        return (  ($timearray['year'] - 1980) << 25)
+        | ($timearray['mon'] << 21)
+        | ($timearray['mday'] << 16)
+        | ($timearray['hours'] << 11)
+        | ($timearray['minutes'] << 5)
+        | ($timearray['seconds'] >> 1);
+    }
+
+
+    var $old_offset = 0;
+    private function addFile($data, $filename, $time = 0)
+    {
+        $filename = str_replace('\\', '/', $filename);
+
+        $dtime    = dechex($this->unix2DosTime($time));
+        $hexdtime = '\x' . $dtime[6] . $dtime[7]
+            . '\x' . $dtime[4] . $dtime[5]
+            . '\x' . $dtime[2] . $dtime[3]
+            . '\x' . $dtime[0] . $dtime[1];
+        eval('$hexdtime = "' . $hexdtime . '";');
+
+        $fr       = "\x50\x4b\x03\x04";
+        $fr      .= "\x14\x00";
+        $fr      .= "\x00\x00";
+        $fr      .= "\x08\x00";
+        $fr      .= $hexdtime;
+        $unc_len  = strlen($data);
+        $crc      = crc32($data);
+        $zdata    = gzcompress($data);
+        $c_len    = strlen($zdata);
+        $zdata    = substr(substr($zdata, 0, strlen($zdata) - 4), 2);
+        $fr      .= pack('V', $crc);
+        $fr      .= pack('V', $c_len);
+        $fr      .= pack('V', $unc_len);
+        $fr      .= pack('v', strlen($filename));
+        $fr      .= pack('v', 0);
+        $fr      .= $filename;
+
+        $fr      .= $zdata;
+
+        $fr      .= pack('V', $crc);
+        $fr      .= pack('V', $c_len);
+        $fr      .= pack('V', $unc_len);
+
+        $this->datasec[] = $fr;
+        $new_offset      = strlen(implode('', $this->datasec));
+
+        $cdrec  = "\x50\x4b\x01\x02";
+        $cdrec .= "\x00\x00";
+        $cdrec .= "\x14\x00";
+        $cdrec .= "\x00\x00";
+        $cdrec .= "\x08\x00";
+        $cdrec .= $hexdtime;
+        $cdrec .= pack('V', $crc);
+        $cdrec .= pack('V', $c_len);
+        $cdrec .= pack('V', $unc_len);
+        $cdrec .= pack('v', strlen($filename) );
+        $cdrec .= pack('v', 0 );
+        $cdrec .= pack('v', 0 );
+        $cdrec .= pack('v', 0 );
+        $cdrec .= pack('v', 0 );
+        $cdrec .= pack('V', 32 );
+
+        $cdrec .= pack('V', $this->old_offset );
+        $this->old_offset = $new_offset;
+
+        $cdrec .= $filename;
+        $this->ctrl_dir[] = $cdrec;
+    }
+
+
+    var $eof_ctrl_dir = "\x50\x4b\x05\x06\x00\x00\x00\x00";
+    private function file()
+    {
+        $data    = implode('', $this->datasec);
+        $ctrldir = implode('', $this->ctrl_dir);
+
+        return   $data
+        . $ctrldir
+        . $this->eof_ctrl_dir
+        . pack('v', sizeof($this->ctrl_dir))
+        . pack('v', sizeof($this->ctrl_dir))
+        . pack('V', strlen($ctrldir))
+        . pack('V', strlen($data))
+        . "\x00\x00";
+    }
+
+
+    public function ZipAndDownload($dir)
+    {
+        if(@!function_exists('gzcompress')){ return; }
+
+        ob_end_clean();
+        $filelist = $this->visitFile($dir);
+        if(count($filelist) == 0){ return; }
+
+        foreach($filelist as $file)
+        {
+            if(!file_exists($file) || !is_file($file)){ continue; }
+
+            $fd       = fopen($file, "rb");
+            $content  = @fread($fd, filesize($file));
+            fclose($fd);
+
+            // 1.删除$dir的字符(./folder/file.txt删除./folder/)
+            // 2.如果存在/就删除(/file.txt删除/)
+            $file = substr($file, strlen($dir));
+            if(substr($file, 0, 1) == "\\" || substr($file, 0, 1) == "/"){ $file = substr($file, 1); }
+
+            $this->addFile($content, $file);
+        }
+        $out = $this->file();
+
+        @header('Content-Encoding: none');
+        @header('Content-Type: application/zip');
+        @header('Content-Disposition: attachment ; filename='.$_SERVER['HTTP_HOST'].'.zip');
+        @header('Pragma: no-cache');
+        @header('Expires: 0');
+        print($out);
+    }
+
+
 }
-$params_=array();
-$dodozip = new PHPzip();
-$dfiles = array_diff(scandir("%s"),['.','..']);
-Zip_action($dfiles);
+
+$zip = new PHPZIP();
+$zip->ZipAndDownload('%s');
+
+
+
+  
