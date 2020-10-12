@@ -29,7 +29,7 @@ def main(print_banner: bool = True):
     register_helpmenu()
 
     try:
-        with open("./variables.config", "r") as f:
+        with open(path.join(gget("root_path"), "variables.config"), "r") as f:
             try:
                 for key, value in loads(f.read()).items():
                     custom_set(key=key, value=value)

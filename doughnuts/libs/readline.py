@@ -58,7 +58,7 @@ except ImportError:
     # Read arrow keys correctly
     def getchar():
         firstChar = getch()
-        if firstChar == b'\xe0':
+        if firstChar == b'\xe0' or firstChar == b'\x00':
             return {b"H": "up", b"P": "down", b"M": "right", b"K": "left", b"G": "Home", b"O": "End", b"R": "Ins", b"S": "Del", b"I": "PgUp", b"Q": "PgDn"}[getch()]
         return firstChar
 

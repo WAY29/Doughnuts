@@ -377,7 +377,7 @@ def getAuto(words: list, rule: dict):
 def get_php(keyword: int, passwd: str, salt: str):
 
     method = ["_GET", "_POST", "_COOKIE", "_SERVER"]
-    passwd = "HTTP_" + passwd.upper() if keyword == 6 else passwd
+    passwd = "HTTP_" + str(passwd).upper() if keyword == 6 else str(passwd)
 
     rule = {
         "METHOD": method[keyword - 3],

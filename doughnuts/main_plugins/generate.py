@@ -1,3 +1,4 @@
+from genericpath import exists
 from libs.config import alias, color
 from os import path
 from string import ascii_letters, digits
@@ -27,7 +28,7 @@ def outside_generate(file_path: str, keyword: str = "POST", passwd: str = "", sa
 
 
 @alias(True, "gen", f="file_path", k="keyword", p="passwd", s="salt")
-def run(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
+def run(file_name: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
     """
     generate
 
@@ -56,13 +57,18 @@ def run(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "",
     passwd = passwd if passwd else ranstr(randint(5, 8))
     salt = salt if salt else ranstr(randint(5, 8))
     php = get_php(keyword, passwd, salt, _type)
-    if (path.exists(file_path)):
+    file_path, file_name = path.split(path.realpath(file_name))
+    file_real_path = path.join(file_path, file_name)
+    if (path.exists(file_real_path)):
+        print(color.red("\nFile is exist\n"))
+        return
+    elif(not path.exists(file_path)):
         print(color.red("\nFile path is invalid\n"))
         return
-    with open(file_path, "w+") as f:
+    with open(file_real_path, "w+") as f:
         f.write(php)
     print(color.green(
-        f"\ngenerate {type_dict[_type]}'s php in {path.realpath(file_path)}! enjoy it!"))
+        f"\ngenerate {type_dict[_type]}'s php in {file_real_path}! enjoy it!"))
     print(color.yellow("\nUsage:"))
     print(color.yellow(
         f"    Interactive interface    : connect url {raw_keyword} {passwd} doughnuts-{salt}"))

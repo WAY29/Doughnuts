@@ -190,6 +190,10 @@ python3 doughnuts.py
     - 修改checkvm命令的显示问题
     - 添加对ctrl+l的支持
     - 修复在外部调用generate报错的问题
+- 3.9.3
+    - 修复在某些情况下windows无法使用方向键的问题
+    - 修复dump命令无法打包的问题
+    - 修复gululinbo shell无法使用数字作为密码的问题
 
 ### 3.8
 
