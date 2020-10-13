@@ -14,8 +14,9 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      5: color.green("FFI"),
                      6: color.green("COM"),
                      7: color.green("imap_open"),
-                     8: color.green("MYSQL-UDF")}
-mode_linux_set = {1, 2, 4, 5}
+                     8: color.green("MYSQL-UDF"),
+                     9:color.green("php7-plDoublyLinkedList"),}
+mode_linux_set = {1, 2, 3, 4, 5, 9}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap"}
 
@@ -205,6 +206,14 @@ def run(mode: str = '0'):
         Need:
         - db_init
         - mysql >= 5.1
+    
+    Mode 9 php7-plDoublyLinkedList:
+
+        Targets:
+        - 7.1 - all versions to date
+        - 7.2 - all versions to date
+        - 7.3 - all versions to date
+        - 7.4 < 7.4.11
     """
     if (mode == "close"):
         mode = -1
@@ -212,7 +221,7 @@ def run(mode: str = '0'):
         test_list = windows_test_list if is_windows() else linux_test_list
         php_version = gget("webshell.php_version", "webshell")
         if (not php_version.startswith("7.")):
-            test_list -= {1, 2, 3}
+            test_list -= {1, 2, 3, 9}
         if (not gget("db_connected", "webshell") or gget("db_dbms", "webshell") != "mysql"):
             test_list -= {8}
         for test_mode in test_list:
