@@ -185,6 +185,9 @@ python3 doughnuts.py
     - bdf命令 php7-plDoublyLinkedList模式(Origin:https://www.freebuf.com/vuls/251017.html)
 - 增加命令
     - mupload命令 用于分块压缩上传文件
+- 3.10.3
+    - mupload添加多线程,hash校验
+    - 修复了引号不闭合时线程阻塞的错误
 
 ### 3.9
 

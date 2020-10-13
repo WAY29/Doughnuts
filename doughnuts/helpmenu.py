@@ -81,7 +81,7 @@ def register_helpmenu():
             print(color.yellow("[w|write]      ") + color.cyan("Write file"))
             print(color.yellow("[e|edit]       ") + color.cyan("Modify file"))
             print(color.yellow("[u|upload]     ") + color.cyan("Upload file"))
-            print(color.yellow("[mu|mupload]     ") + color.cyan("Upload file by Block compression"))
+            print(color.yellow("[mu|mupload]     ") + color.cyan("Upload file by Block compression and multi threads"))
             print(color.yellow("[d|download]   ") +
                   color.cyan("Download file"))
             print(color.yellow("[mv|move]      ") +

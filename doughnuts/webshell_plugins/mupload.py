@@ -1,11 +1,20 @@
 from genericpath import exists
-from os import path
+from os import path, truncate
 import zlib
-from base64 import b64encode
+from base64 import b64encode, encode
 from time import sleep
+from threading import Lock
+from concurrent.futures import ThreadPoolExecutor, wait, as_completed, FIRST_EXCEPTION, ALL_COMPLETED
 
 from libs.config import alias, color
-from libs.myapp import send, base64_encode
+from libs.myapp import send, base64_encode, md5_encode
+
+
+UPLOAD_SUCCESS = True
+COLOR_PRINT_LOCK = Lock()
+
+class UploadBreakException(Exception):
+    pass
 
 
 def get_php_force(web_file_path: str, force):
@@ -45,8 +54,37 @@ for($i=0;$i<%s;$i++){
 if($f){
 $data=gzipdecode(base64_decode($data));
 file_put_contents($p, $data);
-if(file_exists($p) && filesize($p) !== 0){echo "success";}
+if(file_exists($p) && filesize($p) !== 0){echo "success ".md5($data);}
 }""" % (web_file_path, total_number)
+
+
+def thread_upload(web_file_path: str, data: str, number : int, blocksize: int):
+    global UPLOAD_SUCCESS, COLOR_PRINT_LOCK
+    retry_time = 5
+    try:
+        with COLOR_PRINT_LOCK:
+            print(color.yellow("[Try] Upload block [%d]" % number))
+        if (not UPLOAD_SUCCESS):
+            return
+        while retry_time:
+            res = send(get_php_upload(web_file_path, data, number))
+            if (res.r_text.strip() == "success"):
+                with COLOR_PRINT_LOCK:
+                    print(color.yellow("[Successs] Upload block [%d]" % number))
+                break
+            else:
+                retry_time -= 1
+                with COLOR_PRINT_LOCK:
+                    print(color.red("[Failed] Upload block [%d]" % number))
+                continue
+        if (not retry_time):
+            with COLOR_PRINT_LOCK:
+                print(color.red("\n[Failed] Upload break [%d]\n" % number))
+            UPLOAD_SUCCESS = False
+            raise UploadBreakException("")
+    except Exception:
+        UPLOAD_SUCCESS = False
+        raise UploadBreakException("")
 
 
 @alias(True, func_alias="mu", s="blocksize")
@@ -54,7 +92,7 @@ def run(file_path: str, web_file_path: str = "", force: bool = False, blocksize:
     """
     mupload
 
-    Upload file by Block compression.
+    Upload file by Block compression and multi threads.
 
     eg: mupload {file_path} {web_file_path=file_name} {force=False} {blocksize=1024}
     """
@@ -75,41 +113,44 @@ def run(file_path: str, web_file_path: str = "", force: bool = False, blocksize:
     elif (text == "not writable"):
         print( color.red("\n[Failed] File path not writable\n"))
         return
-    count = 0
+    global UPLOAD_SUCCESS
+    UPLOAD_SUCCESS = True
     decode_retry_time = 5
-    with open(file_path, "rb+") as fp:
+    with open(file_path, "rb+") as fp, ThreadPoolExecutor() as tp:
+        fdata = fp.read()
+        file_md5_hash = md5_encode(fdata)
+        print(color.yellow(f"\n[Try] Upload {file_path} HASH: {file_md5_hash} \n"))
         compressor = zlib.compressobj(wbits=(16+zlib.MAX_WBITS))
-        compressed = compressor.compress(fp.read())
+        compressed = compressor.compress(fdata)
         compressed += compressor.flush()
         tdata = b64encode(compressed).decode()
-        for i in range(0, len(tdata), blocksize):
-            data = tdata[i:i+blocksize]
-            retry_time = 5
-            count += 1
-            print(color.yellow("[Try] Upload block [%d]" % (count-1)))
-            while retry_time:
-                res = send(get_php_upload(web_file_path, data, count - 1))
-                if (res.r_text.strip() == "success"):
-                    print(color.yellow("[Successs] Upload block [%d]" % (count-1)))
-                    break
-                else:
-                    retry_time -= 1
-                    print(color.red("[Failed] Upload block [%d]" % (count-1)))
-                    continue
-            if (not retry_time):
-                print(color.red("\n[Failed] Upload break\n"))
-                return
-    while decode_retry_time:
-        res = send(get_php_decode(web_file_path, count))
-        if (not res):
+        all_task = []
+        for n, i in enumerate(range(0, len(tdata), blocksize)):
+            all_task.append(tp.submit(thread_upload, web_file_path, tdata[i:i+blocksize], n, blocksize))
+        count = len(all_task)
+        wait(all_task, return_when=FIRST_EXCEPTION)
+        for task in reversed(all_task):
+            task.cancel()
+        wait(all_task, return_when=ALL_COMPLETED)
+        if (not UPLOAD_SUCCESS):
             return
-        if res.r_text.strip() == "success":
-            if (flag):
-                print(color.green(
-                    f"\n[Success] Upload {file_path} as {web_file_path} success\n"))
+        while decode_retry_time:
+            res = send(get_php_decode(web_file_path, count))
+            if (not res):
+                return
+            text = res.r_text.strip()
+            if "success" in text:
+                if (flag):
+                    print(color.green(
+                        f"\n[Success] Upload {file_path} as {web_file_path} success"))
+                else:
+                    print(color.green(f"\n[Success] Upload {web_file_path} success"))
+                check_md5_hash = text.split(" ")[1]
+                if (check_md5_hash == file_md5_hash):
+                    print(color.green(f"[Success] Hash check\n"))
+                else:
+                    print(color.red(f"[Failed] Hash check\n"))
+                return True
             else:
-                print(color.green(f"\n[Success] Upload {web_file_path} success\n"))
-            return True
-        else:
-            print(color.red(f"\n[Failed] Upload error / Request error, retry...\n"))
-            decode_retry_time -= 1
+                print(color.red(f"\n[Failed] Upload error / Request error, retry..."))
+                decode_retry_time -= 1

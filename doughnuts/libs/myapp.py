@@ -1,3 +1,4 @@
+from os import path
 from base64 import b64decode, b64encode
 from binascii import b2a_hex
 from locale import getpreferredencoding
@@ -8,6 +9,7 @@ from string import ascii_letters, digits
 from subprocess import Popen, check_output
 from types import MethodType
 from urllib.parse import quote
+from hashlib import md5
 from uuid import uuid4
 
 import requests
@@ -86,6 +88,26 @@ def base64_decode(data: str, encoding="utf-8"):
 
 def hex_encode(data: str):
     return b2a_hex(data.encode()).decode()
+
+def md5_file(file_path: str):
+    md5_hash = None
+    if path.isfile(file_path):
+        f = open(file_path,'rb')
+        md5_obj = md5()
+        md5_obj.update(f.read())
+        hash_code = md5_obj.hexdigest()
+        f.close()
+        md5_hash = str(hash_code).lower()
+    return md5_hash
+
+def md5_encode(data: bytes):
+    md5_hash = None
+    md5_obj = md5()
+    md5_obj.update(data)
+    hash_code = md5_obj.hexdigest()
+    md5_hash = str(hash_code).lower()
+    return md5_hash
+
 
 
 def clean_trace():

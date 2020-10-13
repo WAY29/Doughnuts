@@ -6,7 +6,7 @@ from re import findall, match
 from sys import exc_info, path
 from traceback import print_exception
 
-from libs.config import custom_get, gget, gset, order_alias, set_namespace
+from libs.config import custom_get, gget, gset, order_alias, set_namespace, color
 from libs.debug import DEBUG
 from libs.readline import LovelyReadline
 from Myplugin import Platform
@@ -173,7 +173,12 @@ def loop_main():
         gset("raw_command", cmd, True)
         if (not cmd):
             continue
-        args = shlex.split(cmd)  # 切割
+        args = cmd
+        try:
+            args = shlex.split(args)  # 切割
+        except ValueError:
+            print(color.red("Invalid command"))
+            continue
         if " " in cmd:  # 输入的命令
             order = args[0]
         else:
