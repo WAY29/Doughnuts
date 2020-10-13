@@ -35,7 +35,7 @@ def register_helpmenu():
                   color.cyan("Get variable(s), use #{varname} to use it"))
             print(color.yellow("[set]              ") +
                   color.cyan("Set variable, use #{varname} to use it"))
-            print(color.yellow("[save]              ") +
+            print(color.yellow("[save]             ") +
                   color.cyan("Save the configuration of the variable(s) to variables.config"))
             print(color.yellow("[reload]           ") +
                   color.cyan("Reload a plugin"))
@@ -81,6 +81,7 @@ def register_helpmenu():
             print(color.yellow("[w|write]      ") + color.cyan("Write file"))
             print(color.yellow("[e|edit]       ") + color.cyan("Modify file"))
             print(color.yellow("[u|upload]     ") + color.cyan("Upload file"))
+            print(color.yellow("[mu|mupload]     ") + color.cyan("Upload file by Block compression"))
             print(color.yellow("[d|download]   ") +
                   color.cyan("Download file"))
             print(color.yellow("[mv|move]      ") +

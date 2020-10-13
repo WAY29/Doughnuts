@@ -180,6 +180,11 @@ python3 doughnuts.py
 ## 更新日志
 
 
+### 3.10
+- 修改命令
+    - bdf命令 php7-plDoublyLinkedList模式(Origin:https://www.freebuf.com/vuls/251017.html)
+- 增加命令
+    - mupload命令 用于分块压缩上传文件
 
 ### 3.9
 
