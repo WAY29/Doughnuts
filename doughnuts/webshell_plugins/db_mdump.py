@@ -180,7 +180,7 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
         print(color.yellow(
             f"[Try] fetch {database}.{table} [rows: {row_number}]"))
     with open(file_path, "wb") as f, ThreadPoolExecutor(max_workers=threads) as tp:
-        f.write(get_table_construct(database, table, encode))
+        f.write(get_table_construct(database, table, encoding))
         f.flush()
         all_task = [tp.submit(get_data, database, table, encoding, offset, blocksize)
                     for offset in range(0, row_number, blocksize)]

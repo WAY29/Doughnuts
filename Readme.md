@@ -191,6 +191,8 @@ python3 doughnuts.py
         - 修复一个bug曾导致路径拼接时使用\转义了外部php的引号导致的报错
 - 添加命令
     - db_mdump命令 用于分块dump数据库
+- 4.0.1
+    - 修复了db_mdump导出的数据库encoding错误导致sql文件无法导入的问题
 
 
 
