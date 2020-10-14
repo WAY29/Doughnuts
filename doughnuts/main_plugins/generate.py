@@ -54,8 +54,8 @@ def run(file_name: str, keyword: str = "POST", passwd: str = "", salt: str = "",
     if (_type not in type_dict):
         print(color.red("\nType error\n"))
         return
-    passwd = passwd if passwd else ranstr(randint(5, 8))
-    salt = salt if salt else ranstr(randint(5, 8))
+    passwd = str(passwd) if passwd else ranstr(randint(5, 8))
+    salt = str(salt) if salt else ranstr(randint(5, 8))
     php = get_php(keyword, passwd, salt, _type)
     file_path, file_name = path.split(path.realpath(file_name))
     file_real_path = path.join(file_path, file_name)

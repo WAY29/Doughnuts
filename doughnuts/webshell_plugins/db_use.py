@@ -4,7 +4,7 @@ from libs.myapp import send,  get_db_connect_code
 
 def get_php(database):
     connect_type = gget("db_connect_type", "webshell")
-    if (connect_type == "mysql"):
+    if (connect_type == "mysqli"):
         return """%s
 if (!$con){die("Connect error: ".mysqli_connect_error());}
 """ % get_db_connect_code(gget("db_host", "webshell"), gget("db_user", "webshell"), gget("db_password", "webshell"), database, gget("db_port", "webshell"))

@@ -43,9 +43,9 @@ if (!$con)
 die("Connect error: ".mysqli_connect_error());
 } else{
 $r=$con->query('%s');
-$rr=$r->fetch_all(MYSQLI_NUM);echo $rr[0]."\\n";$r->close();
+$rr=$r->fetch_all(MYSQLI_NUM);echo $rr[0][0]."\\n";$r->close();
 $r=$con->query('%s');
-$rr=$r->fetch_all(MYSQLI_NUM);echo $rr[0]."\\n";$r->close();
+$rr=$r->fetch_all(MYSQLI_NUM);echo $rr[0][0]."\\n";$r->close();
 $con->close();
 }""" % (connect_code, select_user_code, select_version_code)
     else:

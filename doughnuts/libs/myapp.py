@@ -11,6 +11,7 @@ from types import MethodType
 from urllib.parse import quote
 from hashlib import md5
 from uuid import uuid4
+import zlib
 
 import requests
 from prettytable import PrettyTable
@@ -75,7 +76,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 3.10\n"))
+    print(color.green("Doughnut Version: 4.0\n"))
 
 
 def base64_encode(data: str, encoding="utf-8"):
@@ -89,6 +90,7 @@ def base64_decode(data: str, encoding="utf-8"):
 def hex_encode(data: str):
     return b2a_hex(data.encode()).decode()
 
+
 def md5_file(file_path: str):
     md5_hash = None
     if path.isfile(file_path):
@@ -100,6 +102,7 @@ def md5_file(file_path: str):
         md5_hash = str(hash_code).lower()
     return md5_hash
 
+
 def md5_encode(data: bytes):
     md5_hash = None
     md5_obj = md5()
@@ -108,6 +111,16 @@ def md5_encode(data: bytes):
     md5_hash = str(hash_code).lower()
     return md5_hash
 
+
+def gzinflate(compressed: bytes) -> bytes:
+    return zlib.decompress(compressed, -zlib.MAX_WBITS) if compressed else b''
+
+
+def gzdeflate(data: bytes) -> bytes: 
+    compressor = zlib.compressobj(9, zlib.DEFLATED, -zlib.MAX_WBITS)
+    compressed = compressor.compress(data)
+    compressed += compressor.flush()
+    return compressed
 
 
 def clean_trace():

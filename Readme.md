@@ -179,6 +179,18 @@ python3 doughnuts.py
 
 ## 更新日志
 
+### 4.0
+- 修改命令
+    - 修复当使用mysqli扩展链接mysql数据库时db_info显示的问题
+    - 修复当使用pdo扩展链接数据库时无法db_dump的问题
+    - 修复某些文本错误
+    - db_dump命令 
+        - 不再目标主机上写入文件而是直接下载到本地,修改参数{web_file_path}->{local_path}
+        - 添加参数 {table} 用于指定数据表,默认存储文件名为{database}.{table}.sql
+    - dump命令
+        - 修复一个bug曾导致路径拼接时使用\转义了外部php的引号导致的报错
+
+
 
 ### 3.10
 - 修改命令

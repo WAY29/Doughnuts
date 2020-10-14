@@ -4,8 +4,8 @@ from os import path, makedirs
 
 
 def get_raw_php(web_file_path: str):
-    with open(path.join(gget("root_path"),"phpfiles","zip.php"), "r", encoding="utf-8") as f:
-        text = f.read() % web_file_path
+    with open(path.join(gget("root_path"), "phpfiles", "zip.php"), "r", encoding="utf-8") as f:
+        text = f.read() % web_file_path.strip("\\")
     text = text.replace("<?php\n", "")
     return text
 
@@ -52,7 +52,7 @@ unlink($file_name);
 }
 }
 """
-        % web_file_path
+        % web_file_path.strip("\\")
     )
 
 

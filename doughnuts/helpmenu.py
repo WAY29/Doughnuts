@@ -81,7 +81,7 @@ def register_helpmenu():
             print(color.yellow("[w|write]      ") + color.cyan("Write file"))
             print(color.yellow("[e|edit]       ") + color.cyan("Modify file"))
             print(color.yellow("[u|upload]     ") + color.cyan("Upload file"))
-            print(color.yellow("[mu|mupload]     ") + color.cyan("Upload file by Block compression and multi threads"))
+            print(color.yellow("[mu|mupload]   ") + color.cyan("Upload file by block compression and multi threads"))
             print(color.yellow("[d|download]   ") +
                   color.cyan("Download file"))
             print(color.yellow("[mv|move]      ") +
@@ -125,7 +125,9 @@ def register_helpmenu():
             print(color.yellow("[db_shell]     ") +
                   color.cyan("Get a temporary sql shell of target system"))
             print(color.yellow("[db_dump]      ") +
-                  color.cyan("Dump a database to a file"))
+                  color.cyan("Dump a database or a table to a file"))
+            print(color.yellow("[db_dump]      ") +
+                  color.cyan("Dump a database to a file by block compression and multi threads"))
             print("\n[OTHER]\n")
             print(color.yellow("[cls|clear]    ") + color.cyan("Clear screen"))
             print(color.yellow("[log]          ") +

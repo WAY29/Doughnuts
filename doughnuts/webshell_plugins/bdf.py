@@ -209,11 +209,15 @@ def run(mode: str = '0'):
     
     Mode 9 php7-plDoublyLinkedList:
 
+        Origin:
+        - https://www.freebuf.com/vuls/251017.html
+
         Targets:
         - 7.1 - all versions to date
         - 7.2 - all versions to date
         - 7.3 - all versions to date
         - 7.4 < 7.4.11
+
     """
     if (mode == "close"):
         mode = -1

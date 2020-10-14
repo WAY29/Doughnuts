@@ -7,7 +7,7 @@ from threading import Lock
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed, FIRST_EXCEPTION, ALL_COMPLETED
 
 from libs.config import alias, color
-from libs.myapp import send, base64_encode, md5_encode
+from libs.myapp import send, base64_encode, md5_encode, gzdeflate
 
 
 UPLOAD_SUCCESS = True
@@ -92,7 +92,7 @@ def run(file_path: str, web_file_path: str = "", force: bool = False, blocksize:
     """
     mupload
 
-    Upload file by Block compression and multi threads.
+    Upload file by block compression and multi threads.
 
     eg: mupload {file_path} {web_file_path=file_name} {force=False} {blocksize=1024}
     """
@@ -120,10 +120,7 @@ def run(file_path: str, web_file_path: str = "", force: bool = False, blocksize:
         fdata = fp.read()
         file_md5_hash = md5_encode(fdata)
         print(color.yellow(f"\n[Try] Upload {file_path} HASH: {file_md5_hash} \n"))
-        compressor = zlib.compressobj(wbits=(16+zlib.MAX_WBITS))
-        compressed = compressor.compress(fdata)
-        compressed += compressor.flush()
-        tdata = b64encode(compressed).decode()
+        tdata = b64encode(gzdeflate(fdata)).decode()
         all_task = []
         for n, i in enumerate(range(0, len(tdata), blocksize)):
             all_task.append(tp.submit(thread_upload, web_file_path, tdata[i:i+blocksize], n, blocksize))
