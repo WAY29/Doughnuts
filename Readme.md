@@ -189,6 +189,8 @@ python3 doughnuts.py
         - 添加参数 {table} 用于指定数据表,默认存储文件名为{database}.{table}.sql
     - dump命令
         - 修复一个bug曾导致路径拼接时使用\转义了外部php的引号导致的报错
+- 添加命令
+    - db_mdump命令 用于分块dump数据库
 
 
 
