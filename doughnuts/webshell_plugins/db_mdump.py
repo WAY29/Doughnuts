@@ -112,6 +112,8 @@ def get_table_construct(database, table, encoding):
 
 def get_data(database, table, encoding, offset, blocksize):
     connect_type = gget("db_connect_type", "webshell")
+    with LOCK:
+        print("test", offset, blocksize)
     if (connect_type == "pdo"):
         php = """%s
     if(!$con){
@@ -119,9 +121,9 @@ def get_data(database, table, encoding, offset, blocksize):
     }
     $table_name="%s";
     $offset=%s;
-    $end=$offset + %s;
+    $size=%s;
     $content = "";
-    $table_records = $con->query("select * from $table_name limit $offset,$end;");
+    $table_records = $con->query("select * from $table_name limit $offset,$size;");
     while($record = $table_records->fetch(PDO::FETCH_ASSOC)){
     $keys = "`".join('`,`',array_map('addslashes',array_keys($record)))."`";
     $vals = "'".join("','",array_map('addslashes',array_values($record)))."'";
@@ -136,9 +138,9 @@ def get_data(database, table, encoding, offset, blocksize):
     }
     $table_name="%s";
     $offset=%s;
-    $end=$offset + %s;
+    $size=%s;
     $content = "";
-    $table_records = $con->query("select * from $table_name limit $offset,$end;");
+    $table_records = $con->query("select * from $table_name limit $offset,$size;");
     while($record = mysqli_fetch_assoc($table_records)){
     $keys = "`".join('`,`',array_map('addslashes',array_keys($record)))."`";
     $vals = "'".join("','",array_map('addslashes',array_values($record)))."'";
@@ -182,6 +184,7 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
     with open(file_path, "wb") as f, ThreadPoolExecutor(max_workers=threads) as tp:
         f.write(get_table_construct(database, table, encoding))
         f.flush()
+        
         all_task = [tp.submit(get_data, database, table, encoding, offset, blocksize)
                     for offset in range(0, row_number, blocksize)]
         for future in as_completed(all_task):

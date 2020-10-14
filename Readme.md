@@ -193,7 +193,8 @@ python3 doughnuts.py
     - db_mdump命令 用于分块dump数据库
 - 4.0.1
     - 修复了db_mdump导出的数据库encoding错误导致sql文件无法导入的问题
-
+- 4.0.2
+    - 修复了db_mdump数据重复的问题
 
 
 ### 3.10
