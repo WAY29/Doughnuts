@@ -112,8 +112,6 @@ def get_table_construct(database, table, encoding):
 
 def get_data(database, table, encoding, offset, blocksize):
     connect_type = gget("db_connect_type", "webshell")
-    with LOCK:
-        print("test", offset, blocksize)
     if (connect_type == "pdo"):
         php = """%s
     if(!$con){
