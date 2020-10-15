@@ -195,6 +195,8 @@ python3 doughnuts.py
     - 修复了db_mdump导出的数据库encoding错误导致sql文件无法导入的问题
 - 4.0.2
     - 修复了db_mdump数据重复的问题
+- 4.0.3
+    - 删除测试输出,删除db_mdump中DROP DATABASE语句
 
 
 ### 3.10

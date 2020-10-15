@@ -79,24 +79,24 @@ def get_table_construct(database, table, encoding):
         die("Error : connect to sql failed...");
     }
     $table_name="%s";
-    $content = "DROP DATABASE IF EXISTS `%s`;\\r\\nCREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARACTER SET %s;\\r\\nuse `%s`;\\r\\n";
+    $content = "CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARACTER SET %s;\\r\\nuse `%s`;\\r\\n";
     $table_created_data = $con->query("show create table `$table_name`");
     $table_created_data_array = $table_created_data->fetch(PDO::FETCH_BOTH);
     $content .= "DROP TABLE IF EXISTS `$table_name`;\\r\\n".$table_created_data_array['Create Table'].";\\r\\n\\r\\n";
     echo base64_encode(gzdeflate($content));
-    """ % (get_db_connect_code(dbname=database), table, database, database, encoding, database)
+    """ % (get_db_connect_code(dbname=database), table, database, encoding, database)
     elif (connect_type == "mysqli"):
         php = """%s
     if(!$con){
         die("Error : connect to sql failed...");
     }
     $table_name="%s";
-    $content = "DROP DATABASE IF EXISTS `%s`;\\r\\nCREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARACTER SET %s;\\r\\nuse `%s`;\\r\\n";
+    $content = "CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARACTER SET %s;\\r\\nuse `%s`;\\r\\n";
     $table_created_data = mysqli_query($con,"show create table `$table_name`");
     $table_created_data_array = mysqli_fetch_array($table_created_data);
     $content .= "DROP TABLE IF EXISTS `$table_name`;\\r\\n".$table_created_data_array['Create Table'].";\\r\\n\\r\\n";
     echo base64_encode(gzdeflate($content));
-    """ % (get_db_connect_code(dbname=database), table, database, database, encoding, database)
+    """ % (get_db_connect_code(dbname=database), table, database, encoding, database)
     else:
         php = ""
     retry_time = 5
