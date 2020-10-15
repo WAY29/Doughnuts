@@ -179,6 +179,11 @@ python3 doughnuts.py
 
 ## 更新日志
 
+### 4.1
+- 修改结构
+    - 新建插件时不再需要更改helpmenu.py
+
+
 ### 4.0
 - 修改命令
     - 修复当使用mysqli扩展链接mysql数据库时db_info显示的问题
