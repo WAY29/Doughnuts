@@ -6,7 +6,7 @@ from libs.config import alias, color, gget
 from libs.myapp import send, base64_encode, open_editor
 
 
-@alias(True, func_alias="w")
+@alias(True, func_alias="w", _type="FILE")
 def run(web_file_path: str, editor: str = ""):
     """
     write

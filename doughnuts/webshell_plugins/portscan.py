@@ -101,7 +101,7 @@ Scan($type,$ip,$new_ports,$timeout);
 """ % (type, ip, ports, timeout)
 
 
-@alias(True, func_alias="ps", t="type", p="ports", to="timeout")
+@alias(True, _type="OTHER", func_alias="ps", t="type", p="ports", to="timeout")
 def run(ip: str, ports: str, type: int = 2, timeout: float = 0.5):
     """
     portscan

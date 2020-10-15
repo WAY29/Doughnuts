@@ -81,7 +81,7 @@ echo getinfo("..", false)."\\n";
 foreach($files as $file) {echo getinfo($file)."\\n";}""" % (scan_code, path)
 
 
-@alias(True, func_alias="dir", p="path", m="mode")
+@alias(True, func_alias="dir", _type="COMMON", p="path", m="mode")
 def run(path: str = ".", mode: int = 1):
     """
     ls

@@ -2,7 +2,7 @@ from libs.config import alias, color, gget
 from webshell_plugins.db_init import print_db_info
 
 
-@alias()
+@alias(_type="DATABASE")
 def run():
     """
     db_info

@@ -2,7 +2,7 @@ from libs.config import alias, color
 from libs.myapp import send, is_windows, base64_encode
 
 
-@alias(True, f="web_file_path", m="mode")
+@alias(True, _type="FILE", f="web_file_path", m="mode")
 def run(mode: str, *web_file_paths):
     """
     chmod

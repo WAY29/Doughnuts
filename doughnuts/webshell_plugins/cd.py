@@ -2,7 +2,7 @@ from libs.config import alias, color, gset, gget
 from libs.myapp import send, base64_encode
 
 
-@alias(True, d="dir")
+@alias(True, _type="COMMON", d="dir")
 def run(directory: str = ''):
     """
     cd

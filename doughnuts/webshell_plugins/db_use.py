@@ -14,7 +14,7 @@ catch (PDOException $e) {die("Connect error: ".$e->getMessage());}
 """ % get_db_connect_code(gget("db_host", "webshell"), gget("db_user", "webshell"), gget("db_password", "webshell"), database, gget("db_port", "webshell"))
 
 
-@alias(True, db="database")
+@alias(True, _type="DATABASE", db="database")
 def run(database: str):
     """
     db_use

@@ -3,7 +3,7 @@ from libs.myapp import send, base64_encode
 from os import path
 
 
-@alias(True, func_alias="mv")
+@alias(True, func_alias="mv", _type="FILE")
 def run(web_file_path: str, new_file_path: str):
     """
     move

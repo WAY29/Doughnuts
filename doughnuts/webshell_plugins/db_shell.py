@@ -30,7 +30,7 @@ NEW_SQL_WORDLIST = {"common_wordlist": (
 )}
 
 
-@alias()
+@alias(_type="DATABASE")
 def run():
     """
     db_shell

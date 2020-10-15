@@ -80,7 +80,7 @@ Sqldump();""" % (database, database, encoding, database, get_db_connect_code(dbn
 
 
 
-@alias(True, db="database", t="table", l="local_path")
+@alias(True, _type="DATABASE", db="database", t="table", l="local_path")
 def run(database: str = "", table: str = "", local_path: str = "", encoding: str = "utf8"):
     """
     db_dump

@@ -69,7 +69,7 @@ NEW_UNIX_WORDLIST = {"common_wordlist": (
 )}
 
 
-@alias(True, func_alias="s")
+@alias(True, func_alias="s", _type="SHELL")
 def run(*commands):
     """
     shell

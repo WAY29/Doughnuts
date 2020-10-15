@@ -195,7 +195,7 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
                 f"[Success] fetch {database}.{table} [rows: {row_number}]"))
 
 
-@alias(True, db="database", l="local_path", s="blocksize", ex="exclude", i="include", t="threads")
+@alias(True, _type="DATABASE", db="database", l="local_path", s="blocksize", ex="exclude", i="include", t="threads")
 def run(database: str = "", local_path: str = "", encoding: str = "utf8", blocksize: int = 1000, exclude: str = "", include: str = "", threads: int = 5):
     """
     db_mdump

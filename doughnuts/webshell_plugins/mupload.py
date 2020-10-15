@@ -87,7 +87,7 @@ def thread_upload(web_file_path: str, data: str, number : int, blocksize: int):
         raise UploadBreakException("")
 
 
-@alias(True, func_alias="mu", s="blocksize")
+@alias(True, func_alias="mu", _type="FILE", s="blocksize")
 def run(file_path: str, web_file_path: str = "", force: bool = False, blocksize: int = 1024):
     """
     mupload

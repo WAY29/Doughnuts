@@ -15,7 +15,7 @@ print(file_put_contents($file,''));}
 """ % (filename, command)
 
 
-@alias(True, func_alias="t", f="filename")
+@alias(True, _type="FILE", func_alias="t", f="filename")
 def run(filename: str = ""):
     """
     touch

@@ -126,7 +126,7 @@ def set_mode(mode: int, test: bool = False):
     return True
 
 
-@alias(True, m="mode")
+@alias(True, _type="OTHER", m="mode")
 def run(mode: str = '0'):
     """
     bdf

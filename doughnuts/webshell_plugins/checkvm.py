@@ -5,7 +5,7 @@ from libs.myapp import send, get_system_code
 type_vm = ("Virtual", "KVM", "VMware", "HVM", "RHEV", "VMLite")
 
 
-@alias()
+@alias(_type="DETECT")
 def run():
     """
     checkvm

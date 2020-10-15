@@ -2,7 +2,7 @@ from libs.config import color, alias
 from libs.myapp import gget, send
 
 
-@alias(True, func_alias="env", v="varname")
+@alias(True, func_alias="env", _type="COMMON", v="varname")
 def run(varname: str):
     """
     getenv

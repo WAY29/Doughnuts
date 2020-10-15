@@ -35,7 +35,7 @@ NEW_WORDLIST = {"common_wordlist": (
 )}
 
 
-@alias(True, func_alias="ws")
+@alias(True, func_alias="ws", _type="SHELL")
 def run(*commands):
     """
     webshell

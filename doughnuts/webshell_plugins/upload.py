@@ -18,7 +18,7 @@ def get_php(web_file_path: str, force: bool):
 }""" % (str(not force).lower(), web_file_path, web_file_path)
 
 
-@alias(True, func_alias="u")
+@alias(True, func_alias="u", _type="FILE")
 def run(file_path: str, web_file_path: str = "", force: bool = False):
     """
     upload

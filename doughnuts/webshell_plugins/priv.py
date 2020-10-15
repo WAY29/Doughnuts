@@ -4,7 +4,7 @@ from json import loads
 from libs.myapp import gget, send, get_system_code, is_windows
 
 
-@alias(True, p="find_path")
+@alias(True, _type="DETECT", p="find_path")
 def run(find_path: str = "/usr&/bin"):
     """
     priv

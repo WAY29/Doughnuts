@@ -126,7 +126,7 @@ except:
         )
 
 
-@alias(True, func_alias="re", p="port", type="reverse_type")
+@alias(True, func_alias="re", _type="SHELL", p="port", type="reverse_type")
 def run(ip: str, port: str, reverse_type: str = "php"):
     """
     reverse

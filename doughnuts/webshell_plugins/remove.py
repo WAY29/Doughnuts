@@ -6,7 +6,7 @@ def get_php(web_file_path):
     return """if(unlink(base64_decode("%s"))){echo 'success';}""" % base64_encode(web_file_path)
 
 
-@alias(True, func_alias="rm")
+@alias(True, func_alias="rm", _type="FILE")
 def run(*web_file_paths):
     """
     rm

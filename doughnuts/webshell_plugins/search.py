@@ -19,7 +19,7 @@ foreach(rglob("%s/*") as $v){
 """ % (web_file_path, pattern, web_file_path)
 
 
-@alias(True, w="web_file_path", p="pattern")
+@alias(True, _type="DETECT", w="web_file_path", p="pattern")
 def run(pattern: str, web_file_path: str = "."):
     """
     search

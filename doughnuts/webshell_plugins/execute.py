@@ -4,7 +4,7 @@ from libs.config import alias, color, gget
 from libs.myapp import send, open_editor
 
 
-@alias(True, func_alias="exec")
+@alias(True, func_alias="exec", _type="SHELL")
 def run(editor: str = ""):
     """
     execute

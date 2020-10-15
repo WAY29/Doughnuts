@@ -80,7 +80,7 @@ def order_alias(order):
     return order
 
 
-def alias(none_named_arg: bool = False, func_alias: str = "", **alias):  # 别名装饰器
+def alias(none_named_arg: bool = False, func_alias: str = "", _type: str = "general", **alias):  # 别名装饰器
     def decorator(func):
         if (not gget("outside")):
             folders_namespace = gget("folders_namespace")
@@ -103,9 +103,33 @@ def alias(none_named_arg: bool = False, func_alias: str = "", **alias):  # 别�
                     gset("order_alias", func_alias_dict,
                          namespace=folders_namespace[func_folder])
                 func_alias_dict[func_alias] = func_name
+            func_type_list = gget(
+                "type_list", namespace=folders_namespace[func_folder])
+            if not func_type_list:
+                func_type_list = []
+                gset("type_list", func_type_list,
+                        namespace=folders_namespace[func_folder])
+            type_func_dict = gget(
+                "type_func_dict", namespace=folders_namespace[func_folder])
+            if not type_func_dict:
+                type_func_dict = {}
+                gset("type_func_dict", type_func_dict,
+                        namespace=folders_namespace[func_folder])
+            if (_type not in func_type_list):
+                func_type_list.append(_type)
+            if (_type not in type_func_dict):
+                type_func_dict[_type] = []
+            type_func_dict[_type].append(func_name)
+            try:
+                short_doc = func.__doc__.split("\n")[3].strip().strip(".")
+            except (AttributeError, IndexError):
+                short_doc = ''
+            command_doc = f"[{func_alias}|{func_name}]" if func_alias else f"[{func_name}]"
+            gset(func_name + ".helpdoc", "%-30s%s" % (color.yellow(command_doc),
+                                                        color.cyan(short_doc)), namespace=folders_namespace[func_folder])
 
         @functools.wraps(func)
-        def wrapper(*args, **kw):
+        def wrapper(*args, **kw):   
             kw = conver_args(kw, alias)
             if "" in kw:
                 if none_named_arg:

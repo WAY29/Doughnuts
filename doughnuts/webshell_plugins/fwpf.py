@@ -24,7 +24,7 @@ print(json_encode(scan_rescursive("%s")));
 """ % file_path
 
 
-@alias(True, fp="web_file_path")
+@alias(True, _type="DETECT", fp="web_file_path")
 def run(web_file_path: str = ''):
     """
     fwpf

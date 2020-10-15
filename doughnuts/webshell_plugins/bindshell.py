@@ -140,7 +140,7 @@ while (1) {
 }""" % (passwd, port)
 
 
-@alias(True, func_alias="bs")
+@alias(True, func_alias="bs", _type="SHELL")
 def run(port: int = 7777, passwd: str = "doughnuts"):
     """
     bind shell

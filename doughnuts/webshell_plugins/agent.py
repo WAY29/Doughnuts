@@ -518,7 +518,7 @@ echo $this_request;
        redirect_auto, redirect_cookie_use, timeout, type))
 
 
-@alias(True, func_alias="ag", u="url", m="method", d="data", p="params", c="cookie", t="type",
+@alias(True, _type="OTHER", func_alias="ag", u="url", m="method", d="data", p="params", c="cookie", t="type",
        to="timeout", re_m="redirect_method")
 def run(url: str, method: str,
         data: str = '', params: str = '', cookie: str = '', type: int = 1, timeout: float = 3,

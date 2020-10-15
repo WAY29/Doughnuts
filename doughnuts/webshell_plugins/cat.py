@@ -2,7 +2,7 @@ from libs.config import alias, color
 from libs.myapp import send, base64_encode
 
 
-@alias(True, func_alias="c")
+@alias(True, func_alias="c", _type="FILE")
 def run(*web_file_paths):
     """
     cat

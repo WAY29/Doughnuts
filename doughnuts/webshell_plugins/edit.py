@@ -2,7 +2,7 @@ from libs.config import alias, color, gget
 from libs.myapp import open_editor
 
 
-@alias(True, func_alias="e")
+@alias(True, func_alias="e", _type="FILE")
 def run(web_file_path: str, editor: str = ""):
     """
     edit

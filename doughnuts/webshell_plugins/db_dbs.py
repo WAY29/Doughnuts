@@ -2,7 +2,7 @@ from libs.config import alias, color, gget
 from libs.myapp import execute_sql_command
 
 
-@alias()
+@alias(_type="DATABASE")
 def run():
     """
     db_dbs

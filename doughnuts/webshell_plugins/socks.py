@@ -89,7 +89,7 @@ def main():
 main()""" % port
 
 
-@alias(True)
+@alias(True, _type="OTHER")
 def run(port: int = 8888):
     """
     socks

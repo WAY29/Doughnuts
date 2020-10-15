@@ -20,7 +20,7 @@ proc_close($process);
 """
 
 
-@alias(True, func_alias="rs", l="lhost", p="port", m="mode", f="fakename")
+@alias(True, func_alias="rs", _type="SHELL", l="lhost", p="port", m="mode", f="fakename")
 def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"):
     """
     reshell

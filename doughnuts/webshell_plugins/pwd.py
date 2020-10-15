@@ -1,7 +1,7 @@
 from libs.config import alias, gget
 
 
-@alias()
+@alias(_type="COMMON")
 def run():
     """
     pwd

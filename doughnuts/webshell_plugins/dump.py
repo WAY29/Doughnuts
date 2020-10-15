@@ -56,7 +56,7 @@ unlink($file_name);
     )
 
 
-@alias(True, w="web_file_path", l="local_path")
+@alias(True, _type="FILE", w="web_file_path", l="local_path")
 def run(web_file_path: str, local_path: str = "", _use_raw_php_to_zip: bool = True):
     """
     dump

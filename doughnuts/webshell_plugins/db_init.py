@@ -60,7 +60,7 @@ def print_db_info():
     print(f"\n{dbms} Version:\n    {gget('db_version', 'webshell')}\n")
 
 
-@alias(True, h="host", u="username", pwd="password", p="port")
+@alias(True, _type="DATABASE", h="host", u="username", pwd="password", p="port")
 def run(host: str, username: str, password: str, dbname: str = "", port: int = 0, dbms: str = "mysql"):
     """
     db_init

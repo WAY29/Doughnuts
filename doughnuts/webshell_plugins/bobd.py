@@ -4,7 +4,7 @@ from libs.myapp import is_windows
 needle_functions = {"ini_set", "chdir"}
 
 
-@alias()
+@alias(_type="OTHER")
 def run():
     """
     bobd
