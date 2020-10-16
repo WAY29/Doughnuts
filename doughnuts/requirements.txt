@@ -6,3 +6,4 @@ prettytable==0.7.2
 requests==2.23.0
 urllib3==1.25.9
 pysocks==1.7.1
+tqdm==4.50.2

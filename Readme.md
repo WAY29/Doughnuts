@@ -98,7 +98,7 @@ poetry run python3 Doughnuts/doughnuts.py # 应该对所有系统生效
 # 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
-pip3 install -r requirements.txt 或 pip3 install requests pysocks colorma prettytable
+pip3 install -r requirements.txt 或 pip3 install requests pysocks colorma prettytable tqdm
 # (windows)添加一个bat文件到python根目录下
 # (*unix)添加一个可执行文件到/usr/local/bin下
 # 安装启动器,以方便调用
@@ -178,6 +178,19 @@ python3 doughnuts.py
 - https://github.com/epinna/weevely3
 
 ## 更新日志
+
+### 4.2
+- 修改结构
+    - myapp尝试丢弃webshell执行代码之前的输出
+- 添加命令
+    - mdownload命令 用于分块下载文件
+- 修改命令
+    - mupload命令 完全重写,真正意义上的分块上传,修复mupload上传失败不会自动清理临时文件的问题
+- 修复bug
+    - 修复mdownload, mupload没有ls后补全的问题
+- 新增依赖
+    - tqdm
+
 
 ### 4.1
 - 修改结构

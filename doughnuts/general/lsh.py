@@ -10,6 +10,7 @@ def run(*coomands):
     lsh
 
     Run a command on local machine.
+
     """
     command = str(value_translation(gget("raw_command_args")))
     if (command):

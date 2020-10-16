@@ -4,8 +4,7 @@ from os import path, makedirs
 
 
 def get_php(web_file_path: str):
-    return (
-        """function download($fd){
+    return """function download($fd){
 if (@file_exists($fd)){
 $fileinfo = pathinfo($fd);
 header("Content-type: application/x-" . $fileinfo["extension"]);
@@ -14,9 +13,7 @@ header("Content-Disposition: attachment; filename=" . $fileinfo["basename"]);
 }
 }
 download(base64_decode("%s"));
-"""
-        % base64_encode(web_file_path)
-    )
+""" % base64_encode(web_file_path)
 
 
 @alias(True, func_alias="d", _type="FILE", w="web_file_path", l="local_path")

