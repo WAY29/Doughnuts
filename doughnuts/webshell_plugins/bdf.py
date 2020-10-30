@@ -15,7 +15,7 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      6: color.green("COM"),
                      7: color.green("imap_open"),
                      8: color.green("MYSQL-UDF"),
-                     9:color.green("php7-plDoublyLinkedList"),}
+                     9:color.green("php7-SplDoublyLinkedList"),}
 mode_linux_set = {1, 2, 3, 4, 5, 9}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap"}

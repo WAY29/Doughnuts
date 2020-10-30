@@ -15,8 +15,8 @@ def run():
     if (is_windows()):
         print(color.red("Target system isn't *unix"))
         return
-    if (needle_functions & set(disable_func_list)):
-        print("\n" + color.red("ini_set or chdir function is disabled") + "\n")
+    if ("chdir" in disable_func_list or ("ini_set" in disable_func_list and "ini_alter" in disable_func_list)):
+        print("\n" + color.red("ini_set/ini_alter or chdir function is disabled") + "\n")
         return
     switch = not gget("webshell.bypass_obd", "webshell", default=False)
     print(

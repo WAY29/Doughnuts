@@ -1,6 +1,8 @@
 from libs.config import alias, color
 from libs.myapp import send
 
+from pprint import pprint
+
 
 def get_php(type, ip, ports, timeout):
     return """
@@ -12,7 +14,7 @@ function microtime_float()
 }
 function Scan($type,$ip,$ports,$timeout){
     try{
-        $result = array();
+        $result = array(array(), array(), array());
         #socket_
         if($type == 1){
             foreach($ports as $port){
@@ -26,11 +28,11 @@ function Scan($type,$ip,$ports,$timeout){
                 socket_close($sock);
                 if(microtime_float() - $tmp_ < $timeout and $return != 0){
                     if($return == 1)
-                        array_push($result,'Open');
+                         array_push($result[0], $port);
                     if($return == 2)
-                        array_push($result,'Close');
+                        array_push($result[1], $port);
                 }else{
-                    array_push($result,'Timeout');
+                    array_push($result[2], $port);
                 }
             }
         }
@@ -46,9 +48,9 @@ function Scan($type,$ip,$ports,$timeout){
                 );
                 $context=stream_context_create($opts);
                 if(@file_get_contents($url.':'.$port,false,$context)){
-                    array_push($result,'Open');
+                    array_push($result[0], $port);
                 }else{
-                    array_push($result,'Timeout');
+                    array_push($result[2], $port);
                 }
             }
         }
@@ -62,15 +64,13 @@ function Scan($type,$ip,$ports,$timeout){
                 curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,$timeout);
                 $exec=curl_exec($ch);
                 if($exec){
-                    array_push($result,'Open');
+                    array_push($result[0], $port);
                 }else{
-                    array_push($result,'Timeout');
+                    array_push($result[2], $port);
                 }
             }
         }
-        foreach($result as $k => $v){
-            echo '['.$ports[$k].'] => ['.$v."]\n";
-        }
+        echo json_encode($result);
     }
     catch (customException $e){
         die("");
@@ -101,55 +101,44 @@ Scan($type,$ip,$new_ports,$timeout);
 """ % (type, ip, ports, timeout)
 
 
-@alias(True, _type="OTHER", func_alias="ps", t="type", p="ports", to="timeout")
-def run(ip: str, ports: str, type: int = 2, timeout: float = 0.5):
+def human_friendly_list_print(l: list) -> str:
+    str_dict = {}
+    for i in l:
+        if (isinstance(i, int)):
+            if ((i-1) in str_dict):
+                temp = str_dict[(i-1)]
+                del str_dict[(i-1)]
+                str_dict[i] = temp.split("-")[0] + "-" + str(i)
+            else:
+                str_dict[i] = str(i)
+    return " ".join(str_dict.values())
+
+
+@alias(True, _type="OTHER", t="type", p="ports", to="timeout")
+def run(ip: str, ports: str, _type: int = 2, timeout: float = 0.5):
     """
     portscan
 
     Scan intranet ports.
 
-    eg: portscan {ip} {ports} {type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}
+    eg: portscan {ip} {ports} {_type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}
     """
-    php = get_php(type, ip, ports, timeout)
+    if (_type not in [1,2,3]):
+        print(color.red("\nType error!\n"))
+        return
+    php = get_php(_type, ip, ports, timeout)
     res = send(php)
     if (not res):
         return
-    text = res.r_text
-    ports = str(ports)
-    split_ports = ports.split(",")
-    all_ports = set()
-    for each in split_ports:
-        if ("-" in each):
-            each_list = each.split("-")
-            start_port, end_port = each_list[0], each_list[1]
-            all_ports = all_ports | set(
-                range(int(start_port), int(end_port) + 1))
-        else:
-            all_ports.add(int(each.strip()))
-    if ('' in all_ports):
-        all_ports.remove('')
+    port_result = res.r_json()
     # ------------------------------------------
-    try:
-        port_data = set(text.strip().split("\n"))
-        port_dict = {}
-        data = [line.split('=>') for line in port_data]
-        [port_dict.update({port: status}) for port, status in
-            zip((line[0].strip() for line in data), (line[1].strip() for line in data))].clear()
-        print(f"\n{color.green(ip)} [{color.yellow(str(ports))}] :\n")
-        port_result = [[], [], []]
-        port_format = {'[Open]': 0, '[Close]': 1, '[Timeout]': 2}
-        [port_result[port_format[value]].append(
-            int(key[1:-1])) if value in port_format.keys() else None for key, value in port_dict.items()].clear()
-
-        if(len(port_result[0])):
-            print(color.green('Open') + ' port:\n' + " " *
-                  4 + " ".join(str(port) for port in sorted(port_result[0])) + '\n')
-        if(len(port_result[1])):
-            print(color.red('Close') + ' port:\n' + " " *
-                  4 + " ".join(str(port) for port in sorted(port_result[1])) + '\n')
-        if (len(port_result[2])):
-            print(color.magenta('Timeout') + ' port:\n' + " " *
-                  4 + " ".join(str(port) for port in sorted(port_result[2])) + '\n')
-        print("")
-    except Exception:
-        print("PortScan error.")
+    if(len(port_result[0])):
+        print(color.green('Open') + ' port:\n' + " " *
+                4 + human_friendly_list_print(sorted(port_result[0])) + '\n')
+    if(len(port_result[1])):
+        print(color.red('Close') + ' port:\n' + " " *
+                4 + human_friendly_list_print(sorted(port_result[1])) + '\n')
+    if (len(port_result[2])):
+        print(color.magenta('Timeout') + ' port:\n' + " " *
+                4 + human_friendly_list_print(sorted(port_result[2])) + '\n')
+    print("")

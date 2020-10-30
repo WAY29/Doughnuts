@@ -49,12 +49,12 @@ Sqldump();""" % (database, database, encoding, database, get_db_connect_code(dbn
         $content="";
         $table_created_data = mysqli_query($con,"show create table `$table_name`");
         $table_created_data_array = mysqli_fetch_array($table_created_data);
-        $content .= "DROP TABLE IF EXISTS `$table_name`;\\r\\n".$table_created_data_array['Create Table'].";\\r\\n\\r\\n";
+        $struct=str_replace("NOT NULL", "", $table_created_data_array['Create Table']);
+        $content .= "DROP TABLE IF EXISTS `$table_name`;\\r\\n".$struct.";\\r\\n\\r\\n";
         $table_records = mysqli_query($con,"select * from `$table_name`");
         while($record = mysqli_fetch_assoc($table_records)){
-            $keys = "`".join('`,`',array_map('addslashes',array_keys($record)))."`";
-            $vals = "'".join("','",array_map('addslashes',array_values($record)))."'";
-            $content .= "insert into `$table_name`($keys) values($vals);\\r\\n";
+            $vals = "'".join("','",array_map('mysql_real_escape_string',array_values($record)))."'";
+            $content .= "insert into `$table_name` values($vals);\\r\\n";
         }
         return $content;
     }

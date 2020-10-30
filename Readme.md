@@ -179,6 +179,18 @@ python3 doughnuts.py
 
 ## 更新日志
 
+### 4.3
+- 修改命令
+    - portscan去除短名ps, 修改显示结果,变得更加可读
+    - bobd支持在ini_set被禁用时使用ini_alter
+    - bdf php7-backtrace 添加在Exception类被禁用后使用Error类
+- 添加命令
+    - copy命令 用于复制文件
+    - ps命令 类似于linux下的ps命令,用于读取系统进程信息
+- 修复bug
+    - 在back返回主菜单后清理mysql连接记录
+
+
 ### 4.2
 - 修改结构
     - myapp尝试丢弃webshell执行代码之前的输出
@@ -190,6 +202,11 @@ python3 doughnuts.py
     - 修复mdownload, mupload没有ls后补全的问题
 - 新增依赖
     - tqdm
+- 4.2.1
+    - 修改命令
+        - db_mdump命令 优化,去除key键,去除表结构中的Not NULL, 使用mysql_real_escape_string转义
+
+
 
 
 ### 4.1
