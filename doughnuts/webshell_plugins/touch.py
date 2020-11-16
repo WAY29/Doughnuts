@@ -33,5 +33,5 @@ def run(filename: str = ""):
         print(color.green(f"\nSuccessfully created an empty file {filename}.\n"))
     elif ("No system execute function" in text):
         print(color.red(text))
-    else:
+    elif (len(text) > 0):
         print(color.green(f"\nModify time stamp {text} success\n"))

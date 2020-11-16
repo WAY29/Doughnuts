@@ -24,7 +24,7 @@
 
 - 支持连接,记录,管理webshell,方便下一次连接
 - 基于eval的连接,支持GET,POST,COOKIE,HEADER四种连接方式
-- 请求伪装
+- **请求与响应伪装**
 - 支持编码payload(已内置base64,str_rot13,hex,doughnuts四种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
 - 支持绕过open_basedir
 - 支持多种方式绕过disable_functions
@@ -37,7 +37,7 @@
     - COM
     - imap_open
 - 核心功能
-    - 获取网站,系统信息
+    - 获取网站,系统,进程信息
     - 输出disbale_functions
     - 寻找可写的PHP文件(以树状结构显示)
     - 寻找配置文件(文件名中包含cfg/config/db/database) 也可以通过修改代码来支持寻找更多的文件(以树状结构显示)
@@ -190,6 +190,12 @@ python3 doughnuts.py
 - 4.4.1
     - 修复bug
         - **回显加密在php5会出错**
+- 4.4.2
+    - 修改命令
+        - touch命令 提示修改
+        - ps命令    提示修改,只允许在*unix目标上运行
+    - 修复bug
+        - 曾导致在linux下调用vi编辑器失败
 
 ### 4.3
 - 修改命令

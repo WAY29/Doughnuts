@@ -1571,7 +1571,10 @@ def has_env(env: str, remote: bool = True):
             flag = gget("webshell.has_%s" % env, "webshell")
     else:
         if (not gget("has_%s" % env)):
-            flag = check_output([command, env]).strip().decode(LOCAL_ENCODING)
+            try:
+                flag = check_output([command, env]).strip().decode(LOCAL_ENCODING)
+            except Exception:
+                flag = False
             gset("has_%s" % env, flag)
         else:
             flag = gget("has_%s" % env)
@@ -1588,7 +1591,7 @@ def open_editor(file_path: str, editor: str = ""):
             print(color.red(f"{editor} not found in local environment"))
             return False
     else:
-        binpath = "notepad.exe" if has_env("notepad.exe", False) else "vi"
+        binpath = "notepad.exe" if (is_windows(False)) else "vi"
     try:
         p = Popen([binpath, file_path], shell=False)
         p.wait()
