@@ -325,7 +325,7 @@ def decode_g(result ,key : str, options : bool):
 def send(phpcode: str, raw: bool = False, **extra_params):
     # extra_params['quiet'] 不显示错误信息
     offset = 8
-    encode_recv = True
+    encode_recv = gget("encode_recv", default=False)
     quiet = False
     if ("quiet" in extra_params):
         del extra_params["quiet"]
