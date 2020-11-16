@@ -318,16 +318,16 @@ def decode_g(result, key: str, options: bool):
             s = s[:i] + chr(
                 int(bin(ord(s[i]) ^ ord(kr[i % klen]))[2:].zfill(8)[::-1], 2) ^ ord(keys[ct][i % klen])) + s[i + 1:]
 
-        de = getencoder("rot-13")(s)[0][::-1].encode("latin1")
+    de = getencoder("rot-13")(s)[0][::-1].encode("latin1")
 
-        try:
-            if (options):
-                return de
-            else:
-                return de.decode("utf8")
+    try:
+        if (options):
+            return de
+        else:
+            return de.decode("utf8")
 
-        except UnicodeDecodeError:
-            return b"" if options else ""
+    except UnicodeDecodeError:
+        return b"" if options else ""
 
 def send(phpcode: str, raw: bool = False, **extra_params):
     # extra_params['quiet'] 不显示错误信息
