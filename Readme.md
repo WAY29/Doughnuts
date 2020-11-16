@@ -186,7 +186,7 @@ python3 doughnuts.py
 
 ### 4.5
 - 添加命令
-    - enrecv命令 用于随时开启回显加密
+    - enrecv命令 用于随时开启/关闭回显加密
     - rempshell命令 可以简易的弹一个meterpreter的shell
 - 修复bug
     - 修复回显加密在弹shell时可能会出现解码错误的问题
