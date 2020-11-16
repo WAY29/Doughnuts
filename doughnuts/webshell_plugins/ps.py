@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.myapp import send, randstr
+from libs.myapp import send, randstr, is_windows
 
 PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload", "mupload", "cp", "copy",
                "d", "download", "mdownload", "dump", "mv", "rm", "cd", "ls", "chmod", "touch"]
@@ -57,11 +57,14 @@ def run():
     """
     ps
 
-    Report a snapshot of the current processes.
+    (Only for *unix) Report a snapshot of the current processes.
 
     eg: ps
 
     """
+    if (is_windows()):
+        print(color.red(f"Only for target system is linux."))
+        return False
     splitchars = randstr("!@#$%^&*()1234567890")
     res = send(get_php(splitchars))
     if (not res):
