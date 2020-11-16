@@ -296,31 +296,38 @@ def execute_sql_command(command, database: str = "", raw: bool = False):
         return form
     return ''
 
-def decode_g(result ,key : str, options : bool):
+def decode_g(result, key: str, options: bool):
     try:
         s = result.decode()
     except AttributeError:
         s = result
-        
-    s = unquote_plus(s,'latin1')
+
+    s = unquote_plus(s, 'latin1')
     rlen = len(s)
     klen = len(key)
     keys = [key]
-    
-    for c in range(1,klen):
+
+    for c in range(1, klen):
         for k in range(klen):
-            key= key[:k] + chr((ord(key[(k + 1)%klen])^ord(key[k]))) + key[k + 1:]
+            key = key[:k] + chr((ord(key[(k + 1) % klen]) ^ ord(key[k]))) + key[k + 1:]
         keys.append(key)
 
-    for ct in range(klen - 1,-1,-1):
+    for ct in range(klen - 1, -1, -1):
         kr = keys[ct][::-1]
         for i in range(rlen):
-            s = s[:i] + chr(int(bin(ord(s[i]) ^ ord(kr[i%klen]))[2:].zfill(8)[::-1],2) ^ ord(keys[ct][i%klen])) + s[i+1:]
-    
-    if(options):
-        return getencoder("rot-13")(s)[0][::-1].encode("latin1")
-    else:
-        return getencoder("rot-13")(s)[0][::-1].encode("latin1").decode("utf8")
+            s = s[:i] + chr(
+                int(bin(ord(s[i]) ^ ord(kr[i % klen]))[2:].zfill(8)[::-1], 2) ^ ord(keys[ct][i % klen])) + s[i + 1:]
+
+        de = getencoder("rot-13")(s)[0][::-1].encode("latin1")
+
+        try:
+            if (options):
+                return de
+            else:
+                return de.decode("utf8")
+
+        except UnicodeDecodeError:
+            return b"" if options else ""
 
 def send(phpcode: str, raw: bool = False, **extra_params):
     # extra_params['quiet'] 不显示错误信息
