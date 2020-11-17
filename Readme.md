@@ -191,6 +191,8 @@ python3 doughnuts.py
     - remp命令 可以简易的弹一个meterpreter的shell
 - 修复bug
     - 修复回显加密在弹shell时可能会出现解码错误的问题
+- 4.5.1
+    - 现在使用随机字符作为连接是否成功的判断以防特征检测
 
 
 ### 4.4
