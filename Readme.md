@@ -32,6 +32,7 @@
     - php7-backtrace
     - php7-gc
     - php7-json
+    - php7-plDoublyLinkedList
     - LD_PRELOAD
     - FFI
     - COM
@@ -51,6 +52,7 @@
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
     - 检测suid文件并给出提权建议 / 检测杀毒软件
+    - 可以支持简易弹meterpreter的shell
 - 易于扩展
 
 ## 依赖
@@ -182,6 +184,13 @@ python3 doughnuts.py
 - https://github.com/epinna/weevely3
 
 ## 更新日志
+
+### 4.5
+- 添加命令
+    - enrecv命令 用于随时开启/关闭回显加密
+    - rempshell命令 可以简易的弹一个meterpreter的shell
+- 修复bug
+    - 修复回显加密在弹shell时可能会出现解码错误的问题
 
 
 ### 4.4
