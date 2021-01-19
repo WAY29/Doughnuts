@@ -33,6 +33,8 @@ ALPATHNUMERIC = ascii_letters + digits
 RAND_KEY = str(uuid4())
 UNITS = {"B": 1, "KB": 2**10, "MB": 2**20, "GB": 2**30, "TB": 2**40}
 
+__version__ = "4.5.1"
+
 
 disable_warnings()
 
@@ -80,7 +82,7 @@ def banner():
 
 """
         )
-    print(color.green("Doughnut Version: 4.5\n"))
+    print(color.green("Doughnut Version: %s\n" % __version__))
 
 
 def base64_encode(data: str, encoding="utf-8"):
