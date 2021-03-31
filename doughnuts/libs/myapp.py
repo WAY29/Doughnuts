@@ -235,7 +235,7 @@ def set_prompt():
     verbose = CONFIG['VERBOSE']
     prompt = f"doughnuts ({color.cyan(gget('webshell.netloc', 'webshell'))}) > "
     if verbose:
-        prompt = f"{color.green('PHP ' + gget('webshell.php_version', 'webshell'))}    {color.yellow(gget('webshell.pwd', 'webshell'))}\n" + prompt
+        prompt = f"{color.yellow(gget('webshell.pwd', 'webshell'))}    {color.green('PHP ' + gget('webshell.php_version', 'webshell'))}\n" + prompt
     gset("webshell.prompt", prompt)
 
 
