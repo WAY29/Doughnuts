@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.debug import DEBUG
+from libs.runtime_config import CONFIG
 
 
 @alias(True)
@@ -15,8 +15,8 @@ def run(switch: str = "SEND"):
     """
     switch = switch.upper()
     if (switch in ["LOOP", "SEND"]):
-        DEBUG[switch] = not DEBUG[switch]
+        CONFIG[switch] = not CONFIG[switch]
         print(
-            f"\nSet DEBUG switch {switch}: {color.green('On') if DEBUG[switch] else color.red('Off')}\n")
+            f"\nSet DEBUG switch {switch}: {color.green('On') if CONFIG[switch] else color.red('Off')}\n")
     else:
         print(color.red("\nNo this switch\n"))

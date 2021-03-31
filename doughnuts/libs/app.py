@@ -7,7 +7,7 @@ from sys import exc_info, path
 from traceback import print_exception
 
 from libs.config import custom_get, gget, gset, order_alias, set_namespace, color
-from libs.debug import DEBUG
+from libs.runtime_config import CONFIG
 from libs.readline import LovelyReadline
 from Myplugin import Platform
 
@@ -202,11 +202,11 @@ def loop_main():
                 exc_type, exc_value, exc_tb = exc_info()
                 print("[TypeError] %s" % str(e).replace(
                     "%s()" % api, "%s()" % order))
-                if DEBUG["LOOP"]:
+                if CONFIG["LOOP"]:
                     print_exception(exc_type, exc_value, exc_tb)
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
-                if DEBUG["LOOP"]:
+                if CONFIG["LOOP"]:
                     print_exception(exc_type, exc_value, exc_tb)
                 print("[%s] %s" % (exc_type.__name__, e))
 

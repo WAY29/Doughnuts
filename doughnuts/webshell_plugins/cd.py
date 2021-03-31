@@ -1,5 +1,5 @@
-from libs.config import alias, color, gset, gget
-from libs.myapp import send, base64_encode
+from libs.config import alias, gset
+from libs.myapp import send, base64_encode, set_prompt
 
 
 @alias(True, _type="COMMON", d="dir")
@@ -16,4 +16,4 @@ def run(directory: str = ''):
         return
     pwd = res.r_text.strip()
     gset("webshell.pwd", pwd, namespace="webshell")
-    gset("webshell.prompt", f"doughnuts ({color.cyan(gget('webshell.netloc', 'webshell'))}) > ")
+    set_prompt()
