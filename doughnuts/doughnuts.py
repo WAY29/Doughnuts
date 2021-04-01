@@ -6,13 +6,14 @@ from json import loads, JSONDecodeError
 from helpmenu import register_helpmenu
 from libs.app import Loop_init, run_loop
 from libs.config import gset, gget, custom_set, color
-from libs.debug import DEBUG
+from libs.runtime_config import CONFIG
 from libs.myapp import banner
+
 
 
 builtins.ic = lambda *a, **kw: None
 
-if (DEBUG["DEV"]):
+if (CONFIG["DEV"]):
     try:
         from icecream import ic
         builtins.ic = ic
