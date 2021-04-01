@@ -185,6 +185,12 @@ python3 doughnuts.py
 
 ## 更新日志
 
+### 4.7
+- 4.7.0
+    - 修改命令
+        - remp命令 修改php模式的payload,添加bash和python的payload
+        - bdf命令 php-fpm模式(https://xz.aliyun.com/t/5598)
+
 ### 4.6
 - 4.6.0
     - 添加命令

