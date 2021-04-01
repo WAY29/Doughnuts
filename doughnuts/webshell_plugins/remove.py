@@ -22,6 +22,6 @@ def run(*web_file_paths):
             return
         text = res.r_text.strip()
         if (text == 'success'):
-            print("\n" + color.green(f"Delete {each_file_path} success.") + "\n")
+            print("\n" + color.green(f"Delete {each_file_path} success") + "\n")
         else:
-            print("\n" + color.red(f"Delete {each_file_path} failed.") + "\n")
+            print("\n" + color.red(f"Delete {each_file_path} failed") + "\n")
