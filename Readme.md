@@ -176,7 +176,19 @@ python3 doughnuts.py
     2. 上传a.php,根据提示执行 `doughnuts connect {木马url} POST pass doughnuts-salt `连接至webshell
 
 
-
+## 自定义webshell模板
+1. 进入doughnuts/webshell_plugins目录
+2. 新建/拷贝一个py文件,起一个名字,以test.py为例
+3. 文件中只需要写一个get_php函数,类似于
+```python
+def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
+    ...
+```
+4. 各个参数解释
+    - keyword是一个数字对应一种请求方式,分别对应: GET->3 POST->4 COOKIE->5 HEADER->6
+    - passwd是连接webshell的密码
+    - salt是用于加密算法的盐,你可以不需要使用这个参数,但是函数定义里必须存在
+5. 重启doughnuts或者在doughnuts使用`reload generate`重新加载generate命令,即可使用doughnuts生成自定义webshell
 
 ## 参考
 
@@ -184,6 +196,11 @@ python3 doughnuts.py
 - https://github.com/epinna/weevely3
 
 ## 更新日志
+
+### 4.8
+- 4.8.0
+    - 修改命令
+        - generate命令 现在支持在自定义webshell模板,在doughnuts/webshell_plugins下可以添加自己的模板,详情请查看上面的自定义webshell模板
 
 ### 4.7
 - 4.7.0
