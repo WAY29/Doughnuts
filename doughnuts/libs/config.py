@@ -108,13 +108,13 @@ def alias(none_named_arg: bool = False, func_alias: str = "", _type: str = "gene
             if not func_type_list:
                 func_type_list = []
                 gset("type_list", func_type_list,
-                        namespace=folders_namespace[func_folder])
+                     namespace=folders_namespace[func_folder])
             type_func_dict = gget(
                 "type_func_dict", namespace=folders_namespace[func_folder])
             if not type_func_dict:
                 type_func_dict = {}
                 gset("type_func_dict", type_func_dict,
-                        namespace=folders_namespace[func_folder])
+                     namespace=folders_namespace[func_folder])
             if (_type not in func_type_list):
                 func_type_list.append(_type)
             if (_type not in type_func_dict):
@@ -126,10 +126,10 @@ def alias(none_named_arg: bool = False, func_alias: str = "", _type: str = "gene
                 short_doc = ''
             command_doc = f"[{func_alias}|{func_name}]" if func_alias else f"[{func_name}]"
             gset(func_name + ".helpdoc", "%-30s%s" % (color.yellow(command_doc),
-                                                        color.cyan(short_doc)), namespace=folders_namespace[func_folder])
+                                                      color.cyan(short_doc)), namespace=folders_namespace[func_folder])
 
         @functools.wraps(func)
-        def wrapper(*args, **kw):   
+        def wrapper(*args, **kw):
             kw = conver_args(kw, alias)
             if "" in kw:
                 if none_named_arg:

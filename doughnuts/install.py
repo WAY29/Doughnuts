@@ -1,4 +1,4 @@
-from os import path, chmod, system
+from os import path, chmod
 
 cpath = path.split(path.realpath(__file__))[0]
 

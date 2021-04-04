@@ -1,9 +1,7 @@
-from genericpath import exists
 from libs.config import alias, color
 from os import path
 from string import ascii_letters, digits
 from random import sample, randint
-from webshell_template import pudding, icecream, popsicle, gululingbo
 from Myplugin import Platform
 
 TEMPLATE_PF = Platform("webshell_template", "get_php", True)

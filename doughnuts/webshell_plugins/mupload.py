@@ -1,7 +1,6 @@
 from os import path
 from time import sleep
 from base64 import b64encode
-from time import sleep
 from threading import Lock
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 

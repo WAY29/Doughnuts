@@ -1,5 +1,4 @@
 from os import path
-from .runtime_config import CONFIG
 from re import match, sub
 from base64 import b64decode, b64encode
 from binascii import b2a_hex

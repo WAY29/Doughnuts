@@ -10,7 +10,6 @@ from libs.runtime_config import CONFIG
 from libs.myapp import banner
 
 
-
 builtins.ic = lambda *a, **kw: None
 
 if (CONFIG["DEV"]):

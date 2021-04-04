@@ -26,4 +26,3 @@ def run(mode: str, *web_file_paths):
             print(f"\nchmod {each_file_path} {mode} {color.green('success')}\n")
         else:
             print(f"\nchmod {each_file_path} {mode} {color.red('failed')}\n")
-  

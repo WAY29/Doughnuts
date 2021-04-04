@@ -1,7 +1,7 @@
 from os import path, makedirs
 from concurrent.futures import ThreadPoolExecutor, wait, as_completed, ALL_COMPLETED
 from threading import Lock
-from base64 import b64decode, encode
+from base64 import b64decode
 
 from libs.config import alias, color, gget
 from libs.myapp import send, get_db_connect_code, gzinflate
@@ -71,6 +71,7 @@ def get_table_row_number(database, table):
     except ValueError:
         return -1
 
+
 def get_table_construct(database, table, encoding):
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
@@ -101,7 +102,7 @@ def get_table_construct(database, table, encoding):
         php = ""
     retry_time = 5
     text = None
-    while retry_time and text == None:
+    while retry_time and not text:
         res = send(php)
         try:
             text = gzinflate(b64decode(res.r_content.strip()))
@@ -148,7 +149,7 @@ def get_data(database, table, encoding, offset, blocksize):
         php = ""
     retry_time = 5
     text = None
-    while retry_time and text == None:
+    while retry_time and not text:
         res = send(php)
         try:
             text = gzinflate(b64decode(res.r_content.strip()))
@@ -180,7 +181,7 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
     with open(file_path, "wb") as f, ThreadPoolExecutor(max_workers=threads) as tp:
         f.write(get_table_construct(database, table, encoding))
         f.flush()
-        
+
         all_task = [tp.submit(get_data, database, table, encoding, offset, blocksize)
                     for offset in range(0, row_number, blocksize)]
         for future in as_completed(all_task):

@@ -1,5 +1,5 @@
 
-from libs.config import add_namespace_callback, color, gget
+from libs.config import add_namespace_callback, gget
 
 
 GENERAL_DOC = ""

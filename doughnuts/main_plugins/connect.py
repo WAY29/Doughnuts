@@ -1,6 +1,6 @@
 from os import path, SEEK_END
 from random import randint
-from string import ascii_letters,digits
+from string import ascii_letters, digits
 from urllib.parse import urlparse, parse_qs
 
 from libs.config import alias, color, gget, gset, set_namespace
@@ -105,10 +105,12 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
     )
     gset("webshell.pwd", ".", namespace="webshell")
     gset("webshell.bypass_df", -1, namespace="webshell")
-    version_flag_start = randstr(string = ascii_letters + digits, offset = randint(32,62))
-    version_flag_end = randstr(string = ascii_letters + digits, offset = randint(32,62))
+    version_flag_start = randstr(
+        string=ascii_letters + digits, offset=randint(32, 62))
+    version_flag_end = randstr(
+        string=ascii_letters + digits, offset=randint(32, 62))
     res = send(
-        'print("'+ version_flag_start +'|".phpversion()."|' + version_flag_end + '");', raw=True)
+        'print("' + version_flag_start + '|".phpversion()."|' + version_flag_end + '");', raw=True)
     if (not res or version_flag_start not in res.r_text):
         print(color.red("Connect failed..."))
         if (res):

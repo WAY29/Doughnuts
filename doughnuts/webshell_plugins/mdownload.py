@@ -1,5 +1,4 @@
-from os import path, makedirs
-from re import match, sub
+from os import path
 from base64 import b64decode
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
@@ -26,9 +25,10 @@ def get_data_php(web_file_path: str, offset: int, blocksize: int):
 download(base64_decode("%s"), %s, %s);
 """ % (base64_encode(web_file_path), offset, blocksize)
 
+
 def get_filesize_php(web_file_path: str):
     return """echo filesize(base64_decode("%s"));
-""" % ( base64_encode(web_file_path))
+""" % (base64_encode(web_file_path))
 
 
 def get_data(web_file_path: str, n: int, offset: int, blocksize: int):
@@ -70,18 +70,23 @@ def run(
         blocksize = human_to_size(humansize)
     except Exception:
         blocksize = file_size // 10
-        print(color.yellow(f"[Warn] Parse humansize error, set it to {size_to_human(blocksize)}"))
+        print(color.yellow(
+            f"[Warn] Parse humansize error, set it to {size_to_human(blocksize)}"))
     if (blocksize < file_size / 1000):
         blocksize = file_size // 100
-        print(color.yellow(f"[Warn] Humansize too small, set it to {size_to_human(blocksize)}"))
+        print(color.yellow(
+            f"[Warn] Humansize too small, set it to {size_to_human(blocksize)}"))
     file_human_size = color.green(size_to_human(file_size))
     if (file_size):
-        download_path = local_path or gget("webshell.download_path", "webshell")
-        file_path = path.join(download_path, path.split(web_file_path)[1]).replace("\\", "/")
+        download_path = local_path or gget(
+            "webshell.download_path", "webshell")
+        file_path = path.join(download_path, path.split(
+            web_file_path)[1]).replace("\\", "/")
         content_length = 0
         chunk_dict = {}
         with ThreadPoolExecutor(max_workers=threads) as tp, tqdm(total=file_size, desc="Downloading", unit_scale=True) as bar:
-            all_task = [tp.submit(get_data, web_file_path, n, offset, blocksize) for n, offset in enumerate(range(0, file_size, blocksize))]
+            all_task = [tp.submit(get_data, web_file_path, n, offset, blocksize)
+                        for n, offset in enumerate(range(0, file_size, blocksize))]
             for future in as_completed(all_task):
                 n, chunk = future.result()
                 if (chunk):
@@ -103,7 +108,8 @@ def run(
                 fp.write(content)
                 fp.flush()
                 bar.update(blocksize)
-        print(color.green(f"\nDownloaded file has been saved to {file_path}\n"))
+        print(color.green(
+            f"\nDownloaded file has been saved to {file_path}\n"))
     else:
         print(color.red("\nFile not exist / Download error\n"))
         return ''

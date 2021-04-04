@@ -1,8 +1,6 @@
 from libs.config import alias, color
 from libs.myapp import send
 
-from pprint import pprint
-
 
 def get_php(type, ip, ports, timeout):
     return """
@@ -123,7 +121,7 @@ def run(ip: str, ports: str, _type: int = 2, timeout: float = 0.5):
 
     eg: portscan {ip} {ports} {_type=[socket|file_get_contents|curl]{1|2|3},default = 2} {timeout=0.5}
     """
-    if (_type not in [1,2,3]):
+    if (_type not in [1, 2, 3]):
         print(color.red("\nType error!\n"))
         return
     php = get_php(_type, ip, ports, timeout)
@@ -134,11 +132,11 @@ def run(ip: str, ports: str, _type: int = 2, timeout: float = 0.5):
     # ------------------------------------------
     if(len(port_result[0])):
         print(color.green('Open') + ' port:\n' + " " *
-                4 + human_friendly_list_print(sorted(port_result[0])) + '\n')
+              4 + human_friendly_list_print(sorted(port_result[0])) + '\n')
     if(len(port_result[1])):
         print(color.red('Close') + ' port:\n' + " " *
-                4 + human_friendly_list_print(sorted(port_result[1])) + '\n')
+              4 + human_friendly_list_print(sorted(port_result[1])) + '\n')
     if (len(port_result[2])):
         print(color.magenta('Timeout') + ' port:\n' + " " *
-                4 + human_friendly_list_print(sorted(port_result[2])) + '\n')
+              4 + human_friendly_list_print(sorted(port_result[2])) + '\n')
     print("")

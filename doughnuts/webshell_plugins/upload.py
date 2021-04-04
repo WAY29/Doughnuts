@@ -52,4 +52,3 @@ def run(file_path: str, web_file_path: str = "", force: bool = False):
         return True
     else:
         print("\n" + color.red(f"Upload error / Privileges not enough. Error code: {text}") + "\n")
-
