@@ -236,6 +236,8 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
         - generate命令 现在支持在自定义webshell模板,在doughnuts/webshell_plugins下可以添加自己的模板,详情请查看上面的自定义webshell模板
 - 4.8.1
     - 优化代码结构
+    - 优化doughnuts加密算法
+    - 修复enrecv不存在的问题
 
 ### 4.7
 - 4.7.0

