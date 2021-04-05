@@ -440,7 +440,7 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
     req.r_json = MethodType(r_json, req)
     if CONFIG["SEND"]:  # DEBUG
         print(color.yellow(f"-----DEBUG START------"))
-        print(f"[{req.status_code}] {url} length: {len(req.r_text)} ", end="")
+        print(f"[{req.status_code}] {url} length: {len(req.r_text)} time: {req.elapsed.total_seconds()}", end="")
         print(f"raw: {color.green('True')}" if raw else '')
         for k, v in params_dict.items():
             print(f"{k}: ", end="")
