@@ -22,7 +22,6 @@ from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
 
 from libs.config import color, gget, gset
-from libs.runtime_config import CONFIG
 from auxiliary.fpm.fpm import generate_ssrf_payload, generate_base64_socks_payload
 
 LEVEL = []
@@ -231,8 +230,8 @@ def fake_referer():
         return f"https://juejin.im/post/{randstr(ALPATHNUMERIC, 24)}?{random_params}"
 
 
-def set_prompt():
-    verbose = CONFIG['VERBOSE']
+def update_prompt():
+    verbose = gget("PROMPT.VERBOSE")
     prompt = f"doughnuts ({color.cyan(gget('webshell.netloc', 'webshell'))}) > "
     if verbose:
         prompt = f"{color.yellow(gget('webshell.pwd', 'webshell'))}    {color.green('PHP ' + gget('webshell.php_version', 'webshell'))}\n" + prompt
@@ -438,7 +437,7 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
         req.r_text = decode_g(req.r_text, RAND_KEY, False)
         req.r_content = decode_g(req.r_content, RAND_KEY, True)
     req.r_json = MethodType(r_json, req)
-    if CONFIG["SEND"]:  # DEBUG
+    if gget("DEBUG.SEND"):  # DEBUG
         print(color.yellow(f"-----DEBUG START------"))
         print(f"[{req.status_code}] {url} length: {len(req.r_text)} time: {req.elapsed.total_seconds()}", end="")
         print(f"raw: {color.green('True')}" if raw else '')

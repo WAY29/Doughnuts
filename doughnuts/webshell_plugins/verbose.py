@@ -1,5 +1,5 @@
-from libs.myapp import set_prompt
-from libs.config import alias, color
+from libs.myapp import update_prompt
+from libs.config import gset, gget, alias, color
 from libs.runtime_config import CONFIG
 
 
@@ -16,14 +16,15 @@ def run(switch: str = ""):
     """
     switch = switch.upper()
     if (switch in ["ON", "OFF", ""]):
+        switch_name = "PROMPT.VERBOSE"
         if switch == "":
-            CONFIG["VERBOSE"] = not CONFIG["VERBOSE"]
+            gset(switch_name, not gget(switch_name, default=False))
         elif switch == "ON":
-            CONFIG["VERBOSE"] = True
+            gset(switch_name, True)
         elif switch == "OFF":
-            CONFIG["VERBOSE"] = False
-        set_prompt()
+            gset(switch_name, False)
+        update_prompt()
         print(
-            f"\nSet verbose info: {color.green('On') if CONFIG['VERBOSE'] else color.red('Off')}\n")
+            f"\nSet verbose info: {color.green('On') if gget(switch_name) else color.red('Off')}\n")
     else:
         print(color.red("\nNo this switch\n"))

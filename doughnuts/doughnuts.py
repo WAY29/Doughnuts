@@ -1,23 +1,28 @@
 import builtins
 from os import path
 from sys import argv
-from json import loads, JSONDecodeError
-
 from helpmenu import register_helpmenu
 from libs.app import Loop_init, run_loop
-from libs.config import gset, gget, custom_set, color
-from libs.runtime_config import CONFIG
+from libs.config import gset, gget, load_custom_config, load_var_config
 from libs.myapp import banner
 
 
 builtins.ic = lambda *a, **kw: None
 
-if (CONFIG["DEV"]):
-    try:
-        from icecream import ic
-        builtins.ic = ic
-    except ImportError:
-        pass
+
+def load_config():
+    # load variables.config
+    load_var_config()
+    # load config.ini
+    load_custom_config()
+
+    # DEBUG
+    if (gget("DEBUG.DEV")):
+        try:
+            from icecream import ic
+            builtins.ic = ic
+        except ImportError:
+            pass
 
 
 def main(print_banner: bool = True):
@@ -27,31 +32,25 @@ def main(print_banner: bool = True):
     with open(path.join(gget("root_path"), "auxiliary", "user_agents", "ua.txt"), "r") as f:
         gset("user_agents", f.readlines())
     register_helpmenu()
-
-    try:
-        with open(path.join(gget("root_path"), "variables.config"), "r") as f:
-            try:
-                for key, value in loads(f.read()).items():
-                    custom_set(key=key, value=value)
-                print(
-                    f"\n{color.green('Variable(s) loaded successfully from file variables.config')}\n")
-            except JSONDecodeError:
-                print(
-                    f"\n{color.yellow('Variable(s) could not be read correctly')}\n")
-    except FileNotFoundError:
-        pass
-    except IOError:
-        print(f"\n{color.red('Permission denied to read variables.config')}\n")
-
+    load_config()
     run_loop(My_Loop_init(), leave_message="Bye! Doughnuts:)")
 
 
 class My_Loop_init(Loop_init):
+    def __init__(self, api: str = "run", init_namespace: str = "main"):
+        super().__init__(api=api, init_namespace=init_namespace)
+        # 为webshell平台添加custom的命令列表
+        wordlist = gget("webshell.wordlist")
+        wordlist["command_wordlist"] += gget("custom.wordlist")[
+            "command_wordlist"]
+
     def set_platforms(self) -> dict:
-        return {"main": "main_plugins", "webshell": "webshell_plugins", "general": "general", "encode": "encode"}
+        platforms = {"main": "main_plugins", "webshell": "webshell_plugins",
+                     "general": "general", "encode": "encode", "custom": "custom_plugins"}
+        return platforms
 
     def set_prompts(self) -> dict:
-        return {"main": "doughnuts > ", "webshell": "> "}
+        return {"main": "doughnuts > ", "webshell": "> ", "custom": "> "}
 
 
 if __name__ == "__main__":

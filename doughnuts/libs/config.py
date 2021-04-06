@@ -1,6 +1,9 @@
 import functools
 from typing import Any
 from inspect import getfullargspec
+from configparser import ConfigParser
+from json import loads, JSONDecodeError
+from os import path
 
 from colorama import Back, Fore, init
 
@@ -185,3 +188,34 @@ class Colored(object):
 
 
 color = Colored()
+
+
+def load_custom_config():
+    cfg = ConfigParser()
+    cfg_path = path.join(gget("root_path", default=""), "config.ini")
+    if not path.isfile(cfg_path):
+        return
+    cfg.read(cfg_path)
+    # DEBUG
+    debug = cfg["DEBUG"]
+    for k in debug.keys():
+        gset("DEBUG." + k.upper(), debug.getboolean(k, False))
+
+    # PROMPT
+    prompt = cfg["PROMPT"]
+    gset("PROMPT.VERBOSE", prompt.getboolean("verbose", False))
+
+
+def load_var_config():
+    try:
+        with open(path.join(gget("root_path"), "variables.config"), "r") as f:
+            try:
+                for key, value in loads(f.read()).items():
+                    custom_set(key=key, value=value)
+            except JSONDecodeError:
+                print(
+                    f"\n{color.yellow('variables.config parse error')}\n")
+    except FileNotFoundError:
+        pass
+    except IOError:
+        print(f"\n{color.red('Permission denied to read variables.config')}\n")

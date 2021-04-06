@@ -14,19 +14,22 @@ def run(order: str = ""):
     if (order == ""):
         set_namespace(gget("namespace"), True, False)
         return
-    pf = None
+    tpf = None
     gpf = gget(f"general.pf")
     npf = gget(f"{gget('namespace')}.pf")
+    cpf = gget(f"custom.pf")
     order = order_alias(order)
-    if (order in gpf):
-        pf = gpf
-    elif (order in npf):
-        pf = npf
+    if (order in npf):
+        tpf = gpf
+    elif (order in gpf):
+        tpf = npf
+    elif (order in cpf):
+        tpf = cpf
     elif order:
         print("%s object is not command-function" % order)
         return
     api = gget("api")
-    func = getattr(pf[order], api)
+    func = getattr(tpf[order], api)
     if (func.__doc__):
         print(func.__doc__)
     block = " " * 4

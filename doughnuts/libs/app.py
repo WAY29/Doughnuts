@@ -7,7 +7,6 @@ from sys import exc_info, path
 from traceback import print_exception
 
 from libs.config import custom_get, gget, gset, order_alias, set_namespace, color
-from libs.runtime_config import CONFIG
 from libs.readline import LovelyReadline
 from Myplugin import Platform
 
@@ -155,6 +154,7 @@ def loop_main():
         namespace = gget("namespace")
         tpf = None
         npf = gget(f"{namespace}.pf")
+        cpf = gget("custom.pf")
         if (namespace != old_namespace):
             wordlist = gget(namespace + ".wordlist")
             prefix_wordlist = gget(namespace + ".prefix_wordlist")
@@ -192,9 +192,12 @@ def loop_main():
             tpf = npf
         elif order in gpf:
             tpf = gpf
+        elif order in cpf:
+            tpf = cpf
         elif cmd:
-            print("[Error] %s: Command Not Found" % order)
+            print(f'\n{order}: {color.red("Command Not Found")}\n')
         if tpf:
+            debug = gget("DEBUG.LOOP")
             try:
                 arg_dict = args_parse(args)  # 解析参数
                 tpf[order].run(**arg_dict)
@@ -202,11 +205,11 @@ def loop_main():
                 exc_type, exc_value, exc_tb = exc_info()
                 print("[TypeError] %s" % str(e).replace(
                     "%s()" % api, "%s()" % order))
-                if CONFIG["LOOP"]:
+                if debug:
                     print_exception(exc_type, exc_value, exc_tb)
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
-                if CONFIG["LOOP"]:
+                if debug:
                     print_exception(exc_type, exc_value, exc_tb)
                 print("[%s] %s" % (exc_type.__name__, e))
 

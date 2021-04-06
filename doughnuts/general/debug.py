@@ -1,5 +1,4 @@
-from libs.config import alias, color
-from libs.runtime_config import CONFIG
+from libs.config import gset, gget, alias, color
 
 
 @alias(True)
@@ -15,8 +14,10 @@ def run(switch: str = "SEND"):
     """
     switch = switch.upper()
     if (switch in ["LOOP", "SEND"]):
-        CONFIG[switch] = not CONFIG[switch]
+        switch_name = "DEBUG." + switch
+        button = not gget(switch_name, default=False)
+        gset(switch_name, button)
         print(
-            f"\nSet DEBUG switch {switch}: {color.green('On') if CONFIG[switch] else color.red('Off')}\n")
+            f"\nSet DEBUG switch {switch}: {color.green('On') if button else color.red('Off')}\n")
     else:
         print(color.red("\nNo this switch\n"))

@@ -5,7 +5,7 @@ from urllib.parse import urlparse, parse_qs
 
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.app import value_translation
-from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template, randstr
+from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template, randstr, update_prompt
 
 """
 url ['webshell']
@@ -172,6 +172,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         print(color.cyan("Connect success...\n"))
         print_webshell_info()
         set_namespace("webshell", callback=False)
+        update_prompt()
         if (exec_func == ''):
             print(color.red("No system execute function\n"))
         return True

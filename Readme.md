@@ -230,6 +230,12 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.9
+- 4.9.0
+    - 修改核心
+        - 添加custom_plugins目录,用于存放用户自己编写的插件
+        - 添加config.ini文件,用于配置相关参数
+
 ### 4.8
 - 4.8.0
     - 修改命令

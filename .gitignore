@@ -6,7 +6,7 @@ target/
 .vscode/
 settings.json
 
-.version.toml
+doughnuts/custom_plugins/*.py
 .gitignore
 tempCodeRunnerFile.py
 tempCodeRunnerFile.python
