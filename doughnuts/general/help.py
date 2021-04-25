@@ -20,9 +20,9 @@ def run(order: str = ""):
     cpf = gget(f"custom.pf")
     order = order_alias(order)
     if (order in npf):
-        tpf = gpf
-    elif (order in gpf):
         tpf = npf
+    elif (order in gpf):
+        tpf = gpf
     elif (order in cpf):
         tpf = cpf
     elif order:
