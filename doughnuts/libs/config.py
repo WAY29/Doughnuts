@@ -13,7 +13,7 @@ NAMESPACE_CALLBACK_LIST = []
 
 def gget(key, namespace: str = "main", default=None) -> Any:
     if (namespace not in GLOBAL_DICT):
-        return None
+        return default
     return GLOBAL_DICT[namespace].get(key, default)
 
 

@@ -263,7 +263,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 - 4.9.1
     - 修复在pypi版本与github版本不一致的问题
 - 4.9.2
-- 4.9.3
+- 4.9.3, 4.9.4
     - 修复在不存在自定义命令时连接webshell后帮助菜单无法显示的bug
 
 ### 4.8
