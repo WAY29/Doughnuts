@@ -255,6 +255,11 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+
+### 4.10
+- 4.10.0
+    - 修改命令
+        - touch命令 支持windows,不再调用系统命令去实现
 ### 4.9
 - 4.9.0
     - 修改核心
