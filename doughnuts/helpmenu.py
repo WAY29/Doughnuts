@@ -33,8 +33,8 @@ def register_helpmenu():
                                               for func_name in gget("type_func_dict", namespace=namespace)[_type])
                     WEBSHELL_DOC += "\n"
             if (not CUSTOM_WEBSHELL_DOC):
-                CUSTOM_WEBSHELL_DOC = "\n".join(gget(func_name + ".helpdoc", namespace="custom")
-                                                for func_name in gget("type_func_dict", namespace="custom")["general"])
+                CUSTOM_WEBSHELL_DOC = "\n".join(gget(func_name + ".helpdoc", namespace="custom", default="")
+                                                for func_name in gget("type_func_dict", namespace="custom", default={'general': ()})["general"])
             print("\n[GENERAL]\n")
             print(GENERAL_DOC)
             print(WEBSHELL_DOC + "\n")
