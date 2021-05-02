@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "doughnuts"
-version = "4.10.4"
+version = "4.10.5"
 description = "A webshell manager for PHP"
 authors = ["WAY29 <toloveu29@gmail.com>"]
 license = "MIT"
