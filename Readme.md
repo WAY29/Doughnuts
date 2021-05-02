@@ -260,6 +260,9 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 - 4.10.0
     - 修改命令
         - touch命令 支持windows,不再调用系统命令去实现
+- 4.10.1-3(废弃版本)
+- 4.10.4
+    - 添加缺少的依赖到requirements.txt: six
 ### 4.9
 - 4.9.0
     - 修改核心

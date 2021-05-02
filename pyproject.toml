@@ -15,6 +15,7 @@ colorama = "^0.4.3"
 prettytable = "^0.7.2"
 pysocks = "^1.7.1"
 tqdm = "^4.50.2"
+six = "^1.15.0"
 
 [tool.poetry.dev-dependencies]
 icecream = "^2.0.0"
