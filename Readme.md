@@ -116,6 +116,11 @@ python3 doughnuts.py
 # enjoy it!
 ```
 
+- 使用docker
+```sh
+docker run --rm -it longlone/doughnuts
+```
+
 ## 使用例子
 
 *由于windows原因，在windows命令行连接下不支持&符号连接参数。
@@ -263,6 +268,8 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 - 4.10.1-3(废弃版本)
 - 4.10.4
     - 添加缺少的依赖到requirements.txt: six
+- 4.10.5
+    - 添加docker并上传到dockerhub,可以使用docker命令一键起doughnuts
 ### 4.9
 - 4.9.0
     - 修改核心
