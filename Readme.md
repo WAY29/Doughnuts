@@ -117,8 +117,17 @@ python3 doughnuts.py
 ```
 
 - 使用docker
-```sh
-docker run --rm -it longlone/doughnuts
+
+```bash
+# 启动一个doughnuts容器
+docker run --name doughnuts -itd longlone/doughnuts
+# 执行doughnuts容器的bash
+docker exec -it doughnuts bash
+# 在容器中运行doughnuts,这样你可以存储webshell记录等
+doughnuts
+
+# 或者直接执行doughnuts
+docker run --rm -it longlone/doughnuts:cli
 ```
 
 ## 使用例子
