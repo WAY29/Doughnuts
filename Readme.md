@@ -32,11 +32,12 @@
     - php7-backtrace
     - php7-gc
     - php7-json
-    - php7-plDoublyLinkedList
+    - php7-splDoublyLinkedList
     - LD_PRELOAD
     - FFI
     - COM
     - imap_open
+    - fpm(支持三种攻击方式)
 - 核心功能
     - 获取网站,系统,进程信息
     - 输出disbale_functions
@@ -46,13 +47,13 @@
     - 获取一个临时的非完全交互式shell和webshell
     - 正向/反弹shell
     - (仅限双方均为*unix)获取完全交互式的反弹shell
-    - 读/写/上传/下载/删除/搜索文件,目录打包
-    - 数据库管理,脱库
+    - 读/写/上传/下载/删除/搜索文件,目录打包,分段文件上传/下载
+    - 数据库管理,临时的sql-shell,数据dump,分段dump
     - 端口扫描
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
     - 检测suid文件并给出提权建议 / 检测杀毒软件
-    - 可以支持简易弹meterpreter的shell
+    - 可以支持弹meterpreter的shell(php代码实现)
 - 易于扩展
 
 ## 依赖
@@ -269,7 +270,14 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
-
+### 4.11
+- 4.11.0
+    - 修改命令
+        - bdf命令 重写fpm部分,使用antsword的[bypass_disable_functions扩展](https://github.com/Medicean/as_bypass_php_disable_functions)
+            现在支持三种attack_type: gopher,sock,http_sock
+            - gopher: 使用curl扩展与gopher协议攻击fpm端口
+            - sock: 使用stream_socket_client攻击fpm-sock
+            - http_sock: 使用fsockopen,pfsockopen连接fpm端口
 ### 4.10
 - 4.10.0
     - 修改命令
