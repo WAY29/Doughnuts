@@ -50,7 +50,6 @@ class Loop_init:
         gset("loop", True)
         gset("blockexit", False)
         gset("namespace", init_namespace)
-        gset("root_path", path[0])
         gset("namespace_folders",  platforms)
         gset("folders_namespace", {v: k for k, v in platforms.items()})
         root_path = gget("root_path")

@@ -280,6 +280,8 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
             - http_sock: 使用fsockopen,pfsockopen连接fpm端口
 - 4.11.1
     - 修改fpm的sock和http_sock攻击方式,防止整个doughnuts卡死
+- 4.11.2
+    - 修复无法使用`python3 -m doughnuts`启动doughnuts的bug
 ### 4.10
 - 4.10.0
     - 修改命令
