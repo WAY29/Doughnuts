@@ -278,6 +278,8 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
             - gopher: 使用curl扩展与gopher协议攻击fpm端口
             - sock: 使用stream_socket_client攻击fpm-sock
             - http_sock: 使用fsockopen,pfsockopen连接fpm端口
+- 4.11.1
+    - 修改fpm的sock和http_sock攻击方式,防止整个doughnuts卡死
 ### 4.10
 - 4.10.0
     - 修改命令
