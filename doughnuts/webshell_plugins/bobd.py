@@ -9,7 +9,7 @@ def run():
     """
     bobd
 
-    (Only for *unix) Try to bypass open_basedir by ini_set and chdir.
+    (Only for *unix) Try to bypass open_basedir by ini_set/int_alter and chdir.
     """
     disable_func_list = gget("webshell.disable_functions", "webshell")
     if (is_windows()):

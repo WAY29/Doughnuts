@@ -1,54 +1,79 @@
 from os import path
+from base64 import b64encode
 
 from libs.config import alias, color
-from libs.myapp import send, base64_encode
+from libs.myapp import send
 
 
-def get_php(web_file_path: str, force: bool):
-    web_file_path = base64_encode(web_file_path)
+def get_php(filename: str, web_file_path: str, force: bool):
     return """if (isset($_FILES)){
-    if (%s and file_exists(base64_decode("%s"))){
-        print("exist");
+    $upload_path="%s";
+    if (file_exists($upload_path)) {$upload_path=realpath($upload_path);}
+    $fname="%s";
+    if (is_dir($upload_path)) {
+        $upload_path .= DIRECTORY_SEPARATOR.$fname;
     }
-    else if (move_uploaded_file($_FILES["file"]["tmp_name"], base64_decode("%s"))){
-        print("success");
+    if (%s and file_exists($upload_path)){
+        print("$upload_path exist");
+    }
+    else if (move_uploaded_file($_FILES["file"]["tmp_name"], $upload_path)){
+        print("Upload $upload_path success");
     } else {
         print($_FILES["file"]["error"]);
     }
-}""" % (str(not force).lower(), web_file_path, web_file_path)
+}""" % (web_file_path, filename, str(not force).lower())
 
 
-@alias(True, func_alias="u", _type="FILE")
-def run(file_path: str, web_file_path: str = "", force: bool = False):
+def get_php_file_put_contents(filename: str, web_file_path: str, force: bool, content: str):
+    return """
+    $upload_path="%s";
+    if (file_exists($upload_path)) {$upload_path=realpath($upload_path);}
+    $fname="%s";
+    if (is_dir($upload_path)) {
+        $upload_path .= DIRECTORY_SEPARATOR.$fname;
+    }
+    if (%s and file_exists($upload_path)){
+        print("$upload_path exist");
+    }
+    else if(file_put_contents($upload_path, base64_decode("%s"))) {
+        print("Upload $upload_path success");
+    } else {
+        print("Upload $upload_path error");
+    }
+""" % (web_file_path, filename, str(not force).lower(), content)
+
+
+@alias(True, func_alias="u", _type="FILE", t="upload_type")
+def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bool = False):
     """
     upload
 
     Upload file to target system.
 
-    eg: upload {file_path} {web_file_path=file_name} {force=False}
+    eg: upload {file_path} {web_file_path=file_name} {upload_type=0(FILES)/1(file_put_contents)} {force=False}
     """
-    flag = True
+    filename = path.basename(file_path)
     if (not web_file_path):
-        web_file_path = path.basename(file_path)
-        flag = False
+        web_file_path = filename
     try:
         fp = open(file_path, "rb")
     except FileNotFoundError:
         print("\n" + color.red("Local File not exist") + "\n")
         return
-    php = get_php(web_file_path, force)
-    res = send(php, files={"file": fp})
+    if not upload_type:
+        php = get_php(filename, web_file_path, force)
+        res = send(php, files={"file": fp})
+    else:
+        php = get_php_file_put_contents(filename, web_file_path, force, b64encode(fp.read()).decode())
+        res = send(php)
     if (not res):
         return
     text = res.r_text.strip()
-    if text == "success":
-        if (flag):
-            print(color.green(f"\nUpload {file_path} as {web_file_path} success\n"))
-        else:
-            print(color.green(f"\nUpload {file_path} success\n"))
+    if "success" in text:
+        print(color.green(f"\n{text}\n"))
         return True
-    elif text == "exist":
-        print(color.yellow(f"\n{web_file_path} exist\n"))
+    elif "exist" in text:
+        print(color.yellow(f"\n{text}\n"))
         return True
     else:
-        print("\n" + color.red(f"Upload error / Privileges not enough. Error code: {text}") + "\n")
+        print("\n" + color.red(f"Upload error / Privileges not enough. Result: {text}") + "\n")

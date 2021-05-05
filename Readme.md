@@ -270,6 +270,31 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.12
+- 4.12.0
+    - 新增功能
+        - bdf
+            - 修改ld_preload部分,重构代码,支持x86 linux
+            - 为udf部分切割代码
+        - reverse
+            - 修改默认反弹类型,默认会根据目标系统选择powershell/bash
+            - 添加bash_exec类型,使用exec和管道符实现
+        - search
+            - 添加别名find, 最后结果以绝对路径显示
+        - remp
+            - 支持pfsockopen, 删除bash类型的反弹,将其移到reverse命令
+        - upload
+            - 新增参数upload_type,支持file_put_contents直接写入内容,同时优化输出
+    - 修复bug
+        upload
+    - 添加注释
+        bdf, reverse, av, checkvm
+    - 修改帮助文档
+        bdf, reverse, bobd, search, upload
+    - 重构代码
+        search, bdf, upload
+    - 修改分类
+        - verbose general->COMMON
 ### 4.11
 - 4.11.0
     - 修改命令
@@ -278,6 +303,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
             - gopher: 使用curl扩展与gopher协议攻击fpm端口
             - sock: 使用stream_socket_client攻击fpm-sock
             - http_sock: 使用fsockopen,pfsockopen连接fpm端口
+        
 - 4.11.1
     - 修改fpm的sock和http_sock攻击方式,防止整个doughnuts卡死
 - 4.11.2

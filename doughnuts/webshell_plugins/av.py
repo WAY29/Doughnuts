@@ -21,8 +21,12 @@ def run(find_path: str = "/usr&/bin"):
     if (not res or not res.r_text or "No system execute function" in res.r_text):
         print(color.red("\nDetect error\n"))
         return
+
+    # load av list
     with open(path.join(gget("root_path"), "auxiliary", "av", "av.json"), "r", encoding="utf-8") as f:
         av_processes = loads(f.read())
+
+    # find av by av list and tasklist result
     flag = 0
     print("\n" + color.green(" " * 37 + "Result"))
     for line in res.r_text.split("\n"):

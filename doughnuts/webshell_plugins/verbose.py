@@ -1,9 +1,8 @@
 from libs.myapp import update_prompt
 from libs.config import gset, gget, alias, color
-from libs.runtime_config import CONFIG
 
 
-@alias(True)
+@alias(True, _type="COMMON")
 def run(switch: str = ""):
     """
     verbose
