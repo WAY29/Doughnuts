@@ -19,4 +19,4 @@ def run(web_file_path: str, editor: str = ""):
     if (not flag):
         print("\n" + color.red(f"Call {editor} failed") + "\n")
         return
-    webshell_pf["upload"].run(download_file_path, web_file_path, True)
+    webshell_pf["upload"].run(download_file_path, web_file_path, force=True)

@@ -60,7 +60,7 @@ def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bo
     except FileNotFoundError:
         print("\n" + color.red("Local File not exist") + "\n")
         return
-    if not upload_type:
+    if upload_type == 0:
         php = get_php(filename, web_file_path, force)
         res = send(php, files={"file": fp})
     else:
