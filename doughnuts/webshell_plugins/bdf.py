@@ -81,7 +81,8 @@ def set_mode(mode: int, test: bool = False):
                     print(color.red("\nUnknown bits\n"))
                     return False
             bits = str(bits)
-
+            if bits == "32":
+                bits = "86"
             # upload so
             upload_result = upload(
                 path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x"+bits+".so"), filename, True)
