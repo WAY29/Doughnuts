@@ -272,6 +272,14 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+
+### 4.14
+- 4.14.0
+    - 新增功能
+        - bdf
+            - 增加iconv模式
+    - 修复bug
+        edit, upload
 ### 4.13
 - 4.13.0
     - 新增功能

