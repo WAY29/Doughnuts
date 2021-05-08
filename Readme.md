@@ -285,6 +285,10 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
     - 新增功能
         - bdf
             - 增加apache-mod-cgi模式
+- 4.13.1
+    - 修复bug
+        - iconv.c源码
+        - bdf apache-mod-cgi模式 在切换目录之后无法执行系统命令,现在固定在webshell目录中上传.htaccess和cgi脚本
 ### 4.12
 - 4.12.0
     - 新增功能
