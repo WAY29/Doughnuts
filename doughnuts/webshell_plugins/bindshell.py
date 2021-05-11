@@ -153,7 +153,7 @@ def run(port: int = 7777, passwd: str = "doughnuts"):
     t.setDaemon(True)
     t.start()
     sleep(1)
-    if (t.isAlive()):
+    if (t.is_alive()):
         print(f"\nBind {port} {color.green('success')}. Password is {color.green(passwd)}\n")
     else:
         print(f"\nBind {port} {color.red('error')}\n")

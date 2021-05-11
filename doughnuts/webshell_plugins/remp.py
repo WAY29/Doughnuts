@@ -59,7 +59,7 @@ def run(ip: str, port: str, reverse_type: str = "php"):
         print(color.red("Reverse type Error"))
         return
     sleep(1)
-    if (t.isAlive()):
+    if (t.is_alive()):
         print(
             f"\nReverse meterpreter shell to {ip}:{port} {color.green('success')}\n")
     else:

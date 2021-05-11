@@ -121,7 +121,7 @@ def run(port: int = 8888):
         t2.setDaemon(True)
         t2.start()
         sleep(1)
-        if (t.isAlive()):
+        if (t.is_alive()):
             print(f"\nStart socks5 server listen on {port} {color.green('success')}.\n")
         else:
             print(f"\nStart socks5 server {color.red('error')}.\n")
