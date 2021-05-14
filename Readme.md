@@ -40,6 +40,7 @@
     - MYSQL-UDF
     - fpm(支持三种攻击方式)
     - apache-mod-cgi
+    - iconv
 - 核心功能
     - 获取网站,系统,进程信息
     - 输出disbale_functions
@@ -281,6 +282,14 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
     - 修复bug
         - edit, upload
         - bdf apache-mod-cgi模式 在切换目录之后无法执行系统命令,现在固定在webshell目录中上传.htaccess和cgi脚本
+- 4.14.1
+- 4.14.2
+    - 修复bug
+        - 在Python3.9中报错
+            -bindshell, remp, reverse, socks
+        - gululingbo模板生成的webshell没有php头
+        - log命令默认参数时提示File path is invalid
+        
 ### 4.13
 - 4.13.0
     - 新增功能
