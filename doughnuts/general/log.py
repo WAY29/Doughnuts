@@ -35,7 +35,7 @@ def run(filepath="log.txt"):
     if (is_windows(False)):
         print(color.red("\nYour system isn't *unix\n"))
         return
-    if access(path.dirname(filepath), W_OK):
+    if access(filepath, W_OK):
         print(color.green(f"\nSet log in {filepath}\n"))
         sys.stdout = Logger(filepath, sys.__stdout__)
         sys.stderr = Logger(filepath, sys.__stderr__)
