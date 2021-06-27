@@ -104,14 +104,14 @@ def run(path: str = ".", mode: int = 1):
         info = line.split(" ")
         if (len(info) < 7):
             continue
-        ls_wordlist.append(info[6])
-        prems, name = info[0], info[-1]
+        prems, name = info[0], " ".join(info[6:])
+        ls_wordlist.append(name)
         if (prems[0] == 'd'):
-            info[-1] = color.cyan(name)
+            name = color.cyan(name)
             info[3] = ''
         elif ('x' in prems):
-            info[-1] = color.green(name)
+            name = color.green(name)
         print("%s  %-8s  %-8s  %6s  %s  %s  %s" %
-              (info[0], info[1], info[2], info[3], info[4], info[5], info[6]))
+              (info[0], info[1], info[2], info[3], info[4], info[5], name))
     for prefix in PREFIX_LIST:
         readline.add_prefix_wordlist(prefix, ls_wordlist)

@@ -289,6 +289,13 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
             -bindshell, remp, reverse, socks
         - gululingbo模板生成的webshell没有php头
         - log命令默认参数时提示File path is invalid
+- 4.14.3
+    - 修复bug
+        - 在windows下连接使用额外参数时错误
+        - ls显示带有空格文件名的文件的时候显示不全
+    - 删除特性
+        - 不再能从外部使用connect命令
+
         
 ### 4.13
 - 4.13.0

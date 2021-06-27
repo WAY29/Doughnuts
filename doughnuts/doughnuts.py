@@ -60,8 +60,5 @@ if __name__ == "__main__":
             gset("outside", True)
             from main_plugins.generate import outside_generate as generate
             generate(*argv[2:])
-        elif (argv[1] in ["connect", "c"]):
-            gset("preload_command", " ".join(argv[1:]))
-            main(False)
     else:
         main()

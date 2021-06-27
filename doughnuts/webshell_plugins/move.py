@@ -14,7 +14,7 @@ def run(web_file_path: str, new_file_path: str):
     """
     if (new_file_path.endswith("/")):
         new_file_path += path.basename(web_file_path)
-    res = send(f"print(rename(base64_decode('{base64_encode(web_file_path)}'), base64_decode('{base64_encode(new_file_path)}')));")
+    res = send(f"print(rename(base64_decode('{base64_encode(str(web_file_path))}'), base64_decode('{base64_encode(str(new_file_path))}')));")
     if (not res):
         return
     text = res.r_text.strip()

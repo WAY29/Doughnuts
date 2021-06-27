@@ -1,7 +1,7 @@
 from os import path, SEEK_END
 from random import randint
 from string import ascii_letters, digits
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, unquote_plus
 
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.app import value_translation
@@ -59,37 +59,44 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
     else:
         print(color.red("Method error"))
         return
-    if (is_windows(False)):
-        new_eop = []
-        extra_params = []
-        pass_next = False
-        eop_len = len(encoders_or_params)
-        for i in range(eop_len):  # 清洗数据,解决windows下a=b传成2个参数的错误
-            v = str(encoders_or_params[i])
-            if (pass_next):
-                pass_next = False
-                continue
-            if (":" not in v):
-                new_eop.append(str(v))
-            elif (i < eop_len - 1):
-                extra_params.append(v + "=" + str(encoders_or_params[i+1]))
-                pass_next = True
-        encoders_or_params = new_eop
+
+    # if (is_windows(False)):
+    #     new_eop = []
+    #     extra_params = []
+    #     pass_next = False
+    #     eop_len = len(encoders_or_params)
+    #     for i in range(eop_len):  # 清洗数据,解决windows下a=b传成2个参数的错误
+    #         v = str(encoders_or_params[i])
+    #         if (pass_next):
+    #             pass_next = False
+    #             continue
+    #         if (":" not in v):
+    #             new_eop.append(str(v))
+    #         elif (i < eop_len - 1):
+    #             extra_params.append(v + "=" + str(encoders_or_params[i+1]))
+    #             pass_next = True
+    #     encoders_or_params = new_eop
+
     extra_params = [f for f in encoders_or_params if "=" in str(f)]
+
     params_dict[raw_key] = {}
     for each in extra_params:
         if(":" in each):
             k, data = each.split(":")
             if (k not in params_dict):
                 params_dict[k] = {}
-            params_dict[k].update(dict([(k, value_translation(v[0]))
-                                        for k, v in parse_qs(data).items()]))
+            pairs = [p.split("=", 1) for p in data.split("&")]
+
+            values_dict = {unquote_plus(k): unquote_plus(v) for k, v in pairs}
+
+            params_dict[k].update(values_dict)
         else:
             k, data = each.split("=")
             if (k not in params_dict):
                 params_dict[k] = {}
             if (k == "auth"):
                 params_dict[k] = value_translation(data)
+
     webshell_netloc = urlparse(url).netloc
     gset("webshell.url", url, namespace="webshell")
     gset("webshell.params_dict", params_dict, namespace="webshell")
@@ -159,7 +166,8 @@ print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].
         except ValueError:
             bits = 0
             print(color.yellow("detect architecture error\n"))
-        gset("webshell.os_version", info[1] + " (%d bits)" % bits, namespace="webshell")
+        gset("webshell.os_version", info[1] +
+             " (%d bits)" % bits, namespace="webshell")
         gset("webshell.arch", bits, namespace="webshell")
         gset("webshell.directory_separator", info[8], namespace="webshell")
         gset("webshell.disable_functions",
