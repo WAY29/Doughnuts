@@ -39,11 +39,15 @@ def custom_set(key, value) -> Any:
 
 
 def conver_args(arg_dict: dict, arg_name_dict: dict) -> dict:  # 别名转换
+    new_arg_dict = arg_dict.copy()
     for k, v in arg_dict.items():
         if k in arg_name_dict:
-            arg_dict[arg_name_dict[k]] = v
-            del arg_dict[k]
-    return arg_dict
+            del new_arg_dict[k]
+            new_arg_dict[arg_name_dict[k]] = v
+        else:
+            new_arg_dict[k] = v
+
+    return new_arg_dict
 
 
 def set_namespace(namespace: str = "main", callback: bool = True, clean_history: bool = True) -> None:  # 改变名称空间

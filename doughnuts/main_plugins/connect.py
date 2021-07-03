@@ -19,6 +19,7 @@ webshell.download_path ['webshell']
 webshell.os_version ['webshell']
 webshell.php_version ['webshell']
 webshell.root ['webshell']
+webshell.webshell_root ['webshell']
 webshell.v7 ['webshell'] Whether is php7
 webshell.iswin ['webshell'] Whether is windows
 webshell.upload_tmp_dir ['webshell']
@@ -97,12 +98,16 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
             if (k == "auth"):
                 params_dict[k] = value_translation(data)
 
-    webshell_netloc = urlparse(url).netloc
+    parsed = urlparse(url)
+    webshell_netloc = parsed.netloc
+    webshell_scheme = parsed.scheme
+
     gset("webshell.url", url, namespace="webshell")
     gset("webshell.params_dict", params_dict, namespace="webshell")
     gset("webshell.password", str(pwd), namespace="webshell")
     gset("webshell.method", raw_key, namespace="webshell")
     gset("webshell.encode_functions", encoders_or_params, namespace="webshell")
+    gset("webshell.scheme", webshell_scheme, namespace="webshell")
     gset("webshell.netloc", webshell_netloc, namespace="webshell")
     gset(
         "webshell.download_path",
@@ -143,6 +148,7 @@ print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].
         )
         gset("webshell.server_version", info[2], namespace="webshell")
         gset("webshell.pwd", info[3], namespace="webshell")
+        gset("webshell.webshell_root", info[3], namespace="webshell")
         gset("webshell.prompt",
              f"doughnuts ({color.cyan(webshell_netloc)}) > ")
         gset("webshell.exec_func", exec_func, namespace="webshell")

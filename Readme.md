@@ -16,7 +16,9 @@
 
 ## 使用文档
 
-***终于迎来了新的使用文档！***
+~~终于迎来了新的使用文档！~~
+
+***文档中许多内容已经过期，请以新版为准***
 
 详细使用文档请前往[此页面](http://doughnuts.cc/)进行查看。
 
@@ -38,9 +40,11 @@
     - COM
     - imap_open
     - MYSQL-UDF
-    - fpm(支持三种攻击方式)
+    - fpm(支持三种攻击方式，sock和端口的攻击方式)
     - apache-mod-cgi
     - iconv
+    - FFI-php_exec
+    - php7-reflectionProperty
 - 核心功能
     - 获取网站,系统,进程信息
     - 输出disbale_functions
@@ -273,6 +277,23 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.15
+- 4.15.0
+    - 修改别名
+        socks -> old_socks
+    - 新增功能
+        - bdf
+            - 增加FFI-php_exec, php7-reflectionProperty模式
+        - outnetwork
+            - 快速检查目标机器是否能出网
+        - socks
+            - 启动一个socks服务器,上传并连接远程的webshell管道以实现内网穿透的功能(power by neo-regeorg)
+    - 修改输出
+        write
+    - 修复bug
+        - 无法使用参数短别名
+        - requirements.txt中的urllib3版本修改为1.26.5
+        
 
 ### 4.14
 - 4.14.0
