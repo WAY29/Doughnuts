@@ -57,6 +57,7 @@
     - 读/写/上传/下载/删除/搜索文件,目录打包,分段文件上传/下载
     - 数据库管理,临时的sql-shell,数据dump,分段dump
     - 端口扫描
+    - 出网检测
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
     - 检测suid文件并给出提权建议 / 检测杀毒软件
@@ -193,9 +194,9 @@ docker run --rm -it longlone/doughnuts:cli
         ```
 
 2. 生成webshell:
-
-    1. 在执行`python3 -m doughnuts.install`之后执行`doughnuts generate a.php POST pass salt 1`在当前目录下生成Pudding类型的webshell:a.php
-    2. 上传a.php,根据提示执行 `doughnuts connect {木马url} POST pass doughnuts-salt `连接至webshell
+    1. 运行doughnuts
+    2. 执行`generate a.php POST pass salt 1`生成webshell,名字为a.php
+    3. 上传a.php 根据提示执行`connect {木马url} POST pass doughnuts-salt`连接webshell
 
 ## 自定义编码器
 1. 进入doughnuts/encode目录
@@ -293,7 +294,11 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
     - 修复bug
         - 无法使用参数短别名
         - requirements.txt中的urllib3版本修改为1.26.5
-        
+- 4.15.1
+    - 修改bug
+        - ps命令在无法读取/proc目录时没有输出报错
+    - 修改输出
+        - touch
 
 ### 4.14
 - 4.14.0
