@@ -7,22 +7,22 @@ from libs.myapp import send, base64_encode, open_editor
 
 
 @alias(True, func_alias="w", _type="FILE")
-def run(web_file_path: str, editor: str = ""):
+def run(web_file_path: str, editor: str = "", edit_args: str = ""):
     """
     write
 
-    Write files directly to the target system by notepad / vi as default or your own editor.
+    Write files directly to the target system by notepad / vi as default or your own editor,edit_args split by space.
 
-    eg: write {web_file_path} {editor=""}
+    eg: write {web_file_path} {editor=""} {edit_args=""} write a.php code '"--wait"'
     """
     web_file_path = base64_encode(web_file_path)
-    file_name = str(uuid4())
+    file_name = str(uuid4()) + ".php"
     file_path = gget("webshell.download_path", "webshell")
     if not path.exists(file_path):
         makedirs(file_path)
     real_file_path = path.join(file_path, file_name).replace("\\", "/")
-    open(real_file_path, 'a').close()
-    open_editor(real_file_path, editor)
+
+    open_editor(real_file_path, editor, edit_args)
 
     with open(real_file_path, "r") as f:
         result = base64_encode(f.read())

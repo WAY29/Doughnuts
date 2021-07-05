@@ -1871,32 +1871,45 @@ def has_env(env: str, remote: bool = True):
         if (not gget("has_%s" % env)):
             try:
                 flag = check_output(
-                    [command, env]).strip().decode(LOCAL_ENCODING)
+                    [command, env]).decode(LOCAL_ENCODING).strip()
             except Exception:
-                flag = False
+                flag = ''
             gset("has_%s" % env, flag)
         else:
             flag = gget("has_%s" % env)
     return len(flag)
 
 
-def open_editor(file_path: str, editor: str = ""):
+def open_editor(file_path: str, editor: str = "", edit_args: str = ""):
+
     if (editor):
         if (has_env(editor, False)):
             binpath = gget(f"has_{editor}")
             if ("\n" in binpath):
-                binpath = binpath.split("\n")[0]
+                binpath = binpath.split("\n")[0].strip()
         else:
             print(color.red(f"{editor} not found in local environment"))
             return False
     else:
         binpath = "notepad.exe" if (is_windows(False)) else "vi"
-    try:
-        p = Popen([binpath, file_path], shell=False)
-        p.wait()
-        return True
-    except FileNotFoundError:
-        return False
+
+    with open(file_path, "w+"):
+        ...
+
+    if editor.lower() in ["code", "vscode"] and not edit_args:
+        edit_args = "--wait"
+
+    edit_args = edit_args.split(" ")
+    if edit_args[0]:
+        command_args = [binpath] + edit_args + [file_path]
+    else:
+        command_args = [binpath, file_path]
+        print(command_args)
+
+    p = Popen(command_args, shell=True)
+    p.wait()
+    returncode = p.returncode
+    return True if returncode == 0 else False
 
 
 def _print_tree(tree_or_node, depth=0, is_file=False, end=False):

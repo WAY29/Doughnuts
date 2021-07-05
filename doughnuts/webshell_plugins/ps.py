@@ -63,13 +63,17 @@ def run():
 
     """
     if (is_windows()):
-        print(color.red(f"Only for target system is linux."))
+        print(color.red("Only for target system is linux."))
         return False
     splitchars = randstr("!@#$%^&*()1234567890")
     res = send(get_php(splitchars))
+    text = res.r_text.strip()
     if (not res):
         return
-    info_list = res.r_text.strip().split('\n')
+    if ("[-]" in text):
+        print(color.red(text))
+        return
+    info_list = text.split('\n')
     for line in info_list:
         info = line.split(splitchars)
         if (len(info) < 4):

