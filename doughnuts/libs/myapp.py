@@ -33,7 +33,7 @@ ALPATHNUMERIC = ascii_letters + digits
 RAND_KEY = str(uuid4())
 UNITS = {"B": 1, "KB": 2**10, "MB": 2**20, "GB": 2**30, "TB": 2**40}
 
-__version__ = "4.15.0"
+__version__ = "4.15.1"
 
 
 disable_warnings()
