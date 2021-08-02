@@ -68,7 +68,7 @@ def set_mode(mode: int, test: bool = False):
             ld_preload_funcs = [
                 f for f in available_trigger_funcs if f not in disable_funcs]
             if (not ld_preload_funcs):
-                print(color.red("\nNo ld_preload function!\n"))
+                print(color.red("\nNo ld_preload function\n"))
                 return False
             ld_preload_func = choice(ld_preload_funcs)
 
@@ -166,7 +166,7 @@ def set_mode(mode: int, test: bool = False):
     elif (mode == 10):  # php-fpm
         res = send("print(php_sapi_name());")
         if (not res or "fpm" not in res.r_text):
-            print(color.red("\nTarget php not run by php-fpm!\n"))
+            print(color.red("\nTarget php not run by php-fpm\n"))
             return False
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
         attack_type = input(
@@ -389,7 +389,7 @@ def run(mode: str = '0'):
         - iconv extension
         - putenv  fucntions
 
-    Mode 13 FFI(Only for *unix):
+    Mode 13 FFI-php_exec(Only for *unix):
 
         Targets:
         - 7.4

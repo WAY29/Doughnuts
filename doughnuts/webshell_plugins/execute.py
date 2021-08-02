@@ -1,7 +1,7 @@
-from os import path, makedirs, remove
+from os import remove
 from uuid import uuid4
-from libs.config import alias, color, gget
-from libs.myapp import send, open_editor
+from libs.config import alias, color
+from libs.myapp import send, open_editor, newfile
 
 
 @alias(True, func_alias="exec", _type="SHELL")
@@ -15,10 +15,7 @@ def run(editor: str = "", edit_args: str = ""):
     eg: execute {editor=""} {edit_args=""} execute code '"--wait"'
     """
     file_name = str(uuid4()) + ".php"
-    file_path = gget("webshell.download_path", "webshell")
-    if not path.exists(file_path):
-        makedirs(file_path)
-    real_file_path = path.join(file_path, file_name).replace("\\", "/")
+    real_file_path = newfile(file_name)
 
     open_editor(real_file_path, editor, edit_args)
     with open(real_file_path, "r") as f:

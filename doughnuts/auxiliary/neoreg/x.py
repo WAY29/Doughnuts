@@ -1,3 +1,4 @@
+# LICENSE https://github.com/L-codes/Neo-reGeorg/blob/master/LICENSE
 from threading import Thread
 from itertools import chain
 from socket import *
@@ -446,7 +447,7 @@ def generate(httpcode=200, read_buff=513, max_read_size=512):
     return text
 
 
-def connectTunnel(url, listen_on, listen_port, local_dns=False, read_buff=7, read_interval=300, write_interval=200, max_threads=1000):
+def connectTunnel(url, listen_on, listen_port, local_dns=False, read_buff=7, read_interval=300, write_interval=200, max_threads=1000, proxy=""):
     global LOCALDNS, PROXY, INIT_COOKIE, READBUFSIZE, MAXTHERADS, READINTERVAL, WRITEINTERVAL
 
     LOCALDNS = local_dns
@@ -463,8 +464,7 @@ def connectTunnel(url, listen_on, listen_port, local_dns=False, read_buff=7, rea
     #         exit()
 
     # INIT_COOKIE = args.cookie
-    PROXY = None
-    # PROXY = {'http': args.proxy, 'https': args.proxy} if args.proxy else None
+    PROXY = {'http': proxy, 'https': proxy} if proxy else None
 
     try:
         conn = requests.Session()

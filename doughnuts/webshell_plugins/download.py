@@ -1,6 +1,7 @@
+from os import makedirs, path
+
 from libs.config import alias, color, gget
-from libs.myapp import send, base64_encode
-from os import path, makedirs
+from libs.myapp import base64_encode, send
 
 
 def get_php(web_file_path: str):
@@ -35,9 +36,8 @@ def run(
     download_path = local_path or gget("webshell.download_path", "webshell")
     if len(content):
         file_name = path.split(web_file_path)[1]
-        if not path.exists(download_path):
-            makedirs(download_path)
-        file_path = path.join(download_path, file_name).replace("\\", "/")
+        download_path = download_path.replace("\\", "/")
+        file_path = path.join(download_path, file_name) if path.isdir(download_path) else download_path
         with open(file_path, "wb") as f:
             f.write(content)
         print(color.green(f"Downloaded file has been saved to {file_path}"))

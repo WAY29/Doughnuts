@@ -14,7 +14,7 @@ def get_php(file_path: str):
             $res[$folder] = scan_rescursive($item);
             continue;
         }
-        else if(preg_match('/ph*/i',end(explode('.', $file))) && is_writable($file)){
+        else if(preg_match('/ph*/i',end(explode('.', $item))) && is_writable($item)){
             $res[] = base64_encode(basename($item));
         }
     }

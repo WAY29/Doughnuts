@@ -12,10 +12,12 @@ def run(proxy_url: str = ""):
     eg: proxy {proxy_url='http://127.0.0.1:10808'}
     """
     if (proxy_url == ""):
-        print("\n" + color.green(f"Current proxy: {gget('proxy_url', 'webshell')}") + "\n")
+        print("\n" + color.green(f"Current proxy: {gget('proxy_url')}") + "\n")
     else:
         if (proxy_url.lower() == "none"):
             proxy_url = None
-        Session.proxies = {'http': proxy_url, 'https': proxy_url}
+        proxies = {'http': proxy_url, 'https': proxy_url}
+        Session.proxies = proxies
         print("\n" + color.green(f"Set proxy: proxy {proxy_url}") + "\n")
-        gset("proxy_url", proxy_url, True, namespace="webshell")
+        gset("proxy_url", proxy_url, True)
+        gset("proxies", proxy_url, True)

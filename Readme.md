@@ -276,6 +276,23 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.16
+- 4.16.0
+    - 优化功能
+        - socks
+            - 支持代理选项,支持如`http://127.0.0.1:1080/` 或 `socks5://127.0.0.1:1080/`的代理
+            - 支持在fsockopen被禁用时使用pfsockopen
+            - 更改说明,只支持5.4.0及以上版本
+    - 新增功能
+        - phpinfo
+            - 调用默认浏览器显示phpinfo信息
+    - 修复bug
+        - bdf LD_PRELOAD模式 mb_send_mail无法成功bypass
+        - 修复某些命令会输出debug消息的bug
+        - fwpf无法生效
+        - connect时额外参数有多个:或者=号时程序异常
+        - download，mdownload:指定文件保存名时认为是目录的bug
+
 ### 4.15
 - 4.15.0
     - 修改别名

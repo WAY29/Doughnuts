@@ -1,9 +1,9 @@
 from re import match
-from os import path, makedirs, remove
+from os import remove
 from uuid import uuid4
 
-from libs.config import alias, color, gget
-from libs.myapp import send, base64_encode, open_editor
+from libs.config import alias, color
+from libs.myapp import send, base64_encode, open_editor, newfile
 
 
 @alias(True, func_alias="w", _type="FILE")
@@ -15,12 +15,9 @@ def run(web_file_path: str, editor: str = "", edit_args: str = ""):
 
     eg: write {web_file_path} {editor=""} {edit_args=""} write a.php code '"--wait"'
     """
-    web_file_path = base64_encode(web_file_path)
+
     file_name = str(uuid4()) + ".php"
-    file_path = gget("webshell.download_path", "webshell")
-    if not path.exists(file_path):
-        makedirs(file_path)
-    real_file_path = path.join(file_path, file_name).replace("\\", "/")
+    real_file_path = newfile(file_name)
 
     open_editor(real_file_path, editor, edit_args)
 

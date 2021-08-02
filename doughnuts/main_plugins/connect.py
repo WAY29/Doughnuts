@@ -83,7 +83,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
     params_dict[raw_key] = {}
     for each in extra_params:
         if(":" in each):
-            k, data = each.split(":")
+            k, data = each.split(":", 1)
             if (k not in params_dict):
                 params_dict[k] = {}
             pairs = [p.split("=", 1) for p in data.split("&")]
@@ -92,7 +92,7 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
 
             params_dict[k].update(values_dict)
         else:
-            k, data = each.split("=")
+            k, data = each.split("=", 1)
             if (k not in params_dict):
                 params_dict[k] = {}
             if (k == "auth"):

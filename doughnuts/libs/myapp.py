@@ -1,4 +1,4 @@
-from os import path
+from os import path, makedirs
 from re import match, sub
 from base64 import b64decode, b64encode
 from binascii import b2a_hex
@@ -211,6 +211,16 @@ def randstr(string="", offset=8):
 
 def trush(min_num=2, max_num=4):
     return randstr(ALPATHNUMERIC, randint(min_num, max_num))
+
+
+def newfile(file_name):
+    file_path = gget("webshell.download_path", "webshell")
+    if not path.exists(file_path):
+        makedirs(file_path)
+    real_file_path = path.join(file_path, file_name).replace("\\", "/")
+    with open(real_file_path, "w+"):
+        ...
+    return real_file_path
 
 
 def fake_ua():
@@ -1192,7 +1202,7 @@ $o=$GLOBAL['o'];""" % (base64_encode(command), print_command)
         elif (ld_preload_func == "error_log"):
             ld_preload_command = "error_log('',1);"
         elif (ld_preload_func == "mb_send_mail"):
-            ld_preload_command = "mb_send_mail('','','')"
+            ld_preload_command = "mb_send_mail('','','');"
         elif (ld_preload_func == "imap_mail"):
             ld_preload_command = 'imap_mail("1@a.com","0","1","2","3");'
         return """$p="/tmp/%s";
@@ -1904,7 +1914,6 @@ def open_editor(file_path: str, editor: str = "", edit_args: str = ""):
         command_args = [binpath] + edit_args + [file_path]
     else:
         command_args = [binpath, file_path]
-        print(command_args)
 
     p = Popen(command_args, shell=True)
     p.wait()

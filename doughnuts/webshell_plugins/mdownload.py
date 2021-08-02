@@ -76,12 +76,13 @@ def run(
         blocksize = file_size // 100
         print(color.yellow(
             f"[Warn] Humansize too small, set it to {size_to_human(blocksize)}"))
-    file_human_size = color.green(size_to_human(file_size))
+
     if (file_size):
+        file_name = path.split(web_file_path)[1]
         download_path = local_path or gget(
             "webshell.download_path", "webshell")
-        file_path = path.join(download_path, path.split(
-            web_file_path)[1]).replace("\\", "/")
+        download_path = download_path.replace("\\", "/")
+        file_path = path.join(download_path, file_name) if path.isdir(download_path) else download_path
         content_length = 0
         chunk_dict = {}
         with ThreadPoolExecutor(max_workers=threads) as tp, tqdm(total=file_size, desc="Downloading", unit_scale=True) as bar:

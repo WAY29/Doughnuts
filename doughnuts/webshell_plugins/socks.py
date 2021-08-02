@@ -13,13 +13,13 @@ def default_input(msg, value):
 
 
 @alias(True, _type="OTHER", k="key", code="httpcode", dns="local_dns", t="threads", l="listen_on", p="listen_port")
-def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1", listen_port: int = 1080,  httpcode: int = 200, read_buff: int = 513, connect_read_buf: int = 7, max_read_size: int = 512, read_interval: int = 300, write_interval: int = 200, local_dns: bool = False):
+def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1", listen_port: int = 1080, proxy: str = "", httpcode: int = 200, read_buff: int = 513, connect_read_buf: int = 7, max_read_size: int = 512, read_interval: int = 300, write_interval: int = 200, local_dns: bool = False):
     """
     socks
 
-    (DEVELOP) Start a socks server, upload and connect to the remote webshell tunnel for port mapping power by neo-regeorg.
+    (DEVELOP) (php >= 5.4.0) Start a socks server, upload and connect to the remote webshell tunnel for port mapping power by neo-regeorg.
 
-    eg: socks {key='doughnuts'} {threads=1000} {listen_on='127.0.0.1'} {listen_port=1080} {httpcode=200} {read_buff=513} {connect_read_buf=7} {max_read_size=512} {read_interval=300} {write_interval=200} {local_dns=False}
+    eg: socks {key='doughnuts'} {threads=1000} {listen_on='127.0.0.1'} {listen_port=1080} {proxy=current_proxy} {httpcode=200} {read_buff=513} {connect_read_buf=7} {max_read_size=512} {read_interval=300} {write_interval=200} {local_dns=False}
     """
     name = randstr(ALPATHNUMERIC, 8) + ".php"
 
@@ -30,6 +30,9 @@ def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1
     web_root = gget("webshell.root", "webshell", "")
     webshell_root = gget("webshell.webshell_root", "webshell", ".")
     relpath = path.relpath(webshell_root + "/" + name, web_root)
+    current_proxy = gget('proxies')
+    if not proxy and current_proxy:
+        proxy = current_proxy
 
     tunnel_path = default_input("tunnel path", webshell_root + depr + name)
     http_path = default_input("http path", http_root_path + relpath)
@@ -52,8 +55,10 @@ def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1
         return
 
     # connect
-    t = Thread(target=connectTunnel, args=(http_path, listen_on, listen_port, local_dns, connect_read_buf, read_interval, write_interval, threads))
+    t = Thread(target=connectTunnel, args=(http_path, listen_on, listen_port,
+               local_dns, connect_read_buf, read_interval, write_interval, threads, proxy))
     t.setDaemon(True)
     t.start()
 
-    print(color.green(f"\nStart socks server on {listen_on}:{listen_port} success\n"))
+    print(color.green(
+        f"\nStart socks server on {listen_on}:{listen_port} success\n"))
