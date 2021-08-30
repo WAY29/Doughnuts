@@ -170,8 +170,8 @@ def set_mode(mode: int, test: bool = False):
             return False
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
         attack_type = input(
-            "attack_type[gopher(need curl extension)/sock/http_sock]:").lower()
-        if (attack_type not in ["gopher", "sock", "http_sock"]):
+            "attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
+        if (attack_type not in ["gopher", "sock", "http_sock", "ftp"]):
             return False
 
         gset("webshell.bdf_fpm.type", attack_type, True, "webshell")

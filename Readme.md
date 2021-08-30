@@ -292,6 +292,15 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
         - fwpf无法生效
         - connect时额外参数有多个:或者=号时程序异常
         - download，mdownload:指定文件保存名时认为是目录的bug
+- 4.16.1
+    - 优化功能
+        - 删除generate的非交互输出
+        - 修改reverse的文档，windows-php不建议使用
+        - connect:假如ini_get被禁用也能够链接
+        - bdf-10-fpm
+            - http_sock: 支持stream_socket_client函数作为备用
+            - ftp: 新增ftp模式，通过在目标机器构建一个虚假的ftp服务器以实现ssrf攻击fpm
+        
 
 ### 4.15
 - 4.15.0

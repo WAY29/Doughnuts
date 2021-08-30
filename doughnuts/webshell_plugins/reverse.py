@@ -138,7 +138,7 @@ def run(ip: str, port: str, reverse_type: str = ""):
     reverse_type:
       - bash
       - bash_exec
-      - php
+      - php (windows will upload a exe, Try not to use this function!!)
       - python
       - powershell(ps)
       - perl (only for *unix)

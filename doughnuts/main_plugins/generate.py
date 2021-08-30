@@ -55,9 +55,7 @@ def run(file_name: str, keyword: str = "POST", passwd: str = "", salt: str = "",
         f"\ngenerate {template_name_dict[_type]}'s php in {file_real_path}! enjoy it!"))
     print(color.yellow("\nUsage:"))
     print(color.yellow(
-        f"    Interactive interface    : connect url {raw_keyword} {passwd} doughnuts-{salt}"))
-    print(color.yellow(
-        f"    Non-Interactive interface: doughnuts connect url {raw_keyword} {passwd} doughnuts-{salt}\n"))
+        f"  connect url {raw_keyword} {passwd} doughnuts-{salt}"))
 
 
 run.__doc__ = """

