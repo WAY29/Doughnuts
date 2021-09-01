@@ -200,6 +200,14 @@ def set_mode(mode: int, test: bool = False):
                  requirements_dict["host"], True, "webshell")
             gset("webshell.bdf_fpm.port", str(
                 requirements_dict["port"]), True, "webshell")
+
+        if attack_type != "ftp":
+            new_v = input("Use fpm in to eval php code[N]:")
+            if new_v.upper() in ["Y", "YES"]:
+                gset("webshell.bdf_fpm.use_in_eval", True, True, "webshell")
+            else:
+                gset("webshell.bdf_fpm.use_in_eval", False, True, "webshell")
+
     elif (mode == 11):  # apache-mod-cgi
         res = send("""$f=in_array('mod_cgi', apache_get_modules());
 $f2=is_writable('.');
@@ -370,7 +378,8 @@ def run(mode: str = '0'):
         - php-fpm
           - gopher: curl extension, fpm can access by http
           - sock: stream_socket_client function, fpm can access by sock
-          - http_sock: fsockopen / pfsockopen function, fpm can access by http
+          - http_sock: fsockopen / pfsockopen / stream_socket_client function, fpm can access by http
+          - ftp: stream_socket_server && stream_socket_accept function, start a fake ftp server to forward requests to fpm, fpm can access by http
 
     Mode 11 apache-mod-cgi
         Origin:

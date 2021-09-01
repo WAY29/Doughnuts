@@ -1,3 +1,5 @@
+from threading import Thread
+
 from libs.config import gget, alias, color, set_namespace
 from libs.myapp import send, base64_encode, is_windows, get_system_code
 from libs.app import readline, value_translation
@@ -112,9 +114,16 @@ def run(*commands):
                     return
                 pwd = res.r_text.strip()
             else:
-                res = send(f'chdir(base64_decode(\'{b64_pwd}\'));' + get_system_code(command))
-                if (not res):
-                    return
-                print("\n" + res.r_text.strip() + "\n")
+                real_command = f'chdir(base64_decode(\'{b64_pwd}\'));' + get_system_code(command)
+                if command.endswith("&"):
+                    t = Thread(target=send, args=(real_command, ))
+                    t.setDaemon(True)
+                    t.start()
+                    print("\n[+] " + command + ": run in backend\n")
+                else:
+                    res = send(real_command)
+                    if (not res):
+                        return
+                    print("\n" + res.r_text.strip() + "\n")
     finally:
         readline.set_wordlist(wordlist)
