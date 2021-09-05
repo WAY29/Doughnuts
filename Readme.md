@@ -290,6 +290,12 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
     - 新增功能
         - bd_exec
             - 启动编辑器执行任意sql语句
+- 4.18.1
+    - 修复bug
+        - db_mdump
+            - 重试无效的问题
+            - 线程不安全导致dump的数据不全或重复的问题
+            - 数据为空时与数据类型不匹配的问题,将''替换为null
         
 ### 4.17
 - 4.17.0
