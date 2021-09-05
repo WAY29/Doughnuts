@@ -17,7 +17,7 @@ def run(proxy_url: str = ""):
         if (proxy_url.lower() == "none"):
             proxy_url = None
         proxies = {'http': proxy_url, 'https': proxy_url}
-        Session.proxies = proxies
+        # Session.proxies = proxies
         print("\n" + color.green(f"Set proxy: proxy {proxy_url}") + "\n")
         gset("proxy_url", proxy_url, True)
-        gset("proxies", proxy_url, True)
+        gset("proxies", proxies, True)

@@ -6,7 +6,17 @@ from libs.myapp import send
 
 
 def get_php(filename: str, web_file_path: str, force: bool):
-    return """if (isset($_FILES)){
+    return """$errors = array(
+    0 => 'There is no error, the file uploaded with success',
+    1 => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
+    2 => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
+    3 => 'The uploaded file was only partially uploaded',
+    4 => 'No file was uploaded',
+    6 => 'Missing a temporary folder',
+    7 => 'Failed to write file to disk.',
+    8 => 'A PHP extension stopped the file upload.',
+);
+if (isset($_FILES)){
     $upload_path="%s";
     if (file_exists($upload_path)) {$upload_path=realpath($upload_path);}
     $fname="%s";
@@ -19,7 +29,7 @@ def get_php(filename: str, web_file_path: str, force: bool):
     else if (move_uploaded_file($_FILES["file"]["tmp_name"], $upload_path)){
         print("Upload $upload_path success");
     } else {
-        print($_FILES["file"]["error"]);
+        print($errors[$_FILES["file"]["error"]]);
     }
 }""" % (web_file_path, filename, str(not force).lower())
 
@@ -52,6 +62,11 @@ def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bo
 
     eg: upload {file_path} {web_file_path=file_name} {upload_type=0(FILES)/1(file_put_contents)} {force=False}
     """
+    try:
+        upload_type = int(upload_type)
+    except ValueError:
+        upload_type = 0
+
     filename = path.basename(file_path)
     if (not web_file_path):
         web_file_path = filename
@@ -76,4 +91,4 @@ def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bo
         print(color.yellow(f"\n{text}\n"))
         return True
     else:
-        print("\n" + color.red(f"Upload error / Privileges not enough. Result: {text}") + "\n")
+        print("\n" + color.red(f"Upload error / Privileges not enough. Error: {text}") + "\n")

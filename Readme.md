@@ -276,6 +276,21 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.18.0
+- 4.18.0
+    - 修复bug
+        - proxy: 可能失效的问题
+        - db_shell: 命令重复执行
+
+    - 优化功能
+        - upload
+            - 使用$_FILES上传失败时显示失败原因
+        - socks
+            - windows下http path的默认值使用/替换\
+    - 新增功能
+        - bd_exec
+            - 启动编辑器执行任意sql语句
+        
 ### 4.17
 - 4.17.0
     - 添加说明
@@ -286,6 +301,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
         - system:
             - 若命令以&结尾，则会将其起新线程挂在后端执行
 
+        
 
 ### 4.16
 - 4.16.0

@@ -318,7 +318,7 @@ class session(Thread):
                         break
                     data = self.encode_body(raw_data)
                     response = self.conn.post(
-                        self.url_sample(), headers=headers, data=data)
+                        self.url_sample(), headers=headers, data=data, proxies=self.conn.proxies)
                     rep_headers = response.headers
                     if K['X-STATUS'] in rep_headers:
                         status = rep_headers[K["X-STATUS"]]
@@ -465,6 +465,7 @@ def connectTunnel(url, listen_on, listen_port, local_dns=False, read_buff=7, rea
 
     # INIT_COOKIE = args.cookie
     PROXY = {'http': proxy, 'https': proxy} if proxy else None
+    print("test", proxy)
 
     try:
         conn = requests.Session()

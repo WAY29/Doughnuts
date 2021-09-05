@@ -29,7 +29,7 @@ def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1
     http_root_path = "%s://%s/" % (scheme, netloc)
     web_root = gget("webshell.root", "webshell", "")
     webshell_root = gget("webshell.webshell_root", "webshell", ".")
-    relpath = path.relpath(webshell_root + "/" + name, web_root)
+    relpath = path.relpath(webshell_root + "/" + name, web_root).replace("\\", '/')
     current_proxy = gget('proxies')
     if not proxy and current_proxy:
         proxy = current_proxy

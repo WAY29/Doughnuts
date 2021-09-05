@@ -77,7 +77,7 @@ def run():
                     print(
                         "\n" + color.red("Connection Error / SQL syntax error") + "\n")
                 else:
-                    print(execute_sql_command(command, database))
+                    print(form)
     finally:
         gset("db_dbname", database, True, "webshell")
         readline.set_wordlist(wordlist)

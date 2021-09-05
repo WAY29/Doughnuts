@@ -539,6 +539,7 @@ def send(phpcode: str, raw: bool = False, **extra_params):
         del extra_params["_in_system_command"]
         in_system_command = True
 
+    proxies = gget("proxies")
     url = gget("webshell.url", "webshell")
     params_dict = gget("webshell.params_dict", "webshell").copy()
     php_v7 = gget("webshell.v7", "webshell")
@@ -547,10 +548,12 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     encode_functions = gget("webshell.encode_functions", "webshell")
     encode_pf = gget("encode.pf")
     params_dict.update(extra_params)
+
     if "data" not in params_dict:
         params_dict["data"] = {}
     head = randstr("!@#$%^&*()[];,.?", offset)
     tail = randstr("!@#$%^&*()[];,.?", offset)
+
     pwd_b64 = b64encode(
         gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
     raw_data = phpcode
@@ -582,6 +585,7 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     params_dict['headers']['User-agent'] = fake_ua()
     params_dict['headers']['Referer'] = fake_referer()
     params_dict[raw_key][password] = phpcode
+    params_dict['proxies'] = proxies
 
     try:
         if is_fpm_eval_code and not in_system_command:
