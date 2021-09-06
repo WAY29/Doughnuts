@@ -18,6 +18,7 @@ from codecs import getencoder
 import zlib
 
 import requests
+from requests.adapters import HTTPAdapter
 from prettytable import PrettyTable
 from requests.models import complexjson
 from requests.utils import guess_json_utf
@@ -34,6 +35,9 @@ LOCAL_ENCODING = getpreferredencoding()
 ALPATHNUMERIC = ascii_letters + digits
 RAND_KEY = str(uuid4())
 UNITS = {"B": 1, "KB": 2**10, "MB": 2**20, "GB": 2**30, "TB": 2**40}
+Session.mount('http://', HTTPAdapter(max_retries=2))
+Session.mount('https://', HTTPAdapter(max_retries=2))
+
 
 __version__ = "4.18.1"
 
@@ -277,6 +281,31 @@ def get_db_connect_code(host="", username="", password="", dbname="", port=""):
             lambda x: x, (host, username, password, dbname, port))])
         return connect_code % temp_code
     return ""
+
+
+def get_ini_value_code():
+    return """function get_ini_value($key){
+    if(function_exists('ini_get')){
+        return ini_get($key);    
+    } else if(function_exists('ini_get_all')) {
+        $gev = version_compare(PHP_VERSION,'5.3.0','ge');
+        if($gev){
+            $values = ini_get_all(null,false);
+        } else {
+            $values = ini_get_all();
+        }
+        if(array_key_exists($key, $values)){
+            return $gev?$values[$key]:$values[$key]['local_value'];
+        } else {
+            return '';
+        }
+    } else if(function_exists('get_cfg_var')) {
+        return get_cfg_var($key);
+    } else{
+        return '';
+    }
+}
+"""
 
 
 def get_sql_command_php(command, database, ruid, luid):
