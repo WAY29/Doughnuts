@@ -34,6 +34,8 @@ def run(
         return
     content = res.r_content
     download_path = local_path or gget("webshell.download_path", "webshell")
+    if not path.isdir(download_path):
+        makedirs(download_path)
     if len(content):
         file_name = path.split(web_file_path)[1]
         download_path = download_path.replace("\\", "/")
@@ -45,3 +47,4 @@ def run(
     else:
         print(color.red("File not exist / Download error"))
         return ''
+
