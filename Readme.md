@@ -2,6 +2,25 @@
 
 *一个基于Python3.6+的PHPwebshell管理器*
 
+
+<p align="center">
+     <a target="_blank" href="https://github.com/Stakcery/MagicStick">
+        <img alt="" src="https://img.shields.io/github/stars/WAY29/Doughnuts?style=flat"/>
+     </a>
+     <a target="_blank" href="https://github.com/WAY29/Doughnuts/blob/master/LICENSE">
+        <img alt="" src="https://img.shields.io/badge/license-MIT-green"/>
+     </a>
+     <a target="_blank" href="https://github.com/php/php-src/tree/PHP-7.0.0">
+        <img alt="" src="https://img.shields.io/badge/python-%5E3%2e6-blue"/>
+     </a>
+     <a target="_blank" href="https://github.com/Stakcery/MagicStick">
+        <img alt="" src="https://img.shields.io/github/watchers/WAY29/Doughnuts"/>
+     </a>
+     <a target="_blank" href="https://www.codacy.com/gh/WAY29/Doughnuts/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WAY29/Doughnuts&amp;utm_campaign=Badge_Grade">
+        <img alt="" src="https://app.codacy.com/project/badge/Grade/dc3e98656257440da1f40bfa49f185e3"/>
+     </a>
+</p>
+
 ![](https://gitee.com/guuest/images/raw/master/img/20210705094530.png)
 
 ![image-20210705094640194](https://gitee.com/guuest/images/raw/master/img/image-20210705094640194.png)
