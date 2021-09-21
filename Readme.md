@@ -57,7 +57,7 @@
     - COM
     - imap_open
     - MYSQL-UDF
-    - fpm(支持三种攻击方式，sock和端口的攻击方式)
+    - fpm(支持四种攻击方式，sock和端口的攻击方式)
     - apache-mod-cgi
     - iconv
     - FFI-php_exec
@@ -307,7 +307,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
         - socks
             - windows下http path的默认值使用/替换\
     - 新增功能
-        - bd_exec
+        - db_exec
             - 启动编辑器执行任意sql语句
 - 4.18.1
     - 修复bug
