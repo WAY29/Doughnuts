@@ -23,7 +23,7 @@ def run(web_file_path: str, editor: str = "", edit_args: str = ""):
 
     with open(real_file_path, "r") as f:
         result = base64_encode(f.read())
-        res = send(f"print(file_put_contents(base64_decode('{web_file_path}'), base64_decode('{result}')));")
+        res = send(f"print(file_put_contents(base64_decode('{base64_encode(web_file_path)}'), base64_decode('{result}')));")
         if (not res):
             return
         text = res.r_text.strip()

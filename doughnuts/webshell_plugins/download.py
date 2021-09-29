@@ -38,7 +38,6 @@ def run(
         makedirs(download_path)
     if len(content):
         file_name = path.split(web_file_path)[1]
-        download_path = download_path.replace("\\", "/")
         file_path = path.join(download_path, file_name) if path.isdir(download_path) else download_path
         with open(file_path, "wb") as f:
             f.write(content)
@@ -47,4 +46,3 @@ def run(
     else:
         print(color.red("File not exist / Download error"))
         return ''
-

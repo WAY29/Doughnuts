@@ -45,8 +45,8 @@
 - 基于eval的连接,支持GET,POST,COOKIE,HEADER四种连接方式
 - **请求与响应伪装**
 - 支持编码payload(已内置base64,str_rot13,hex,doughnuts四种编码,可以通过添加encode文件夹中的py文件进行扩展),以实现连接带有解码的webshell
-- 支持绕过open_basedir
-- 支持多种方式绕过disable_functions
+- **支持绕过open_basedir**
+- **支持多种方式绕过disable_functions**
     - 自动识别
     - php7-backtrace
     - php7-gc
@@ -74,10 +74,10 @@
     - (仅限双方均为*unix)获取完全交互式的反弹shell
     - 读/写/上传/下载/删除/搜索文件,目录打包,分段文件上传/下载
     - 数据库管理,临时的sql-shell,数据dump,分段dump
-    - 端口扫描
-    - 出网检测
+    - **端口扫描**
+    - **出网检测**
+    - **集成neo-regeorg，一键开启socks5服务器**
     - 内网网页文本式浏览代理，可自定义请求方法和数据
-    - 开启socks5服务器
     - 检测suid文件并给出提权建议 / 检测杀毒软件
 - 易于扩展
 
@@ -295,6 +295,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+
 ### 4.18.0
 - 4.18.0
     - 修复bug
@@ -328,6 +329,13 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
             - 增加提示
             - 使用临时文件而非内存存储chunk
         - 请求: 添加重试次数2
+- 4.18.3
+    - 修复bug
+        - mdownload,download在下载时会创建文件夹
+        - write写入文件名错误
+        - edit编辑文件时为空
+    - README
+        - 添加shields
 ### 4.17
 - 4.17.0
     - 添加说明

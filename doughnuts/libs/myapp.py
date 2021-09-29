@@ -2153,8 +2153,9 @@ def open_editor(file_path: str, editor: str = "", edit_args: str = ""):
     else:
         binpath = "notepad.exe" if (is_windows(False)) else "vi"
 
-    with open(file_path, "w+"):
-        ...
+    if not path.exists(file_path):
+        with open(file_path, "w+"):
+            ...
 
     if editor.lower() in ["code", "vscode"] and not edit_args:
         edit_args = "--wait"

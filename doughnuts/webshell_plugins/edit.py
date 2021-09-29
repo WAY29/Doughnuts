@@ -15,6 +15,7 @@ def run(web_file_path: str, editor: str = "", edit_args: str = ""):
     download_file_path = webshell_pf["download"].run(web_file_path)
     if (not download_file_path):
         return
+
     flag = open_editor(download_file_path, editor, edit_args)
     if (not flag):
         print("\n" + color.red(f"Call {editor} failed") + "\n")

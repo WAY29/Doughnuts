@@ -1,4 +1,4 @@
-from os import path, remove
+from os import path, remove, makedirs
 from base64 import b64decode
 from concurrent.futures import ThreadPoolExecutor, wait
 from hashlib import md5
@@ -134,6 +134,9 @@ def run(
         download_path = local_path or gget(
             "webshell.download_path", "webshell")
         download_path = download_path.replace("\\", "/")
+        if not path.isdir(download_path):
+            makedirs(download_path)
+
         file_path = path.join(download_path, file_name) if path.isdir(
             download_path) else download_path
         file_path = path.abspath(file_path)
