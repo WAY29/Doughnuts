@@ -62,6 +62,7 @@
     - iconv
     - FFI-php_exec
     - php7-reflectionProperty
+    - user_filter
 - 核心功能
     - 获取网站,系统,进程信息
     - 输出disbale_functions
@@ -295,7 +296,10 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
-
+### 4.19.0
+- 4.19.0
+    - 新增功能
+        - bdf: 新增user_filter模式，适用于7.0-8.0所有版本
 ### 4.18.0
 - 4.18.0
     - 修复bug
