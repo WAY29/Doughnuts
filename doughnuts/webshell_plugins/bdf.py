@@ -21,9 +21,10 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      11: color.green("apache_mod_cgi"),
                      12: color.green("iconv"),
                      13: color.green("FFI-php_exec"),
-                     14: color.green("php7-reflectionProperty")
+                     14: color.green("php7-reflectionProperty"),
+                     15: color.green("php-user_filter")
                      }
-mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14}
+mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14, 15}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet",
                          7: "imap", 12: "iconv", 13: "FFI"}
@@ -417,6 +418,15 @@ def run(mode: str = '0'):
 
         Need:
         - ReflectionProperty class
+
+    Mode 15 php-user_filter
+
+        Origin:
+        - https://github.com/mm0r1/exploits/blob/master/php-filter-bypass
+        - https://bugs.php.net/bug.php?id=54350
+
+        Targets:
+        - 7.0 - 8.0
     """
     if (mode == "close"):
         mode = -1
@@ -424,7 +434,7 @@ def run(mode: str = '0'):
         test_list = windows_test_list if is_windows() else linux_test_list
         php_version = gget("webshell.php_version", "webshell")
         if (not php_version.startswith("7.")):
-            test_list -= {1, 2, 3, 9}
+            test_list -= {1, 2, 3, 9, 13, 14}
         if (not gget("db_connected", "webshell") or gget("db_dbms", "webshell") != "mysql"):
             test_list -= {8}
         for test_mode in test_list:
