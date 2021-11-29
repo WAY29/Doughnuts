@@ -63,6 +63,7 @@
     - FFI-php_exec
     - php7-reflectionProperty
     - user_filter
+    - ShellShock
 - 核心功能
     - 获取网站,系统,进程信息
     - 输出disbale_functions
