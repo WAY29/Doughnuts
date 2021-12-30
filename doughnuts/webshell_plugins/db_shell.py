@@ -5,7 +5,6 @@ from libs.config import alias, color, gget, gset, set_namespace
 from libs.myapp import send, execute_sql_command
 from webshell_plugins.db_use import get_php as check_database
 
-
 NEW_SQL_WORDLIST = {"common_wordlist": (
     "use",
     "select",
@@ -28,7 +27,6 @@ NEW_SQL_WORDLIST = {"common_wordlist": (
     "prepare",
     "execute",
 )}
-
 
 @alias(_type="DATABASE")
 def run():

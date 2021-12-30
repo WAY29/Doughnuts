@@ -1,27 +1,11 @@
 from libs.config import alias, gget
 from libs.myapp import send, color, print_tree
+from libs.functions.webshell_plugins.fwpf import *
 from json import JSONDecodeError
 
 
 def get_php(file_path: str):
-    return """function scan_rescursive($directory) {
-    global $cfgs;
-    $res = array();
-    foreach(glob("$directory/*") as $item) {
-        if(is_dir($item)) {
-            $items=explode('/', $item);
-            $folder = base64_encode(end($items));
-            $res[$folder] = scan_rescursive($item);
-            continue;
-        }
-        else if(preg_match('/ph*/i',end(explode('.', $item))) && is_writable($item)){
-            $res[] = base64_encode(basename($item));
-        }
-    }
-    return $res;
-}
-print(json_encode(scan_rescursive("%s")));
-""" % file_path
+    return get_php_fwpf() % file_path
 
 
 @alias(True, _type="DETECT", fp="web_file_path")

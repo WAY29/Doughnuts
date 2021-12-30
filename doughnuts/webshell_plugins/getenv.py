@@ -4,7 +4,7 @@ from libs.myapp import send, get_ini_value_code
 
 def get_php(varname: str):
     return """
-%s
+    %s
 print(@get_ini_value('%s'));
 """ % (get_ini_value_code(), varname)
 

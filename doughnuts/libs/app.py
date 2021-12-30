@@ -55,10 +55,13 @@ class Loop_init:
         root_path = gget("root_path")
         cwd = getcwd()
         chdir(root_path)
+        # {平台名称 -> 插件路径}
         for k, v in platforms.items():
             pf = import_platform(v, api)
             gset(k + ".pf", pf)
+            # 平台 -> 命令列表
             gset(k + ".wordlist", {"command_wordlist": list(pf.names())})
+            # 平台 -> {命令名称 -> [命令参数,]}
             gset(k + ".prefix_wordlist", {command: gget(command + ".arg_wordlist", k)
                                           for command in gget(k + ".wordlist")["command_wordlist"]})
         general_wordlist = gget("general.wordlist")["command_wordlist"]
@@ -67,6 +70,7 @@ class Loop_init:
                 continue
             wordlist = gget(k + ".wordlist")
             wordlist["command_wordlist"] += general_wordlist
+        # 设置输入提示符
         for k, v in self.set_prompts().items():
             gset(k + ".prompt", v)
         chdir(cwd)
@@ -150,16 +154,28 @@ def loop_main():
     api = gget("api")
     old_namespace = ''
     while gget("loop"):
+        # 获取当前命名空间
         namespace = gget("namespace")
         tpf = None
+        # 获取当前平台
         npf = gget(f"{namespace}.pf")
+        # 获取自定义平台
         cpf = gget("custom.pf")
+        # 如果跳出当前平台（进入其他平台时）
         if (namespace != old_namespace):
+            # 初始化新平台命令列表
             wordlist = gget(namespace + ".wordlist")
+            # 初始化新平台{命令名称 -> 命令参数}
             prefix_wordlist = gget(namespace + ".prefix_wordlist")
+            # 合并general的参数部分
+            prefix_wordlist = {**prefix_wordlist, **gget("general.prefix_wordlist")}
+            # 初始化readline
             readline.set_wordlist(wordlist)
             readline.set_prefix_wordlist(prefix_wordlist)
+            # 记录
+            old_namespace = namespace
         # --------------------------------------
+        # 判断是否有预载命令
         if (gget("preload_command")):
             cmd = gget("preload_command")
             gset("preload_command", None, True)
@@ -169,24 +185,28 @@ def loop_main():
                 cmd = input().strip()
             else:
                 cmd = readline().strip()
+        # 存储输入的命令值
         gset("raw_command", cmd, True)
+        # 若输入空值
         if (not cmd):
             continue
-        args = cmd
         try:
-            args = shlex.split(args)  # 切割
+            args = shlex.split(cmd)  # 切割
         except ValueError:
             print(color.red("Invalid command"))
             continue
+        # 判断输入的命令值有无参数，获取输入的命令
         if " " in cmd:  # 输入的命令
             order = args[0]
         else:
             order = cmd
         del args[0]
+        # 存储输入的命令值的参数
         raw_command_args = " ".join(args)
         gset("raw_command_args", raw_command_args, True)
         order = order_alias(order)  # 解析别名
         # --------------------------------------
+        # 判断命令是否存在于[当前平台]/[general]/[自定义平台]
         if order in npf:  # 命令存在
             tpf = npf
         elif order in gpf:
@@ -195,6 +215,7 @@ def loop_main():
             tpf = cpf
         elif cmd:
             print(f'\n{order}: {color.red("Command Not Found")}\n')
+
         if tpf:
             debug = gget("DEBUG.LOOP")
             try:
@@ -202,15 +223,15 @@ def loop_main():
                 tpf[order].run(**arg_dict)
             except TypeError as e:
                 exc_type, exc_value, exc_tb = exc_info()
-                print("[TypeError] %s" % str(e).replace(
-                    "%s()" % api, "%s()" % order))
+                print("[TypeError] %s" % str(e).replace("%s()" % api, "%s()" % order))
                 if debug:
                     print_exception(exc_type, exc_value, exc_tb)
             except Exception as e:
                 exc_type, exc_value, exc_tb = exc_info()
+                print("[%s] %s" % (exc_type.__name__, e))
                 if debug:
                     print_exception(exc_type, exc_value, exc_tb)
-                print("[%s] %s" % (exc_type.__name__, e))
+
 
 
 def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):

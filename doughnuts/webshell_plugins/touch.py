@@ -2,19 +2,11 @@ from re import match
 
 from libs.config import alias, color
 from libs.myapp import send
+from libs.functions.webshell_plugins.touch import *
 
 
 def get_php(filename):
-    return """$arr = glob("*.*");
-$reference = $arr[mt_rand(0, count($arr) - 1)];
-$file='%s';
-if ($file==''){$file=basename($_SERVER['SCRIPT_NAME']);}
-
-if (file_exists($file)){
-touch($file, filectime($reference));
-echo $file.' as '.$reference;} else{
-print(file_put_contents($file,''));}
-""" % (filename)
+    return get_php_touch() % (filename)
 
 
 @alias(True, _type="FILE", func_alias="t", f="filename")

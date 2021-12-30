@@ -16,8 +16,7 @@ def run():
         commands = (get_system_code(
             'Systeminfo | findstr /i "System Model"', True))
     else:
-        commands = (get_system_code(each, True) for each in (
-            "dmidecode -s system-product-name", "lshw -class system", "dmesg | grep -i virtual", "lscpu"))
+        commands = (get_system_code(each, True) for each in ("dmidecode -s system-product-name", "lshw -class system", "dmesg | grep -i virtual", "lscpu"))
     isvm = False
 
     # detect vm by keyword

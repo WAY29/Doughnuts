@@ -1,38 +1,40 @@
 from os import path, chmod
-
-cpath = path.split(path.realpath(__file__))[0]
-
 from sys import path as pyfpath, executable, argv
-pyfpath.append(cpath)
-
 from libs.config import color
 from libs.myapp import is_windows
 from os import environ
 
+# doughnuts.py所在/启动目录
+cpath = path.split(path.realpath(__file__))[0]
+# python可执行文件目录
 pypath = executable
-filename = "doughnuts"
+# 添加doughnuts.py所在/启动目录到python环境变量中
+pyfpath.append(cpath)
+# 默认执行名称
+filename = "doughnuts" if len(argv) != 2 or not argv[2] else argv[2]
 
-
-if (len(argv) == 2 and argv[1] != ""):
-    filename = argv[1]
-
-if (not is_windows(False)):
-    if ("/usr/local/bin" not in environ["PATH"]):
-        print(color.red(f"please add /usr/local/bin to $PATH"))
-        exit(1)
-    fpath = "/usr/local/bin/" + filename
-    print(color.green(f"Try to generate {fpath}"))
-    with open(fpath, "w+") as f:
-        f.write(f"#!/bin/sh\n{pypath} {cpath}/doughnuts.py $*")
-    chmod(fpath, 0o755)
-    if (path.exists(fpath)):
-        print(color.green("generate success!"))
+def install():
+    # 如果非windows
+    if not is_windows(False):
+        if "/usr/local/bin" not in environ["PATH"]:
+            print(color.red("please add /usr/local/bin to $PATH"))
+            exit(1)
+        # 写入执行脚本
+        fpath =  f"/usr/local/bin/{filename}"
+        fcontents = f"#!/bin/sh\n{pypath} {cpath}/doughnuts.py $*"
+        print(color.green(f"Try to generate {fpath}"))
+        with open(fpath,"w+") as f:
+            f.write(fcontents)
+        chmod(fpath, 0o755)
+        # 判断是否成功写入
+        if (path.exists(fpath)):
+            print(color.green("generate success!"))
+        else:
+            print(color.red("generate error!"))
     else:
-        print(color.red("generate error!"))
-else:
-    fpath = path.dirname(pypath)+"\\" + filename + ".bat"
-    print(color.green(f"Try to generate {fpath}"))
-    text = f"""@echo off
+        # windows安装
+        fpath = f"{path.dirname(pypath)}\\{ filename}.bat"
+        fcontents = f"""@echo off
 :param
 set str=%1
 if "%str%"=="" (
@@ -44,9 +46,14 @@ goto param
 :end
 {pypath} {cpath}\\doughnuts.py %allparam%
 """
-    with open(fpath, "w+") as f:
-        f.write(text)
-    if (path.exists(fpath)):
-        print(color.green("generate success!"))
-    else:
-        print(color.red("generate error!"))
+        print(color.green(f"Try to generate {fpath}"))
+        with open(fpath, "w+") as f:
+            f.write(fcontents)
+        # 判断是否写入
+        if (path.exists(fpath)):
+            print(color.green("generate success!"))
+        else:
+            print(color.red("generate error!"))
+
+if __name__ == '__main__':
+    install()

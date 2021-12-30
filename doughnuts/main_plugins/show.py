@@ -17,6 +17,7 @@ def run():
     with open(webshell_log_path, "r") as f:
         lines = f.readlines()
         for index, line in enumerate(lines, 1):
+            # URL | METHOD | PASS | ENCODER | EXTRA
             data = line.strip().split("|")
             if (len(data) < 3):
                 continue

