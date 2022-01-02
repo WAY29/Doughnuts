@@ -63,11 +63,13 @@ class Rand:
 
     def header_key(self):
         str_len = random.getrandbits(4) + 2  # len 2 to 17
-        return ''.join([self.k_clist[random.getrandbits(10) % self.k_clen] for _ in range(str_len)]).capitalize()
+        return ''.join([self.k_clist[random.getrandbits(10) % self.k_clen]
+                       for _ in range(str_len)]).capitalize()
 
     def header_value(self):
         str_len = random.getrandbits(6) + 2  # len 2 to 65
-        return ''.join([self.v_clist[random.getrandbits(10) % self.v_clen] for _ in range(str_len)])
+        return ''.join([self.v_clist[random.getrandbits(10) %
+                       self.v_clen] for _ in range(str_len)])
 
     def base64_chars(self, charslist):
         newshuffle = random.shuffle
@@ -208,7 +210,7 @@ class session(Thread):
     def setupRemoteSession(self, target, port):
         self.mark = self.session_mark()
         target_data = ("%s|%d" % (target, port)).encode()
-        headers = {K["X-CMD"]: self.mark+V["CONNECT"],
+        headers = {K["X-CMD"]: self.mark + V["CONNECT"],
                    K["X-TARGET"]: self.encode_target(target_data)}
         self.headerupdate(headers)
         self.target = target
@@ -245,7 +247,7 @@ class session(Thread):
                     if hasattr(self, 'target'):
                         ...
                 if hasattr(self, 'mark'):
-                    headers = {K["X-CMD"]: self.mark+V["DISCONNECT"]}
+                    headers = {K["X-CMD"]: self.mark + V["DISCONNECT"]}
                     self.headerupdate(headers)
                     self.conn.get(self.url_sample(), headers=headers)
                 if not self.connect_closed:
@@ -258,7 +260,7 @@ class session(Thread):
 
     def reader(self):
         try:
-            headers = {K["X-CMD"]: self.mark+V["READ"]}
+            headers = {K["X-CMD"]: self.mark + V["READ"]}
             self.headerupdate(headers)
             n = 0
             while True:
@@ -307,7 +309,7 @@ class session(Thread):
 
     def writer(self):
         try:
-            headers = {K["X-CMD"]: self.mark+V["FORWARD"],
+            headers = {K["X-CMD"]: self.mark + V["FORWARD"],
                        'Content-type': 'application/octet-stream'}
             self.headerupdate(headers)
             n = 0
@@ -447,7 +449,8 @@ def generate(httpcode=200, read_buff=513, max_read_size=512):
     return text
 
 
-def connectTunnel(url, listen_on, listen_port, local_dns=False, read_buff=7, read_interval=300, write_interval=200, max_threads=1000, proxy=""):
+def connectTunnel(url, listen_on, listen_port, local_dns=False, read_buff=7,
+                  read_interval=300, write_interval=200, max_threads=1000, proxy=""):
     global LOCALDNS, PROXY, INIT_COOKIE, READBUFSIZE, MAXTHERADS, READINTERVAL, WRITEINTERVAL
 
     LOCALDNS = local_dns

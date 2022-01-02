@@ -33,7 +33,12 @@ def run(find_path: str = "/usr&/bin"):
         process = line.split(' ')[0]
         if process in av_processes:
             flag = 1
-            print("    %40s     -     %-30s" % (color.cyan(process), color.yellow(av_processes[process])))
+            print(
+                "    %40s     -     %-30s" %
+                (color.cyan(process),
+                 color.yellow(
+                    av_processes[process])))
     if (not flag):
-        print("    %40s     /      %-30s" % (color.green('No anti-virus'), color.red('Not found')))
+        print("    %40s     /      %-30s" %
+              (color.green('No anti-virus'), color.red('Not found')))
     print()

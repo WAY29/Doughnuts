@@ -42,7 +42,7 @@ def run(timeout: float = 2.0):
                 continue
 
             # 检查值
-            check_value = randint(0,int(urandom(8).hex(), 16))
+            check_value = randint(0, int(urandom(8).hex(), 16))
             correct_value = md5(str(check_value).encode()).hexdigest()
             check_command = f"print(md5('{check_value}'));"
 
@@ -53,7 +53,7 @@ def run(timeout: float = 2.0):
                     check_command = encode_pf[func].run(check_command)
 
             # 设置请求参数
-            params_dict = {raw_key: {pwd: check_command},"timeout": timeout }
+            params_dict = {raw_key: {pwd: check_command}, "timeout": timeout}
 
             common_text, status_code_text = "", "000"
             try:
@@ -67,4 +67,5 @@ def run(timeout: float = 2.0):
                 common_text = color.yellow("Timeout")
             except exceptions.RequestException:
                 common_text = color.red("Request error")
-            print(f"[{color.blue(str(index))}] [{color.yellow(status_code_text)}] {common_text} {url}")
+            print(
+                f"[{color.blue(str(index))}] [{color.yellow(status_code_text)}] {common_text} {url}")

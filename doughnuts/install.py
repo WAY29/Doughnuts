@@ -13,6 +13,7 @@ pyfpath.append(cpath)
 # 默认执行名称
 filename = "doughnuts" if len(argv) != 2 or not argv[2] else argv[2]
 
+
 def install():
     # 如果非windows
     if not is_windows(False):
@@ -20,10 +21,10 @@ def install():
             print(color.red("please add /usr/local/bin to $PATH"))
             exit(1)
         # 写入执行脚本
-        fpath =  f"/usr/local/bin/{filename}"
+        fpath = f"/usr/local/bin/{filename}"
         fcontents = f"#!/bin/sh\n{pypath} {cpath}/doughnuts.py $*"
         print(color.green(f"Try to generate {fpath}"))
-        with open(fpath,"w+") as f:
+        with open(fpath, "w+") as f:
             f.write(fcontents)
         chmod(fpath, 0o755)
         # 判断是否成功写入
@@ -54,6 +55,7 @@ goto param
             print(color.green("generate success!"))
         else:
             print(color.red("generate error!"))
+
 
 if __name__ == '__main__':
     install()

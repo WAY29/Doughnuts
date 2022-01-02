@@ -1,6 +1,5 @@
 
 
-
 def get_php_ls():
     return """
     $umap=array();$gmap=array();

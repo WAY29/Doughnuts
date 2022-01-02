@@ -26,6 +26,7 @@ def get_php_table_name(connect_type):
     else:
         return ""
 
+
 def get_php_table_row_number(connect_type):
 
     if (connect_type == "pdo"):
@@ -52,6 +53,7 @@ def get_php_table_row_number(connect_type):
     """
     else:
         return ""
+
 
 def get_php_table_construct(connect_type):
 
@@ -82,6 +84,7 @@ def get_php_table_construct(connect_type):
             """
     else:
         return ""
+
 
 def get_php_data(connect_type):
 

@@ -305,13 +305,13 @@ def generate_extension(ext_name, ext_path, command):
         elif ext_name == 'ant_x64.dll':
             start = 1552
             end = 1691
-        if len(command) > (end-start):
+        if len(command) > (end - start):
             return b''
         data[end] = 0
-        for n in range(start, start+20):
+        for n in range(start, start + 20):
             data[n] = 32
         for n in range(len(command)):
-            data[start+n] = ord(command[n])
+            data[start + n] = ord(command[n])
         return bytes(data)
 
 

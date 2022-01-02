@@ -5,8 +5,10 @@ from libs.config import alias, color, gget
 from libs.myapp import send, get_db_connect_code, gzinflate
 from libs.functions.webshell_plugins.db_dump import *
 
+
 @alias(True, _type="DATABASE", db="database", t="table", l="local_path")
-def run(database: str = "", table: str = "", local_path: str = "", encoding: str = "utf8"):
+def run(database: str = "", table: str = "",
+        local_path: str = "", encoding: str = "utf8"):
     """
     db_dump
 
@@ -23,7 +25,16 @@ def run(database: str = "", table: str = "", local_path: str = "", encoding: str
         makedirs(download_path)
     file_name = f"{database}.sql" if (not table) else f"{database}.{table}.sql"
     connect_type = gget("db_connect_type", "webshell")
-    res = send(get_php_db_dump(connect_type)%(database, database, encoding, database, get_db_connect_code(dbname=database), encoding, table))
+    res = send(
+        get_php_db_dump(connect_type) %
+        (database,
+         database,
+         encoding,
+         database,
+         get_db_connect_code(
+             dbname=database),
+            encoding,
+            table))
     if (not res):
         return
     text = res.r_text.strip()
@@ -32,7 +43,10 @@ def run(database: str = "", table: str = "", local_path: str = "", encoding: str
         file_path = path.join(download_path, file_name).replace("\\", "/")
         with open(file_path, "wb") as f:
             f.write(gzinflate(b64decode(content)))
-        print("\n" + color.green(f"Dump {database} to {file_name} success") + "\n")
+        print(
+            "\n" +
+            color.green(f"Dump {database} to {file_name} success") +
+            "\n")
     elif ("Error" in res.r_text):
         print("\n" + color.red(res.r_text.strip()) + "\n")
     else:

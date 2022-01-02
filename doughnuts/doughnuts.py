@@ -52,19 +52,19 @@ class My_Loop_init(Loop_init):
 
     def set_platforms(self) -> dict:
         platforms = {
-                    "main": "main_plugins",
-                     "webshell": "webshell_plugins",
-                     "general": "general",
-                     "encode": "encode",
-                     "custom": "custom_plugins"
+            "main": "main_plugins",
+            "webshell": "webshell_plugins",
+            "general": "general",
+            "encode": "encode",
+            "custom": "custom_plugins"
         }
         return platforms
 
     def set_prompts(self) -> dict:
         return {
-                "main": "doughnuts > ",
-                "webshell": "> ",
-                "custom": "> "
+            "main": "doughnuts > ",
+            "webshell": "> ",
+            "custom": "> "
         }
 
 

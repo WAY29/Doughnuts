@@ -5,6 +5,7 @@ from libs.functions.webshell_plugins.ps import *
 PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload", "mupload", "cp", "copy",
                "d", "download", "mdownload", "dump", "mv", "rm", "cd", "ls", "chmod", "touch"]
 
+
 def get_php(splitchars):
     return get_php_ps() % splitchars
 

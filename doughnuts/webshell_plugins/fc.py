@@ -17,7 +17,10 @@ def run(web_file_path: str = ""):
 
     eg: fc {web_file_path=webroot}
     """
-    web_file_path = web_file_path if (len(web_file_path)) else gget("webshell.root", "webshell")
+    web_file_path = web_file_path if (
+        len(web_file_path)) else gget(
+        "webshell.root",
+        "webshell")
     php = get_php(web_file_path)
     try:
         res = send(php)

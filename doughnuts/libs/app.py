@@ -50,7 +50,7 @@ class Loop_init:
         gset("loop", True)
         gset("blockexit", False)
         gset("namespace", init_namespace)
-        gset("namespace_folders",  platforms)
+        gset("namespace_folders", platforms)
         gset("folders_namespace", {v: k for k, v in platforms.items()})
         root_path = gget("root_path")
         cwd = getcwd()
@@ -88,7 +88,8 @@ def import_platform(platform_path: str, api: str):
 
 def is_numberic(string):
     global NUMBER_PATTERN
-    return True if (len(string) and (isinstance(string, (int, float)) or NUMBER_PATTERN.match(string))) else False
+    return True if (len(string) and (isinstance(
+        string, (int, float)) or NUMBER_PATTERN.match(string))) else False
 
 
 def value_translation(arg):
@@ -100,8 +101,8 @@ def value_translation(arg):
         except json.JSONDecodeError:
             pass
         if (isinstance(arg, str)):
-            custom_vars = findall("#{(\w+)}", arg)
-            if (match("#{(\w+)}", arg)):
+            custom_vars = findall("#{(\\w+)}", arg)
+            if (match("#{(\\w+)}", arg)):
                 arg = custom_get(custom_vars[0], arg)
             else:
                 if (not custom_vars):
@@ -168,7 +169,9 @@ def loop_main():
             # 初始化新平台{命令名称 -> 命令参数}
             prefix_wordlist = gget(namespace + ".prefix_wordlist")
             # 合并general的参数部分
-            prefix_wordlist = {**prefix_wordlist, **gget("general.prefix_wordlist")}
+            prefix_wordlist = {
+                **prefix_wordlist,
+                **gget("general.prefix_wordlist")}
             # 初始化readline
             readline.set_wordlist(wordlist)
             readline.set_prefix_wordlist(prefix_wordlist)
@@ -223,7 +226,13 @@ def loop_main():
                 tpf[order].run(**arg_dict)
             except TypeError as e:
                 exc_type, exc_value, exc_tb = exc_info()
-                print("[TypeError] %s" % str(e).replace("%s()" % api, "%s()" % order))
+                print(
+                    "[TypeError] %s" %
+                    str(e).replace(
+                        "%s()" %
+                        api,
+                        "%s()" %
+                        order))
                 if debug:
                     print_exception(exc_type, exc_value, exc_tb)
             except Exception as e:
@@ -231,7 +240,6 @@ def loop_main():
                 print("[%s] %s" % (exc_type.__name__, e))
                 if debug:
                     print_exception(exc_type, exc_value, exc_tb)
-
 
 
 def run_loop(loop_init_object: Loop_init, leave_message: str = "Bye!"):

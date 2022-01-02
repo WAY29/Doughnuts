@@ -1,5 +1,5 @@
 from libs.config import alias, color, gget, gset
-from libs.myapp import send,  get_db_connect_code
+from libs.myapp import send, get_db_connect_code
 
 
 def get_php(database):
@@ -30,5 +30,8 @@ def run(database: str):
     if ("Connect error" in res.r_text):
         print("\n" + color.red(res.r_text.strip()) + "\n")
     else:
-        print("\n" + color.green(f"Change current database: {database}") + "\n")
+        print(
+            "\n" +
+            color.green(f"Change current database: {database}") +
+            "\n")
         gset("db_dbname", database, True, "webshell")

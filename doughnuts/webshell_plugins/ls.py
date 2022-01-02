@@ -6,6 +6,7 @@ from libs.functions.webshell_plugins.ls import *
 PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload", "mupload", "cp", "copy",
                "d", "download", "mdownload", "dump", "mv", "rm", "cd", "ls", "chmod", "touch"]
 
+
 def get_php(path, mode):
     scan_code = f'$files=scandir("{path}");sort($files);'
     if (mode == 2):

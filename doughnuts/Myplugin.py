@@ -15,6 +15,7 @@ class Platform():
 
         message(bool)=[FALSE/true] 是否保存插件导入的消息,如保存,则可以通过调用get_messages与print_messages来得到/输出消息列表
     '''
+
     def __init__(self, plugin_path: str = 'plugins', required: str = '', load_now: bool = True, message: bool = False):  # 初始化,导入文件夹下所有模块
         self.origin_plugin_path = plugin_path
         self.plugin_path = plugin_path.replace('\\', '.').replace('/', '.')
@@ -78,13 +79,13 @@ class Platform():
         return True if self.loaded_plugins == self.total_plugins else False
 
     def call(self, plugin_name: str, func_name: str, args: tuple):  # 运行一个插件中的函数
-        if (type(args) != tuple):
+        if (not isinstance(args, tuple)):
             return None
         func = getattr(self.get(plugin_name), func_name)
         return func(*args)
 
     def call_all(self, func_name: str, args: tuple):  # 运行所有插件中的某个函数
-        if (type(args) != tuple):
+        if (not isinstance(args, tuple)):
             return None
         response_dict = {}
         for x in self.names():
@@ -120,10 +121,12 @@ class Platform():
         return hasattr(self.__plugin_dict[plugin_name], method_name)
 
     def get(self, plugin_name: str):  # 获得某个导入的插件
-        return self.__plugin_dict[plugin_name] if (plugin_name in self.__plugin_dict) else None
+        return self.__plugin_dict[plugin_name] if (
+            plugin_name in self.__plugin_dict) else None
 
     def __getitem__(self, plugin_name: str):  # 获得某个导入的插件
-        return self.__plugin_dict[plugin_name] if (plugin_name in self.__plugin_dict) else None
+        return self.__plugin_dict[plugin_name] if (
+            plugin_name in self.__plugin_dict) else None
 
     # def __getattribute__(self, plugin_name: str):  # 获得某个导入的插件
     #     if (plugin_name in object.__getattribute__(self, '_Platform__plugin_dict')):
@@ -151,4 +154,5 @@ class Platform():
         return next(self.__iter)
 
     def __repr__(self):
-        return 'Platform for "%s"\nplugins: %s' % (self.origin_plugin_path, ' '.join(self.__plugin_dict.keys()))
+        return 'Platform for "%s"\nplugins: %s' % (
+            self.origin_plugin_path, ' '.join(self.__plugin_dict.keys()))

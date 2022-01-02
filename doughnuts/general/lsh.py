@@ -4,7 +4,7 @@ from libs.config import alias, gget, color
 from libs.app import value_translation
 
 
-@alias(True,  func_alias="!")
+@alias(True, func_alias="!")
 def run(*coomands):
     """
     lsh
@@ -16,7 +16,11 @@ def run(*coomands):
     if (command):
         if (command.startswith("cd ")):
             chdir(command[3:])
-            print(color.green("\nResult:\n\n") + "current working directory:\n\n    " + getcwd() + "\n")
+            print(
+                color.green("\nResult:\n\n") +
+                "current working directory:\n\n    " +
+                getcwd() +
+                "\n")
         else:
             print(color.green("\nResult:\n"))
             system(command)

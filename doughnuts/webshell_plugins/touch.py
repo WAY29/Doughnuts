@@ -23,6 +23,7 @@ def run(filename: str = ""):
         return
     text = res.r_text.strip()
     if (match(r"\d+", text)):
-        print(color.green(f"\nSuccessfully created an empty file {filename}\n"))
+        print(
+            color.green(f"\nSuccessfully created an empty file {filename}\n"))
     elif (len(text) > 0):
         print(color.green(f"\nModify time stamp {text} success\n"))

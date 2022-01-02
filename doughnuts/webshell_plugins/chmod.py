@@ -18,11 +18,13 @@ def run(mode: str, *web_file_paths):
     if (len(mode) < 4):
         mode = "0" + mode
     for each_file_path in web_file_paths:
-        res = send(f"print(chmod(base64_decode('{base64_encode(each_file_path)}'), {mode}));")
+        res = send(
+            f"print(chmod(base64_decode('{base64_encode(each_file_path)}'), {mode}));")
         if (not res):
             return
         text = res.r_text.strip()
         if len(text):
-            print(f"\nchmod {each_file_path} {mode} {color.green('success')}\n")
+            print(
+                f"\nchmod {each_file_path} {mode} {color.green('success')}\n")
         else:
             print(f"\nchmod {each_file_path} {mode} {color.red('failed')}\n")

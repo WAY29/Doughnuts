@@ -15,12 +15,14 @@ def ranstr(num):
     return ''.join(sample(ascii_letters + digits, num))
 
 
-def get_php(keyword: int = 4, passwd: str = "", salt: str = "", _type: int = 1):
+def get_php(keyword: int = 4, passwd: str = "",
+            salt: str = "", _type: int = 1):
     template_name = template_name_dict[_type]
     return TEMPLATE_PF[template_name].get_php(keyword, passwd, salt)
 
 
-def outside_generate(file_path: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
+def outside_generate(file_path: str, keyword: str = "POST",
+                     passwd: str = "", salt: str = "", _type: int = 1):
     try:
         _type = int(_type)
     except ValueError:
@@ -29,7 +31,8 @@ def outside_generate(file_path: str, keyword: str = "POST", passwd: str = "", sa
 
 
 @alias(True, "gen", f="file_path", k="keyword", p="passwd", s="salt")
-def run(file_name: str, keyword: str = "POST", passwd: str = "", salt: str = "", _type: int = 1):
+def run(file_name: str, keyword: str = "POST",
+        passwd: str = "", salt: str = "", _type: int = 1):
     raw_keyword = keyword.upper()
     if (raw_keyword not in keyword_dict):
         print(color.red("\nKeyword error\n"))

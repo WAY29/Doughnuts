@@ -80,4 +80,4 @@ def get_php_fpm_eval(attack_type):
             die('stream_socket_server/stream_socket_accept function not exist');
         }"""
 
-    return  php_code
+    return php_code

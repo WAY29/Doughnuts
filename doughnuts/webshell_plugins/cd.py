@@ -11,7 +11,8 @@ def run(directory: str = ''):
 
     eg: cd {directory=""}
     """
-    res = send(f"chdir(base64_decode('{base64_encode(str(directory))}'));print(getcwd());")
+    res = send(
+        f"chdir(base64_decode('{base64_encode(str(directory))}'));print(getcwd());")
     if (not res):
         return
     pwd = res.r_text.strip()

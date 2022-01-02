@@ -13,7 +13,7 @@ class User{
         $this->config = $config;
     }
     function __toString(){
-        preg_match_all('/[\S\s]{2}/i',$this->hash,$zip,2);
+        preg_match_all('/[\\S\\s]{2}/i',$this->hash,$zip,2);
         foreach($zip as $hex){
             $dzip.=chr(hexdec($hex[0]));
         }

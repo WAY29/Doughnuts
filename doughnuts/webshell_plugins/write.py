@@ -36,7 +36,7 @@ def run(web_file_path: str, editor: str = "", edit_args: str = ""):
 
     with open(real_file_path, "r") as f:
         result = base64_encode(f.read())
-        res = send(get_php_write(web_file_path,result,write_method))
+        res = send(get_php_write(web_file_path, result, write_method))
         if (not res):
             return
         text = res.r_text.strip()

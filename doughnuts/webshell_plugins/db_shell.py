@@ -28,6 +28,7 @@ NEW_SQL_WORDLIST = {"common_wordlist": (
     "execute",
 )}
 
+
 @alias(_type="DATABASE")
 def run():
     """

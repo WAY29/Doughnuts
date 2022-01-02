@@ -27,6 +27,7 @@ def get_php_upload():
         }
     }"""
 
+
 def get_php_file_put_contents():
     return """
         $upload_path="%s";

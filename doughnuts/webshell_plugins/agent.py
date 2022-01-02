@@ -1,10 +1,11 @@
 from libs.config import alias, color
-from libs.myapp import send,  base64_decode
+from libs.myapp import send, base64_decode
 from libs.functions.webshell_plugins.agent import *
 from re import findall, I, M
 from os import makedirs, urandom
 from os.path import dirname, exists
 from time import time
+
 
 @alias(True, _type="OTHER", func_alias="ag", u="url", m="method", d="data", p="params", c="cookie", t="type",
        to="timeout", re_m="redirect_method")

@@ -30,7 +30,8 @@ def run(
         makedirs(download_path)
     if len(content):
         file_name = path.split(web_file_path)[1]
-        file_path = path.join(download_path, file_name) if path.isdir(download_path) else download_path
+        file_path = path.join(download_path, file_name) if path.isdir(
+            download_path) else download_path
         with open(file_path, "wb") as f:
             f.write(content)
         print(color.green(f"Downloaded file has been saved to {file_path}"))

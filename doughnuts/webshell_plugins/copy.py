@@ -14,11 +14,14 @@ def run(web_file_path: str, new_file_path: str):
     """
     if (new_file_path.endswith("/")):
         new_file_path += path.basename(web_file_path)
-    res = send(f"print(copy(base64_decode('{base64_encode(web_file_path)}'), base64_decode('{base64_encode(new_file_path)}')));")
+    res = send(
+        f"print(copy(base64_decode('{base64_encode(web_file_path)}'), base64_decode('{base64_encode(new_file_path)}')));")
     if (not res):
         return
     text = res.r_text.strip()
     if len(text):
-        print(color.green(f"\n[Success] copy {web_file_path} to {new_file_path}\n"))
+        print(
+            color.green(f"\n[Success] copy {web_file_path} to {new_file_path}\n"))
     else:
-        print(color.red(f"\n[Failed] copy {web_file_path} to {new_file_path}\n"))
+        print(
+            color.red(f"\n[Failed] copy {web_file_path} to {new_file_path}\n"))

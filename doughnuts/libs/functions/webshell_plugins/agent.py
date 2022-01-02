@@ -1,7 +1,7 @@
 
 
 def get_php_agent(request_target, request_method, request_redirect_method, request_data, request_params, request_cookie,
-            redirect_auto, redirect_cookie_use, timeout, type):
+                  redirect_auto, redirect_cookie_use, timeout, type):
     php_code = """
 # 代理目标
 $REQUEST_URL= "%s";
@@ -104,8 +104,8 @@ class Agent{
     }
 
     private function get_element($host,$body){
-        preg_match_all("/<link[\s\S]*?href=['\\"](.*?[.]css.*?)[\\"'][\s\S]*?>/i", $body, $css);
-        preg_match_all("/<script[\s\S]*?src=['\\"](.*?[.]js.*?)[\\"'][\s\S]*?>/i", $body, $js);
+        preg_match_all("/<link[\\s\\S]*?href=['\\"](.*?[.]css.*?)[\\"'][\\s\\S]*?>/i", $body, $css);
+        preg_match_all("/<script[\\s\\S]*?src=['\\"](.*?[.]js.*?)[\\"'][\\s\\S]*?>/i", $body, $js);
 
         foreach ($css[1] as $css_url) {
             $body .= "<style>".@file_get_contents(strpos($css_url, 'http://') == false ? $host . '/' . $css_url:$css_url)."</style>";
@@ -163,7 +163,7 @@ class Agent{
                 fclose($fp);
                 if ($result) {
                     list($header, $body) = explode("\\r\\n\\r\\n" , $result, 2);
-                    preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", explode("\\r\\n", $header)[0], $code);
+                    preg_match("#HTTP/[0-9\\.]+\\s+([0-9]+)#", explode("\\r\\n", $header)[0], $code);
                     $header = explode("\\r\\n",$header);
                     $this->header_data = $header;
 
@@ -214,7 +214,7 @@ class Agent{
             $body = @file_get_contents($url, false, $context);
             $result = $http_response_header;
             $this->header_data = $result;
-            preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $result[0], $code);
+            preg_match("#HTTP/[0-9\\.]+\\s+([0-9]+)#", $result[0], $code);
             if (300 <= $code[1] and $code[1] < 400) {
                 $redirect_url = $this->get_redirect($result);
                 $cookie = $this->get_cookie($result) ? $this->get_cookie($result) : $this->request_cookie;
@@ -331,7 +331,7 @@ class Agent{
 
                 if ($result) {
                     list($header, $body) = explode("\\r\\n\\r\\n" , $result, 2);
-                    preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", explode("\\r\\n", $header)[0], $code);
+                    preg_match("#HTTP/[0-9\\.]+\\s+([0-9]+)#", explode("\\r\\n", $header)[0], $code);
                     $header = explode("\\r\\n",$header);
                     $this->header_data = $header;
 
@@ -384,7 +384,7 @@ class Agent{
             $result = $http_response_header;
             $this->header_data = $result;
 
-            preg_match("#HTTP/[0-9\.]+\s+([0-9]+)#", $result[0], $code);
+            preg_match("#HTTP/[0-9\\.]+\\s+([0-9]+)#", $result[0], $code);
             if (300 <= $code[1] and $code[1] < 400) {
                 $redirect_url = $this->get_redirect($result);
                 $cookie = $this->redirect_cookie_use ? ($this->get_cookie($result) ? $this->get_cookie($result) : $this->request_cookie) : '';
@@ -509,5 +509,5 @@ $this_request = new Agent($REQUEST_URL,$REQUEST_METHOD,$REQUEST_REDIRECT_METHOD,
 
 echo $this_request;
 """
-    return php_code% (request_target, request_method, request_redirect_method, request_data, request_params, request_cookie,
-       redirect_auto, redirect_cookie_use, timeout, type)
+    return php_code % (request_target, request_method, request_redirect_method, request_data, request_params, request_cookie,
+                       redirect_auto, redirect_cookie_use, timeout, type)

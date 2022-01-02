@@ -117,7 +117,10 @@ def main(port, mode: int):
             talk.send(bytes(
                 """python -c "__import__('pty').spawn('/bin/sh')" && exit\n""", encoding='utf-8'))
         talk.send(bytes("""alias ls='ls --color=auto'\n""", encoding='utf-8'))
-        talk.send(bytes("""alias grep='grep --color=auto'\n""", encoding='utf-8'))
+        talk.send(
+            bytes(
+                """alias grep='grep --color=auto'\n""",
+                encoding='utf-8'))
         if (set_size):
             talk.send(bytes("""stty rows %s columns %s\n""" %
                             (rows, columns), encoding='utf-8'))

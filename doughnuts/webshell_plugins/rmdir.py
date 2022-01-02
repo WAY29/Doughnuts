@@ -22,4 +22,5 @@ def run(web_file_path: str):
     if "fail" in text:
         print(f"\n remove directory {web_file_path} {color.red('failed')}\n")
     else:
-        print(f"\n remove directory {web_file_path} {color.green('success')}\n")
+        print(
+            f"\n remove directory {web_file_path} {color.green('success')}\n")

@@ -20,11 +20,11 @@ def run(*web_file_paths):
         read_method = 1
     elif "readfile" not in disable_func_list:
         read_method = 2
-    elif not any((bool(each in disable_func_list) for each in ["fopen","fread","filesize"])):
+    elif not any((bool(each in disable_func_list) for each in ["fopen", "fread", "filesize"])):
         read_method = 3
     elif "DOMDocument" not in disable_classes_list and "dom" in loaded_ext_list:
         read_method = 4
-    elif not any((bool(each in disable_func_list) for each in ["curl_init","curl_setopt","curl_exec"])) and "curl" in loaded_ext_list:
+    elif not any((bool(each in disable_func_list) for each in ["curl_init", "curl_setopt", "curl_exec"])) and "curl" in loaded_ext_list:
         read_method = 5
     elif "SplFileObject" not in disable_classes_list and "SPL" in loaded_ext_list:
         read_method = 6
@@ -32,7 +32,7 @@ def run(*web_file_paths):
         read_method = 7
 
     for each_file_path in web_file_paths:
-        res = send(get_php_cat(each_file_path,read_method))
+        res = send(get_php_cat(each_file_path, read_method))
         if (not res):
             return
         text = res.r_text.strip()

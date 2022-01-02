@@ -1,7 +1,7 @@
 from libs.config import alias, gget, gset, color
 
 
-@alias(True,  func_alias="sw")
+@alias(True, func_alias="sw")
 def run():
     """
     switch

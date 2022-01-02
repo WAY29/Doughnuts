@@ -1,5 +1,6 @@
 from libs.myapp import base64_encode
 
+
 def get_php_write(web_file_path, result, write_method):
 
     php_code = ""

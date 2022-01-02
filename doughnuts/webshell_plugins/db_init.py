@@ -2,7 +2,15 @@ from libs.config import alias, color, gget, gset
 from libs.myapp import send, get_db_connect_code
 from libs.functions.webshell_plugins.db_init import *
 
-PDO_DMBS_EXT_DICT = {"mssql": ("pdo_sqlsrv", "pdo_mssql", "pdo_odbc", "pdo_dblib"), "access": ("pdo_odbc", )}
+PDO_DMBS_EXT_DICT = {
+    "mssql": (
+        "pdo_sqlsrv",
+        "pdo_mssql",
+        "pdo_odbc",
+        "pdo_dblib"),
+    "access": (
+        "pdo_odbc",
+    )}
 
 
 def detect_ext(*exts):
@@ -26,9 +34,11 @@ def get_php(host, username, password, dbname, port):
         select_user_code = "SELECT CurrentUser();"
         select_version_code = "SELECT @@VERSION;"
     if (connect_type == "pdo"):
-        return get_php_db_init(connect_type) % (connect_code, select_user_code, select_version_code)
+        return get_php_db_init(connect_type) % (
+            connect_code, select_user_code, select_version_code)
     elif (connect_type == "mysqli"):
-        return get_php_db_init(connect_type) % (connect_code, select_user_code, select_version_code)
+        return get_php_db_init(connect_type) % (
+            connect_code, select_user_code, select_version_code)
     else:
         return ""
 
@@ -41,8 +51,10 @@ def print_db_info():
     print(f"\n{dbms} Version:\n    {gget('db_version', 'webshell')}\n")
 
 
-@alias(True, _type="DATABASE", h="host", u="username", pwd="password", p="port")
-def run(host: str, username: str, password: str, dbname: str = "", port: int = 0, dbms: str = "mysql"):
+@alias(True, _type="DATABASE", h="host",
+       u="username", pwd="password", p="port")
+def run(host: str, username: str, password: str,
+        dbname: str = "", port: int = 0, dbms: str = "mysql"):
     """
     db_init
 
@@ -72,7 +84,10 @@ def run(host: str, username: str, password: str, dbname: str = "", port: int = 0
         res = send(detect_ext(*PDO_DMBS_EXT_DICT[dbms]))
         text = res.r_text.strip()
         if (not res):  # 探测pdo支持的mssql扩展
-            print("\n" + color.red(f"Detect PDO extension for {dbms} error") + "\n")
+            print(
+                "\n" +
+                color.red(f"Detect PDO extension for {dbms} error") +
+                "\n")
             return
         db_ext = text.split(",")[0][4:]
     gset("db_dbms", dbms, True, "webshell")

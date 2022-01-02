@@ -223,14 +223,18 @@ def getGroup(value: list, group: list, keyword: list, unquie: list, p: int):
             _ = value[group_index][word_index].pop()
 
             if (random.randrange(100) <= p):
-                text_add_one, unquie = getAdd_one(value="$" + _ + "=" + group[group_index][word_index], unquie=unquie)
-                text_add_two, unquie = getAdd_two(value=text_add_one, unquie=unquie)
+                text_add_one, unquie = getAdd_one(
+                    value="$" + _ + "=" + group[group_index][word_index], unquie=unquie)
+                text_add_two, unquie = getAdd_two(
+                    value=text_add_one, unquie=unquie)
             else:
-                text_add_two, unquie = getAdd_two(value="$" + _ + "=" + group[group_index][word_index], unquie=unquie)
+                text_add_two, unquie = getAdd_two(
+                    value="$" + _ + "=" + group[group_index][word_index], unquie=unquie)
 
             text_add_end_one, unquie = getAdd_end(
                 value=group[group_index][word_index], unquie=unquie)
-            text_add_end_two, unquie = getAdd_two(value=text_add_end_one, unquie=unquie)
+            text_add_end_two, unquie = getAdd_two(
+                value=text_add_end_one, unquie=unquie)
 
             result += text_add_two + text_add_two
 
@@ -251,7 +255,8 @@ def getGroup(value: list, group: list, keyword: list, unquie: list, p: int):
 
 
 # 获取混淆的变量声明
-def getPHP(words: list, r: int, min_int: int, max_int: int, length: int = 5, p: int = 33):
+def getPHP(words: list, r: int, min_int: int,
+           max_int: int, length: int = 5, p: int = 33):
 
     unquie = []
     result = []
@@ -270,7 +275,8 @@ def getPHP(words: list, r: int, min_int: int, max_int: int, length: int = 5, p: 
 
 
 # 拼装 mbereg_replace('.*','\0',$_METHOD[PASS],'mer'); 语句
-def getEval(phptext: str, phpdict: dict, rule: dict, unquie: list, rand_line: int = 3, rand_len: int = 10):
+def getEval(phptext: str, phpdict: dict, rule: dict,
+            unquie: list, rand_line: int = 3, rand_len: int = 10):
 
     dict_list = {}
 
@@ -297,18 +303,22 @@ def getEval(phptext: str, phpdict: dict, rule: dict, unquie: list, rand_line: in
     func_tag = getUnquie(
         n=len(dict_list["FUNCTION"][1]) % 10 + 5, unquie=unquie)
     unquie.append(func_tag)
-    func_ok, unquie = getAdd_two(value="$" + func_tag + "=" + dict_list["FUNCTION"][1], unquie=unquie)
+    func_ok, unquie = getAdd_two(
+        value="$" + func_tag + "=" + dict_list["FUNCTION"][1], unquie=unquie)
     func_tag_ok, unquie = getAdd_one(value="$" + func_tag, unquie=unquie)
 
     method_tag = getUnquie(n=len(dict_list["METHOD"][1]), unquie=unquie)
     unquie.append(method_tag)
-    method_ok, unquie = getAdd_two(value="$" + method_tag + "=" + dict_list["METHOD"][1], unquie=unquie)
-    method_tag_ok, unquie = getAdd_one(value="{$" + method_tag + "}", unquie=unquie)
+    method_ok, unquie = getAdd_two(
+        value="$" + method_tag + "=" + dict_list["METHOD"][1], unquie=unquie)
+    method_tag_ok, unquie = getAdd_one(
+        value="{$" + method_tag + "}", unquie=unquie)
 
     func2_tag = getUnquie(
         n=len(dict_list["FUNCTION2"][1]) % 10 + 5, unquie=unquie)
     unquie.append(func2_tag)
-    func2_ok, unquie = getAdd_two(value="$" + func2_tag + "=" + dict_list["FUNCTION2"][1], unquie=unquie)
+    func2_ok, unquie = getAdd_two(
+        value="$" + func2_tag + "=" + dict_list["FUNCTION2"][1], unquie=unquie)
     func2_tag_ok, unquie = getAdd_one(value="$" + func2_tag, unquie=unquie)
 
     result += func_ok + method_ok + func2_ok

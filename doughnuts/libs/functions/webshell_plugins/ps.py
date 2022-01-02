@@ -28,7 +28,7 @@ def get_php_ps():
                 $umap[$els[2]] = $uname;}
             }
         }
-        
+
         if (is_readable("/proc")){
             unamemap();
             echo "PID".$s."UID".$s."STATUS".$s."CMDLINE\\n";

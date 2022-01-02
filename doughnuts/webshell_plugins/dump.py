@@ -13,12 +13,13 @@ def get_raw_php(web_file_path: str):
 
 def get_zip_php(web_file_path: str):
     return (
-         get_php_dump() % web_file_path.strip("\\")
+        get_php_dump() % web_file_path.strip("\\")
     )
 
 
 @alias(True, _type="FILE", w="web_file_path", l="local_path")
-def run(web_file_path: str, local_path: str = "", _use_raw_php_to_zip: bool = True):
+def run(web_file_path: str, local_path: str = "",
+        _use_raw_php_to_zip: bool = True):
     """
     dump
 

@@ -3,7 +3,7 @@ from re import match
 from threading import Thread
 
 from libs.config import alias, gget, color
-from libs.myapp import send, base64_encode,  randstr, ALPATHNUMERIC
+from libs.myapp import send, base64_encode, randstr, ALPATHNUMERIC
 from auxiliary.neoreg.x import init, generate, connectTunnel
 
 
@@ -12,8 +12,10 @@ def default_input(msg, value):
     return result if result else value
 
 
-@alias(True, _type="OTHER", k="key", code="httpcode", dns="local_dns", t="threads", l="listen_on", p="listen_port")
-def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1", listen_port: int = 1080, proxy: str = "", httpcode: int = 200, read_buff: int = 513, connect_read_buf: int = 7, max_read_size: int = 512, read_interval: int = 300, write_interval: int = 200, local_dns: bool = False):
+@alias(True, _type="OTHER", k="key", code="httpcode",
+       dns="local_dns", t="threads", l="listen_on", p="listen_port")
+def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1", listen_port: int = 1080, proxy: str = "", httpcode: int = 200,
+        read_buff: int = 513, connect_read_buf: int = 7, max_read_size: int = 512, read_interval: int = 300, write_interval: int = 200, local_dns: bool = False):
     """
     socks
 
@@ -29,7 +31,13 @@ def run(key: str = 'doughnuts', threads: int = 1000, listen_on: str = "127.0.0.1
     http_root_path = "%s://%s/" % (scheme, netloc)
     web_root = gget("webshell.root", "webshell", "")
     webshell_root = gget("webshell.webshell_root", "webshell", ".")
-    relpath = path.relpath(webshell_root + "/" + name, web_root).replace("\\", '/')
+    relpath = path.relpath(
+        webshell_root +
+        "/" +
+        name,
+        web_root).replace(
+        "\\",
+        '/')
     current_proxy = gget('proxies')
     if not proxy and current_proxy:
         proxy = current_proxy

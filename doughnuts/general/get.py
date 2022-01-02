@@ -16,6 +16,7 @@ def run(key: str = "", show_all: bool = False):
     elif (key):
         value = custom_get(str(key))
         if (value):
-            print(f"\n{color.green(f'{key} => {value} [{type(value).__name__}]')}\n")
+            print(
+                f"\n{color.green(f'{key} => {value} [{type(value).__name__}]')}\n")
         else:
             print(f"\n{color.red(f'unset {key}')}\n")

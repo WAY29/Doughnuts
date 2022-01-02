@@ -10,12 +10,15 @@ def get_php(filename: str, web_file_path: str, force: bool):
     return get_php_upload() % (web_file_path, filename, str(not force).lower())
 
 
-def get_php_file_put_contents(filename: str, web_file_path: str, force: bool, content: str):
-    return get_php_file_put_contents() % (web_file_path, filename, str(not force).lower(), content)
+def get_php_file_put_contents(
+        filename: str, web_file_path: str, force: bool, content: str):
+    return get_php_file_put_contents() % (
+        web_file_path, filename, str(not force).lower(), content)
 
 
 @alias(True, func_alias="u", _type="FILE", t="upload_type")
-def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bool = False):
+def run(file_path: str, web_file_path: str = "",
+        upload_type: int = 0, force: bool = False):
     """
     upload
 
@@ -40,7 +43,9 @@ def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bo
         php = get_php(filename, web_file_path, force)
         res = send(php, files={"file": fp})
     else:
-        php = get_php_file_put_contents(filename, web_file_path, force, b64encode(fp.read()).decode())
+        php = get_php_file_put_contents(
+            filename, web_file_path, force, b64encode(
+                fp.read()).decode())
         res = send(php)
     if (not res):
         return
@@ -52,4 +57,7 @@ def run(file_path: str, web_file_path: str = "", upload_type: int = 0, force: bo
         print(color.yellow(f"\n{text}\n"))
         return True
     else:
-        print("\n" + color.red(f"Upload error / Privileges not enough. Error: {text}") + "\n")
+        print(
+            "\n" +
+            color.red(f"Upload error / Privileges not enough. Error: {text}") +
+            "\n")

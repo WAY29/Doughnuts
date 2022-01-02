@@ -11,9 +11,9 @@ def human_friendly_list_print(l: list) -> str:
     str_dict = {}
     for i in l:
         if (isinstance(i, int)):
-            if ((i-1) in str_dict):
-                temp = str_dict[(i-1)]
-                del str_dict[(i-1)]
+            if ((i - 1) in str_dict):
+                temp = str_dict[(i - 1)]
+                del str_dict[(i - 1)]
                 str_dict[i] = temp.split("-")[0] + "-" + str(i)
             else:
                 str_dict[i] = str(i)

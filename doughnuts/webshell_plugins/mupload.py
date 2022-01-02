@@ -21,20 +21,24 @@ ALL_TASK = []
 
 def get_php_force(web_file_path: str, force):
     web_file_path = base64_encode(web_file_path)
-    return """if (not is_writable(base64_encode("%s"))) {echo "not writable";} else if (%s and file_exists(base64_decode("%s"))){print("exist");}else{unlink(base64_decode("%s"));}""" % (web_file_path, str(not force).lower(), web_file_path, web_file_path)
+    return """if (not is_writable(base64_encode("%s"))) {echo "not writable";} else if (%s and file_exists(base64_decode("%s"))){print("exist");}else{unlink(base64_decode("%s"));}""" % (
+        web_file_path, str(not force).lower(), web_file_path, web_file_path)
 
 
 def get_php_upload(web_file_path: str, data: str, number: int):
     web_file_path = base64_encode(web_file_path + ".tmp%s" % number)
-    return """$p=base64_decode("%s");file_put_contents($p, "%s");if(filesize($p) !== 0){echo "success";}""" % (web_file_path, data)
+    return """$p=base64_decode("%s");file_put_contents($p, "%s");if(filesize($p) !== 0){echo "success";}""" % (
+        web_file_path, data)
 
 
 def get_php_decode(web_file_path: str, number: int):
-    return """$p=base64_decode("%s");$data="";$f=true;$fp=@fopen($p, 'wb');if (fp){for($i=0;$i<%s;$i++){$pp="$p.tmp$i";if(filesize($pp)!==0){$data=gzinflate(base64_decode(file_get_contents($pp)));fwrite($fp, $data);fflush($fp);unlink($pp);} else {$f=false;break; }}}fclose($fp);if($f){if(file_exists($p) && filesize($p) !== 0){echo "success";}}""" % (base64_encode(web_file_path), number)
+    return """$p=base64_decode("%s");$data="";$f=true;$fp=@fopen($p, 'wb');if (fp){for($i=0;$i<%s;$i++){$pp="$p.tmp$i";if(filesize($pp)!==0){$data=gzinflate(base64_decode(file_get_contents($pp)));fwrite($fp, $data);fflush($fp);unlink($pp);} else {$f=false;break; }}}fclose($fp);if($f){if(file_exists($p) && filesize($p) !== 0){echo "success";}}""" % (
+        base64_encode(web_file_path), number)
 
 
 def get_php_clean(web_file_path: str, number: int):
-    return """for($i=0;$i<%s;$i++){unlink(base64_decode("%s").".tmp$i");}""" % (number, base64_encode(web_file_path))
+    return """for($i=0;$i<%s;$i++){unlink(base64_decode("%s").".tmp$i");}""" % (
+        number, base64_encode(web_file_path))
 
 
 def thread_upload(web_file_path: str, data: str, number: int, blocksize: int):
@@ -81,7 +85,8 @@ def update(future):
 
 
 @alias(True, func_alias="mu", _type="FILE", s="humansize")
-def run(file_path: str, web_file_path: str = "", force: bool = False, humansize: str = "1MB", threads: int = 5):
+def run(file_path: str, web_file_path: str = "", force: bool = False,
+        humansize: str = "1MB", threads: int = 5):
     """
     mupload
 

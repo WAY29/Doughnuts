@@ -24,8 +24,7 @@ def register_helpmenu():
             print(MAIN_DOC + "\n")
         elif (namespace == "webshell"):
             if (not WEBSHELL_DOC):
-                type_list = gget("type_list", namespace=namespace)
-                type_list.sort()
+                type_list = sorted(gget("type_list", namespace=namespace))
                 for _type in type_list:
                     WEBSHELL_DOC += "\n[%s]\n\n" % _type
                     WEBSHELL_DOC += "\n".join(gget(func_name + ".helpdoc", namespace=namespace)

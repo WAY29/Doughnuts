@@ -82,7 +82,8 @@ def get_data(web_file_path: str, n: int, offset: int, blocksize: int):
     return (n, content)
 
 
-@alias(True, _type="FILE", w="web_file_path", l="local_path", s="humansize", t="threads")
+@alias(True, _type="FILE", w="web_file_path",
+       l="local_path", s="humansize", t="threads")
 def run(
     web_file_path: str, local_path: str = "", humansize: str = "1MB", threads: int = 5
 ) -> bool:

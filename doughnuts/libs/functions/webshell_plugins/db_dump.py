@@ -1,5 +1,5 @@
 def get_php_db_dump(connect_type):
-    if connect_type ==  "pdo":
+    if connect_type == "pdo":
         return """
         set_time_limit(0); ignore_user_abort(1);
     function Tabledump($con,$table_name){

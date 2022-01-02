@@ -13,6 +13,7 @@ def get_php_detectd_exec(php_init):
         }
     }""" % php_init
 
+
 def get_php_version(*argv):
     return """
         function call($f){
@@ -26,6 +27,7 @@ def get_php_version(*argv):
             return $r;
         }
     print("%s"."|".call('phpversion')."|"."%s"."|".@base64_decode("%s"));""" % argv
+
 
 def get_php_uname(php_init):
     return """
@@ -51,6 +53,7 @@ def get_php_uname(php_init):
     '|'.DIRECTORY_SEPARATOR.
     '|'.get_ini_value('disable_classes'));
 """.strip() % php_init
+
 
 def get_php_loaded_extensions():
     return """
