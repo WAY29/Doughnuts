@@ -23,13 +23,13 @@ from prettytable import PrettyTable
 from requests.models import complexjson
 from requests.utils import guess_json_utf
 from urllib3 import disable_warnings
-from libs.functions.php_sql import *
-from libs.functions.php_base64 import *
-from libs.functions.php_fpm_eval import *
-from libs.functions.php_bp_obd import *
-from libs.functions.php_g_encode import *
-from libs.functions.php_bp_sys import *
-from libs.functions.php_ini import *
+from libs.functions.php_sql import get_php_handle__sql_command
+from libs.functions.php_base64 import get_php_base64_encode, get_php_base64_decode
+from libs.functions.php_fpm_eval import get_php_fpm_eval
+from libs.functions.php_bp_obd import get_php_bp_obd
+from libs.functions.php_g_encode import get_php_g_encode
+from libs.functions.php_bp_sys import get_php_system
+from libs.functions.php_ini import get_ini_value_code
 
 from libs.config import color, gget, gset
 from auxiliary.fpm.fpm import generate_ssrf_payload, generate_ssrf_code_payload, generate_base64_socks_payload, generate_base64_socks_code_payload, generate_extension
@@ -825,6 +825,9 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
             trigger_code = 'mail("a@127.0.0.1", "", "", "-bv");'
         return get_php_system(bdf_mode) % (
             str(uuid4()), trigger_code, base64_encode(command), print_command)
+    elif (bdf_mode == 17):  # php-concat_function
+        return get_php_system(bdf_mode) % (
+            base64_encode(command), print_command)
 
     elif (gget("webshell.exec_func", "webshell") and SYSTEM_TEMPLATE):
         return SYSTEM_TEMPLATE % (base64_encode(command)) + print_command

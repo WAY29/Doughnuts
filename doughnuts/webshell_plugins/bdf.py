@@ -22,9 +22,10 @@ mode_to_desc_dict = {-1: color.red("closed"),
                      13: color.green("FFI-php_exec"),
                      14: color.green("php7-reflectionProperty"),
                      15: color.green("php-user_filter"),
-                     16: color.green("ShellShock")
+                     16: color.green("ShellShock"),
+                     17: color.green("php-concat_function")
                      }
-mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14, 15, 16}
+mode_linux_set = {1, 2, 3, 4, 5, 9, 12, 13, 14, 15, 16, 17}
 mode_windows_set = {6, }
 mode_require_ext_dict = {5: "FFI", 6: "com_dotnet",
                          7: "imap", 12: "iconv", 13: "FFI"}
@@ -474,6 +475,17 @@ def run(mode: str = '0'):
         Targets:
         - 5.* >= 5.4.0
         - Bash <= 4.3
+
+    Mode 17 php-concat_function:
+
+        Origin:
+        - https://github.com/mm0r1/exploits/blob/master/php-concat-bypass/exploit.php
+
+        Targets:
+        - 7.3 - all versions to date
+        - 7.4 - all versions to date
+        - 8.0 - all versions to date
+        - 8.1 - all versions to date
     """
     if (mode == "close"):
         mode = -1

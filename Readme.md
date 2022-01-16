@@ -298,6 +298,9 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ## 更新日志
 
+### 4.23.0
+- 新增功能
+    - bdf-php-concat_function: 对应数字17，详情请看[这里](https://github.com/mm0r1/exploits/tree/master/php-concat-bypass)
 ### 4.22.0
 
 - 4.22.0

