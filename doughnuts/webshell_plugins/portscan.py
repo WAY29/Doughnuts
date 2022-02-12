@@ -1,10 +1,10 @@
 from libs.config import alias, color
 from libs.myapp import send
-from libs.functions.webshell_plugins.portscan import *
+from libs.functions.webshell_plugins.portscan import get_php_portscan
 
 
 def get_php(type, ip, ports, timeout):
-    get_php_portscan() % (type, ip, ports, timeout)
+    return get_php_portscan() % (type, ip, ports, timeout)
 
 
 def human_friendly_list_print(l: list) -> str:
