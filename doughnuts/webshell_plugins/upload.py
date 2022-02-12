@@ -3,7 +3,7 @@ from base64 import b64encode
 
 from libs.config import alias, color
 from libs.myapp import send
-from libs.functions.webshell_plugins.upload import *
+from libs.functions.webshell_plugins.upload import get_php_upload
 
 
 def get_php(filename: str, web_file_path: str, force: bool):

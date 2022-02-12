@@ -2,7 +2,7 @@ from os import makedirs, path
 
 from libs.config import alias, color, gget
 from libs.myapp import base64_encode, send
-from libs.functions.webshell_plugins.download import *
+from libs.functions.webshell_plugins.download import get_php_download
 
 
 def get_php(web_file_path: str):

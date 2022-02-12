@@ -1,6 +1,6 @@
 from libs.config import alias, color
 from libs.myapp import send
-from libs.functions.webshell_plugins.search import *
+from libs.functions.webshell_plugins.search import get_php_search
 
 
 def get_php(web_file_path: str, pattern: str):

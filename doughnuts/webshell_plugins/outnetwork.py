@@ -1,6 +1,6 @@
 from libs.config import alias
 from libs.myapp import send, color
-from libs.functions.webshell_plugins.outnetwork import *
+from libs.functions.webshell_plugins.outnetwork import get_php_outnetwork
 
 
 def get_php():

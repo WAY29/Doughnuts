@@ -1,6 +1,6 @@
 from libs.config import alias, color
 from libs.myapp import send, delay_send, is_windows, has_env, get_system_code, base64_encode
-from libs.functions.webshell_plugins.old_socks import *
+from libs.functions.webshell_plugins.old_socks import get_php_old_socks
 from threading import Thread
 from time import sleep
 

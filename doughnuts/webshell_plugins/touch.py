@@ -2,7 +2,7 @@ from re import match
 
 from libs.config import alias, color
 from libs.myapp import send
-from libs.functions.webshell_plugins.touch import *
+from libs.functions.webshell_plugins.touch import get_php_touch
 
 
 def get_php(filename):

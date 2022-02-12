@@ -1,7 +1,7 @@
 from libs.config import alias, color
 from libs.myapp import send
 from libs.app import readline
-from libs.functions.webshell_plugins.ls import *
+from libs.functions.webshell_plugins.ls import get_php_ls
 
 PREFIX_LIST = ["c", "cat", "w", "write", "e", "edit", "u", "upload", "mupload", "cp", "copy",
                "d", "download", "mdownload", "dump", "mv", "rm", "cd", "ls", "chmod", "touch"]

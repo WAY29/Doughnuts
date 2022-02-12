@@ -1,6 +1,6 @@
 from libs.config import alias, color
 from libs.myapp import send
-from libs.functions.webshell_plugins.bindshell import *
+from libs.functions.webshell_plugins.bindshell import get_php_binshell
 from threading import Thread
 from time import sleep
 

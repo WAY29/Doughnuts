@@ -1,6 +1,6 @@
 from libs.config import alias
 from libs.myapp import send, color, print_tree
-from libs.functions.webshell_plugins.fl import *
+from libs.functions.webshell_plugins.fl import get_php_fl
 from json import JSONDecodeError
 
 

@@ -1,6 +1,6 @@
 from libs.config import alias, color
 from libs.myapp import send, base64_decode
-from libs.functions.webshell_plugins.agent import *
+from libs.functions.webshell_plugins.agent import get_php_agent
 from re import findall, I, M
 from os import makedirs, urandom
 from os.path import dirname, exists

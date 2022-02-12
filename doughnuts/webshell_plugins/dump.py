@@ -1,6 +1,6 @@
 from libs.config import alias, color, gget
 from libs.myapp import send
-from libs.functions.webshell_plugins.dump import *
+from libs.functions.webshell_plugins.dump import get_php_dump
 from os import path, makedirs
 
 

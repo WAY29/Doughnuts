@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from libs.config import alias, color
 from libs.myapp import send, open_editor, newfile, gget
-from libs.functions.webshell_plugins.write import *
+from libs.functions.webshell_plugins.write import base64_encode, get_php_write
 
 
 @alias(True, func_alias="w", _type="FILE")

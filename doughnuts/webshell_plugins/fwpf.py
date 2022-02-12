@@ -1,6 +1,6 @@
 from libs.config import alias, gget
 from libs.myapp import send, color, print_tree
-from libs.functions.webshell_plugins.fwpf import *
+from libs.functions.webshell_plugins.fwpf import get_php_fwpf
 from json import JSONDecodeError
 
 

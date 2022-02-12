@@ -1,6 +1,6 @@
 from libs.config import alias, color
 from libs.myapp import send, base64_decode
-from libs.functions.webshell_plugins.cat import *
+from libs.functions.webshell_plugins.cat import gget, get_php_cat
 
 
 @alias(True, func_alias="c", _type="FILE")
