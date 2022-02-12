@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 from libs.config import alias, color
 from libs.myapp import send
 from libs.functions.webshell_plugins.portscan import get_php_portscan
@@ -36,7 +38,11 @@ def run(ip: str, ports: str, _type: int = 2, timeout: float = 0.5):
     res = send(php)
     if (not res):
         return
-    port_result = res.r_json()
+    try:
+        port_result = res.r_json()
+    except JSONDecodeError:
+        print(color.red('Result error'))
+        return
     # ------------------------------------------
     if(len(port_result[0])):
         print(color.green('Open') + ' port:\n' + " " *
