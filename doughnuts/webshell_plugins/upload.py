@@ -3,14 +3,17 @@ from base64 import b64encode
 
 from libs.config import alias, color
 from libs.myapp import send
-from libs.functions.webshell_plugins.upload import get_php_upload
+from libs.functions.webshell_plugins.upload import get_php_upload, get_php_file_put_contents
 
 
-def get_php(filename: str, web_file_path: str, force: bool):
-    return get_php_upload() % (web_file_path, filename, str(not force).lower())
+def get_php_0(upload_type: int, filename: str, web_file_path: str, force: bool):
+    if upload_type == 0:
+        return get_php_upload() % (web_file_path, filename, str(not force).lower())
+    else:
+        return
 
 
-def get_php_file_put_contents(
+def get_php_1(
         filename: str, web_file_path: str, force: bool, content: str):
     return get_php_file_put_contents() % (
         web_file_path, filename, str(not force).lower(), content)
@@ -40,10 +43,10 @@ def run(file_path: str, web_file_path: str = "",
         print("\n" + color.red("Local File not exist") + "\n")
         return
     if upload_type == 0:
-        php = get_php(filename, web_file_path, force)
+        php = get_php_0(filename, web_file_path, force)
         res = send(php, files={"file": fp})
     else:
-        php = get_php_file_put_contents(
+        php = get_php_1(
             filename, web_file_path, force, b64encode(
                 fp.read()).decode())
         res = send(php)
