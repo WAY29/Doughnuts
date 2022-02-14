@@ -15,18 +15,7 @@ def get_php_detectd_exec(php_init):
 
 
 def get_php_version(*argv):
-    return """
-        function call($f){
-            @$r = $f();
-            if(empty($r)){
-                    if(PHP_VERSION != ""){
-                        return PHP_VERSION;
-                    }
-                return "Unknown";
-            }
-            return $r;
-        }
-    print("%s"."|".call('phpversion')."|"."%s"."|".@base64_decode("%s"));""" % argv
+    return """print("%s"."|".@phpversion()."|"."%s"."|".@base64_decode("%s"));""" % argv
 
 
 def get_php_uname(php_init):
