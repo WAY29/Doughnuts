@@ -133,7 +133,7 @@ poetry run python3 Doughnuts/doughnuts.py # 应该对所有系统生效
 # 安装PYTHON 3.6+
 git clone https://github.com/WAY29/Doughnuts.git
 cd Doughnuts/doughnuts
-pip3 install -r requirements.txt 或 pip3 install requests pysocks colorma prettytable tqdm
+pip3 install -r requirements.txt 或 pip3 install requests pysocks colorama prettytable tqdm
 # (windows)添加一个bat文件到python根目录下
 # (*unix)添加一个可执行文件到/usr/local/bin下
 # 安装启动器,以方便调用
@@ -299,8 +299,16 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 ## 更新日志
 
 ### 4.23.0
-- 新增功能
-    - bdf-php-concat_function: 对应数字17，详情请看[这里](https://github.com/mm0r1/exploits/tree/master/php-concat-bypass)
+- 4.23.0
+    - 新增功能
+        - bdf-php-concat_function: 对应数字17，详情请看[这里](https://github.com/mm0r1/exploits/tree/master/php-concat-bypass)
+- 4.22.1
+    - 修复bug
+        - connect: 某些webshell无法连接的问题 (出现 IndexError)
+        - cat: 在使用DOMDocument读取文件时没有base64解码的错误
+        - portscan: 无法使用的问题
+        - upload: 使用file_put_contents上传文件时错误的问题
+
 ### 4.22.0
 
 - 4.22.0
