@@ -897,7 +897,7 @@ def open_editor(file_path: str, editor: str = "", edit_args: str = ""):
     else:
         command_args = [binpath, file_path]
 
-    p = Popen(command_args, shell=True)
+    p = Popen(command_args)
     p.wait()
     returncode = p.returncode
     return True if returncode == 0 else False
