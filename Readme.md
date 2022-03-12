@@ -302,12 +302,16 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 - 4.23.0
     - 新增功能
         - bdf-php-concat_function: 对应数字17，详情请看[这里](https://github.com/mm0r1/exploits/tree/master/php-concat-bypass)
-- 4.22.1
+- 4.23.1
     - 修复bug
         - connect: 某些webshell无法连接的问题 (出现 IndexError)
         - cat: 在使用DOMDocument读取文件时没有base64解码的错误
         - portscan: 无法使用的问题
         - upload: 使用file_put_contents上传文件时错误的问题
+- 4.23.2
+    - 修复bug
+        - 在linux下调用vi编辑器会导致无法写入的问题
+        - webshell/db_shell/shell 命令现在会根据switch命令切换原始/补全模式
 
 ### 4.22.0
 
