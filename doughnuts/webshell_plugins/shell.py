@@ -102,7 +102,11 @@ def run(*commands):
     try:
         while gget("loop"):
             print(prompt % pwd, end="")
-            command = str(value_translation(readline()))
+            if gget("raw_input", False):
+                command = str(value_translation(readline()))
+            else:
+                command = input()
+
             lower_command = command.lower()
             if (lower_command.lower() in ['exit', 'quit', 'back']):
                 print()

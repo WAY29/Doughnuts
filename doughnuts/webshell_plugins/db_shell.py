@@ -49,7 +49,11 @@ def run():
     try:
         while gget("loop"):
             print(prompt % color.cyan(database), end="")
-            command = readline()
+            if gget("raw_input", False):
+                command = readline()
+            else:
+                command = input()
+
             lower_command = command.lower()
             if (lower_command.lower() in ['exit', 'quit', 'back']):
                 print()

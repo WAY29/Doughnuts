@@ -51,14 +51,18 @@ def run(*commands):
         return
     print(color.cyan(
         "Eenter interactive temporary webshell...\n\nUse 'back' command to return doughnuts.\n"))
-    pwd = send(f'print(getcwd());').r_text.strip()
+    pwd = send('print(getcwd());').r_text.strip()
     set_namespace("webshell", False, True)
     wordlist = gget("webshell.wordlist")
     readline.set_wordlist(NEW_WORDLIST)
     try:
         while gget("loop"):
             print(f"webshell:{pwd} >> ", end="")
-            command = str(value_translation(readline(b"(")))
+            if gget("raw_input", False):
+                command = str(value_translation(readline(b"(")))
+            else:
+                command = input()
+
             lower_command = command.lower()
             if (lower_command.lower() in ['exit', 'quit', 'back']):
                 print()
