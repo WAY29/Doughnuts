@@ -312,6 +312,10 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
     - 修复bug
         - 在linux下调用vi编辑器会导致无法写入的问题
         - webshell/db_shell/shell 命令现在会根据switch命令切换原始/补全模式
+- 4.23.3
+    - 修复bug       
+        - upload无法使用的bug
+        - 在艰难环境下连接webshell的优化
 
 ### 4.22.0
 
