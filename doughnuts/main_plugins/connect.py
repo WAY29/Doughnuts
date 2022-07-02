@@ -127,7 +127,9 @@ def run(url: str, method: str = "GET", pwd: str = "pass", *encoders_or_params):
         return False
 
     # 判断版本
-    if ('7.' in res.r_text or "Unknown" in res.r_text):
+    if ('5.' in res.r_text):
+        gset("webshell.v7", False, namespace="webshell")
+    else:
         gset("webshell.v7", True, namespace="webshell")
 
     # 判断base64函数是否可用

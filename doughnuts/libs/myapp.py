@@ -510,7 +510,14 @@ def send(phpcode: str, raw: bool = False, **extra_params):
 
         # 主体部分
         # -----------------------------------------------------------------------
-        phpcode = f"""{php_header}chdir(base64_decode("{pwd_b64}"));""" + phpcode
+        php_header = f"""{php_header}chdir(base64_decode("{pwd_b64}"));"""
+        php_header = """
+        try{
+            %s
+        } catch (Throwable $e) {}
+        """ % php_header
+
+        phpcode = php_header + phpcode
 
         if (gget("webshell.bypass_obd", "webshell")):
             phpcode = _bypass_open_base_dir() + phpcode

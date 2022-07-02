@@ -36,7 +36,7 @@ linux_test_list = total_test_list - mode_windows_set
 
 
 def get_detectd_ext(extname: str):
-    return """if (extension_loaded("%s")){echo "exist";}""" % extname
+    return """try{if (extension_loaded("%s")){echo "exist";}}catch (Throwable $e){echo "";}""" % extname
 
 
 def set_mode(mode: int, test: bool = False):
@@ -268,7 +268,7 @@ print("success");""")
                 bits = "86"
             # upload so
             upload_result = upload(
-                path.join(gget("root_path"), "auxiliary", "iconv", "iconv_x" + bits + ".so"), filename + ".so", force=True)
+                path.join(gget("root_path"), "auxiliary", "iconv", "iconv_x" + bits + ".so"), filename + ".so", True)
             if (not upload_result):
                 print(color.red("\nUpload error\n"))
                 return
