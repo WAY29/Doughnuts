@@ -300,7 +300,6 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 
 ### 4.24.0
 - 4.24.0 
-  - 4.24.0
     - 新增功能
         - memshell: 通过交互式操作注入php内存马，仅作用于fastcgi,详情请看[这里](https://tttang.com/archive/1720/)
     - 优化
