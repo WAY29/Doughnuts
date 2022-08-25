@@ -223,3 +223,5 @@ def load_var_config():
         pass
     except IOError:
         print(f"\n{color.red('Permission denied to read variables.config')}\n")
+
+

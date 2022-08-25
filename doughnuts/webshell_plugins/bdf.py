@@ -181,7 +181,7 @@ def set_mode(mode: int, test: bool = False):
 
         print(color.yellow("php_sapi_name: " + res.r_text))
 
-        requirements_dict = {'host': '127.0.0.1', 'port': 9000}
+        requirements_dict = {'host': '127.0.0.1', 'port': 9000, 'php_exist_file_path': '/var/www/html/index.php'}
 
         attack_type = input(
             "attack_type[gopher(need curl extension)/sock/http_sock/ftp]:").lower()
@@ -217,7 +217,8 @@ def set_mode(mode: int, test: bool = False):
                  requirements_dict["host"], True, "webshell")
             gset("webshell.bdf_fpm.port", str(
                 requirements_dict["port"]), True, "webshell")
-
+            gset("webshell.bdf_fpm.php_file_path", str(
+                requirements_dict["php_exist_file_path"]), True, "webshell")
         if attack_type != "ftp":
             new_v = input("Use fpm in to eval php code[N]:")
             if new_v.upper() in ["Y", "YES"]:

