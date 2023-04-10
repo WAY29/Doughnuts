@@ -507,8 +507,8 @@ def run(mode: str = '0'):
             print(f"Try Mode {test_mode} {mode_to_desc_dict[test_mode]}:")
 
             if (set_mode(test_mode, True)):
-                tag = uuid4()
-                res = send(get_system_code(f"echo {tag})", mode=test_mode))
+                tag = str(uuid4())
+                res = send(get_system_code(f"echo {tag}", mode=test_mode))
 
                 if (res and tag in res.r_text):
                     print(color.green("\n    Success\n"))
