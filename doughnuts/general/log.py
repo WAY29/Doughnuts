@@ -35,7 +35,15 @@ def run(filepath="log.txt"):
     if (is_windows(False)):
         print(color.red("\nYour system isn't *unix\n"))
         return
-    if access(filepath, W_OK):
+    filepath = path.abspath(filepath)
+    # 获取filepath的文件夹路径
+    dirpath = path.dirname(filepath)
+    # 判断文件夹是否存在
+    if not path.exists(dirpath):
+        print(color.red("\nFile path is invalid\n"))
+        return
+    # 判断文件夹是否可写
+    if access(dirpath, W_OK):
         print(color.green(f"\nSet log in {filepath}\n"))
         sys.stdout = Logger(filepath, sys.__stdout__)
         sys.stderr = Logger(filepath, sys.__stderr__)
