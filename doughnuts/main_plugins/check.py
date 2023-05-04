@@ -1,6 +1,6 @@
 from libs.config import gget, alias, color
 from os.path import exists
-from os import urandom
+from os import path, urandom
 from hashlib import md5
 from random import randint
 from requests import post, exceptions
@@ -15,11 +15,13 @@ def run(timeout: float = 2.0):
 
     eg: check {timeout=2.0}
     """
-    if not exists("webshell.log"):
+    root_path = gget("root_path")
+    log_path = path.join(root_path, "webshell.log") 
+    if not exists(log_path):
         print(color.red("No webshell.Log"))
         return 0
 
-    with open("webshell.log", "r") as f:
+    with open(log_path, "r") as f:
         lines = f.readlines()
 
         for index, line in enumerate(lines, 1):
