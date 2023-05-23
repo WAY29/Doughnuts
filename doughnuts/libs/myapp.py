@@ -46,7 +46,7 @@ Session.mount('http://', HTTPAdapter(max_retries=2))
 Session.mount('https://', HTTPAdapter(max_retries=2))
 
 
-__version__ = "4.24.1"
+__version__ = "4.24.2"
 
 
 disable_warnings()
